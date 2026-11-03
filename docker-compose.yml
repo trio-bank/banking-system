@@ -1,0 +1,17 @@
+services:
+  db:
+    image: postgres:18
+    environment:
+      POSTGRES_DB: triobank
+      POSTGRES_USER: ${DB_USER:-triobank}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-triobank}
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    volumes:
+      - db-data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+
+volumes:
+  db-data:
