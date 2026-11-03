@@ -1,0 +1,13 @@
+# Demo deployment (presentation). All secrets must be provided by the hosting environment — no defaults here.
+spring:
+  flyway:
+    locations: classpath:db/migration,classpath:db/demo
+
+features:
+  demo-jobs-endpoint: true
+
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true

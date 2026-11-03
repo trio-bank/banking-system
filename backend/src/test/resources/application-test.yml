@@ -1,0 +1,4 @@
+# Automated tests: the database comes from Testcontainers, scheduling is off (see SchedulingConfig).
+security:
+  jwt:
+    secret: test-only-secret-not-used-anywhere-else-0123456789
