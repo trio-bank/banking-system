@@ -23,6 +23,16 @@ docker compose up --build
 
 Details: [docs/10-devops.md](docs/10-devops.md#8-local-development).
 
+## Frontend: how to run
+
+```bash
+cd frontend
+npm ci
+npm start         # http://localhost:4200, /api is proxied to the backend on :8080
+```
+
+Requirements, all commands and details: [frontend/README.md](frontend/README.md).
+
 ## Repository layout
 
 | Folder | Content |
