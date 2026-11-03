@@ -1,0 +1,38 @@
+# Secrets (template is .env.example)
+.env
+.env.*
+!.env.example
+
+# IDEs
+.idea/
+*.iml
+*.iws
+*.ipr
+.vscode/
+.classpath
+.project
+.settings/
+.factorypath
+.apt_generated
+.springBeans
+.sts4-cache
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Backend (Maven)
+target/
+!**/src/main/**/target/
+!**/src/test/**/target/
+backend/.mvn/wrapper/maven-wrapper.jar
+backend/HELP.md
+
+# Frontend (Angular)
+node_modules/
+frontend/dist/
+frontend/.angular/
+
+# E2E (Playwright)
+e2e/test-results/
+e2e/playwright-report/

@@ -99,6 +99,7 @@ Hosting for `demo` is decided in Sprint 1 by the QA/DevOps member and recorded a
 |---|---|---|---|
 | `DB_URL` | backend | `jdbc:postgresql://db:5432/triobank` | no |
 | `DB_USER` / `DB_PASSWORD` | backend, db | `triobank` / `triobank` | yes in demo |
+| `DB_PORT` | db (host port in compose) | `5432` | no |
 | `JWT_SECRET` | backend | 32+ random bytes, base64 | **yes** |
 | `ADMIN_EMAIL` / `ADMIN_PASSWORD` | backend bootstrap | `admin@triobank.local` / … | **yes** |
 | `CORS_ALLOWED_ORIGINS` | backend | `http://localhost:4200` | no |
@@ -120,7 +121,7 @@ services:
       POSTGRES_DB: triobank
       POSTGRES_USER: ${DB_USER:-triobank}
       POSTGRES_PASSWORD: ${DB_PASSWORD:-triobank}
-    ports: ["5432:5432"]
+    ports: ["${DB_PORT:-5432}:5432"]
     volumes: [db-data:/var/lib/postgresql]   # check the data path convention of the postgres:18 image
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U triobank"]

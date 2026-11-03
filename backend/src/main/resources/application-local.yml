@@ -1,0 +1,29 @@
+# Local development: docker compose DB + IDE. Safe dev defaults so the app starts without a .env file.
+spring:
+  flyway:
+    locations: classpath:db/migration,classpath:db/demo
+
+security:
+  jwt:
+    secret: ${JWT_SECRET:local-dev-only-secret-change-me-0123456789abcdef}
+  admin-bootstrap:
+    email: ${ADMIN_EMAIL:admin@triobank.local}
+    password: ${ADMIN_PASSWORD:Adm1n!Passw0rd}
+
+features:
+  demo-jobs-endpoint: true
+
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
+
+management:
+  endpoint:
+    health:
+      show-details: always
+
+logging:
+  level:
+    com.triobank: DEBUG
