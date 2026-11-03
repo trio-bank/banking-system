@@ -51,6 +51,15 @@ Build and run all tests (Testcontainers starts its own `postgres:18`):
 cd backend
 ./mvnw verify
 ```
+## Frontend: how to run
+
+```bash
+cd frontend
+npm ci
+npm start         # http://localhost:4200, /api is proxied to the backend on :8080
+```
+
+Requirements, all commands and details: [frontend/README.md](frontend/README.md).
 
 ## Repository layout
 
