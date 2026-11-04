@@ -72,7 +72,7 @@ describe('mockApiInterceptor', () => {
         ),
       );
 
-    it('returns 201 with customer number and IBAN', async () => {
+    it('TC-01 returns 201 with customer number and IBAN', async () => {
       const { res } = await register('new.user@example.com');
       expect(res?.status).toBe(201);
       expect(res?.headers.get('Location')).toBe('/api/v1/me');
@@ -81,7 +81,7 @@ describe('mockApiInterceptor', () => {
       expect(res?.body?.account.iban).toBe('PL45999000121000000000000001');
     });
 
-    it('returns 409 EMAIL_ALREADY_REGISTERED for a taken email', async () => {
+    it('TC-02 returns 409 EMAIL_ALREADY_REGISTERED for a taken email', async () => {
       const { error } = await register(' Anna.Nowak@example.com ');
       expect(error?.status).toBe(409);
       expect(errorCode(error)).toBe('EMAIL_ALREADY_REGISTERED');
@@ -89,7 +89,7 @@ describe('mockApiInterceptor', () => {
   });
 
   describe('A2 POST /auth/login', () => {
-    it('returns 200 with a token valid for 30 minutes', async () => {
+    it('TC-07 returns 200 with a token valid for 30 minutes', async () => {
       const { res } = await login(ANNA);
       expect(res?.status).toBe(200);
       expect(res?.body?.accessToken).toBeTruthy();
@@ -102,13 +102,13 @@ describe('mockApiInterceptor', () => {
     it.each([
       ['wrong password', ANNA, 'Wrong!Passw0rd'],
       ['unknown email', 'nobody@example.com', MOCK_PASSWORD],
-    ])('returns 401 INVALID_CREDENTIALS for %s', async (_, email, password) => {
+    ])('TC-08 returns 401 INVALID_CREDENTIALS for %s', async (_, email, password) => {
       const { error } = await login(email, password);
       expect(error?.status).toBe(401);
       expect(errorCode(error)).toBe('INVALID_CREDENTIALS');
     });
 
-    it('returns 403 USER_LOCKED with lockedUntil for the locked user', async () => {
+    it('TC-09 returns 403 USER_LOCKED with lockedUntil for the locked user', async () => {
       const { error } = await login('locked@example.com');
       expect(error?.status).toBe(403);
       expect(error?.error).toMatchObject({
@@ -117,7 +117,7 @@ describe('mockApiInterceptor', () => {
       });
     });
 
-    it('returns 403 USER_BLOCKED for the blocked user', async () => {
+    it('TC-10 returns 403 USER_BLOCKED for the blocked user', async () => {
       const { error } = await login('blocked@example.com');
       expect(error?.status).toBe(403);
       expect(errorCode(error)).toBe('USER_BLOCKED');
@@ -125,7 +125,7 @@ describe('mockApiInterceptor', () => {
   });
 
   describe('A3 POST /auth/logout', () => {
-    it('returns 204 with a token', async () => {
+    it('TC-11 returns 204 with a token', async () => {
       const token = (await login(ANNA)).res?.body?.accessToken ?? '';
       const { res } = await send(http.post(`${API}/auth/logout`, null, withToken(token)));
       expect(res?.status).toBe(204);
@@ -139,14 +139,14 @@ describe('mockApiInterceptor', () => {
   });
 
   describe('A4 GET /me', () => {
-    it('returns the customer profile with masked PESEL', async () => {
+    it('TC-13 returns the customer profile with masked PESEL', async () => {
       const token = (await login(ANNA)).res?.body?.accessToken ?? '';
       const { res } = await send(http.get<CurrentUserDto>(`${API}/me`, withToken(token)));
       expect(res?.body?.email).toBe(ANNA);
       expect(res?.body?.customer?.peselMasked).toBe('*******2343');
     });
 
-    it('returns customer = null for an admin', async () => {
+    it('TC-13 returns customer = null for an admin', async () => {
       const token = (await login('admin@triobank.example')).res?.body?.accessToken ?? '';
       const { res } = await send(http.get<CurrentUserDto>(`${API}/me`, withToken(token)));
       expect(res?.body?.role).toBe('ADMIN');
