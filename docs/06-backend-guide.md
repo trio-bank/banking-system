@@ -4,13 +4,13 @@ Rules for the Spring Boot application in `/backend`. Architecture is described i
 
 ## 1. Project setup
 
-| Item | Value |
-|---|---|
-| Group / artifact | `com.triobank` / `trio-bank-api` |
-| Java | 21 |
-| Spring Boot | 4.0.x |
-| Build | Maven wrapper (`./mvnw`) |
-| Starters | web, data-jpa, security, validation, actuator, flyway (+ `flyway-database-postgresql`), postgresql driver |
+| Item | Value                                                                                                                                     |
+|---|-------------------------------------------------------------------------------------------------------------------------------------------|
+| Group / artifact | `com.triobank` / `trio-bank-api`                                                                                                          |
+| Java | 21                                                                                                                                        |
+| Spring Boot | 4.1.2                                                                                                                                     |
+| Build | Maven wrapper (`./mvnw`)                                                                                                                  |
+| Starters | web, data-jpa, security, validation, actuator, flyway (+ `flyway-database-postgresql`), postgresql driver                                 |
 | Other | springdoc-openapi (Boot 4 compatible), jjwt or Spring Security OAuth2 resource server (JWT), MapStruct (optional), Testcontainers, JaCoCo |
 
 ## 2. Package structure
