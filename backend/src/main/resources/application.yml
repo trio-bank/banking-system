@@ -48,6 +48,10 @@ springdoc:
   swagger-ui:
     enabled: false
 
+logging:
+  pattern:
+    correlation: "[%X{traceId:-}] "   # request id from TraceIdFilter
+
 management:
   endpoints:
     web:
