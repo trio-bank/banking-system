@@ -12,6 +12,8 @@ Everything about the project — requirements, data model, API contract, archite
 
 ## Running locally
 
+Requires Docker Desktop.
+
 ```bash
 cp .env.example .env
 docker compose up --build
@@ -20,6 +22,10 @@ docker compose up --build
 - Frontend: http://localhost:4200
 - Backend API: http://localhost:8080/api/v1
 - Swagger UI: http://localhost:8080/swagger-ui.html
+
+Stop: `docker compose down` (add `-v` to also wipe the database).
+
+The backend container runs with the `local` Spring profile (dev-only JWT secret and test admin). Never use these defaults in production.
 
 Details: [docs/10-devops.md](docs/10-devops.md#8-local-development).
 
