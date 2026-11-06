@@ -39,6 +39,7 @@ class BackendApplicationTests {
 
         assertThat(response.statusCode()).isEqualTo(200);
         assertThat(response.body()).contains("\"status\":\"UP\"");
+        assertThat(response.headers().firstValue("X-Trace-Id")).hasValueSatisfying(id -> assertThat(id).matches("[0-9a-f]{16}"));
     }
 
     @Test
@@ -49,7 +50,10 @@ class BackendApplicationTests {
 
     @Test
     void otherEndpointsRequireAuthentication() throws Exception {
-        assertThat(get("/api/v1/me").statusCode()).isEqualTo(401);
+        HttpResponse<String> response = get("/api/v1/me");
+
+        assertThat(response.statusCode()).isEqualTo(401);
+        assertThat(response.headers().firstValue("X-Trace-Id")).isPresent();
     }
 
     @Test
