@@ -91,8 +91,8 @@ Business rules are enforced **on the backend** (always) and mirrored on the fron
 | ID | Rule | Error code |
 |---|---|---|
 | BR-01 | Email is unique (case-insensitive) and stored in lower case. Max 254 characters, valid email format. | `EMAIL_ALREADY_REGISTERED` |
-| BR-02 | Password: 12–128 characters, at least one lowercase letter, one uppercase letter, one digit and one special character. Must not contain the email local part. | `VALIDATION_ERROR` (`WEAK_PASSWORD`) |
-| BR-03 | PESEL must have 11 digits, a valid check digit and encode a valid date. Unique across customers. Date of birth is **derived from PESEL** (not entered separately). | `VALIDATION_ERROR` (`INVALID_CHECKSUM`), `PESEL_ALREADY_REGISTERED` |
+| BR-02 | Password: 12–128 characters, at least one lowercase letter, one uppercase letter, one digit and one special character (any character that is not a letter, digit or whitespace). Must not contain the email local part (case-insensitive; only checked when the local part has at least 3 characters). | `VALIDATION_ERROR` (`WEAK_PASSWORD`) |
+| BR-03 | PESEL must have 11 digits, a valid check digit and encode a valid date. Unique across customers. Date of birth is **derived from PESEL** (not entered separately). | `VALIDATION_ERROR` (`INVALID_FORMAT`, `INVALID_CHECKSUM`, `INVALID_DATE`), `PESEL_ALREADY_REGISTERED` |
 | BR-04 | A customer must be at least 18 years old on the day of registration. | `CUSTOMER_UNDERAGE` |
 | BR-05 | One user per email; one customer per user; one customer per PESEL. | — |
 | BR-06 | Registration atomically creates: user (`ACTIVE`, role `CUSTOMER`), customer (with generated customer number) and one `PERSONAL_STANDARD` account. If any step fails, nothing is created. | — |
