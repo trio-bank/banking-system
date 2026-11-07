@@ -1,10 +1,12 @@
 package com.triobank.common.error;
 
 import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ValidationException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import org.hibernate.validator.engine.HibernateConstraintViolation;
 import org.springframework.context.MessageSourceResolvable;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
@@ -15,7 +17,8 @@ import org.springframework.web.method.annotation.HandlerMethodValidationExceptio
 /**
  * Turns validation failures into {@code errors[]} entries.
  * A custom constraint can set its own code with an attribute, e.g.
- * {@code FieldErrorCode errorCode() default FieldErrorCode.INVALID_CHECKSUM;}.
+ * {@code FieldErrorCode errorCode() default FieldErrorCode.INVALID_CHECKSUM;},
+ * or pick it while validating with {@link FieldErrors#reject}.
  */
 final class FieldErrorMapper {
 
@@ -62,6 +65,10 @@ final class FieldErrorMapper {
 
     static FieldErrorCode codeFor(MessageSourceResolvable error, ConstraintViolation<?> violation) {
         if (violation != null) {
+            FieldErrorCode chosenByValidator = dynamicCode(violation);
+            if (chosenByValidator != null) {
+                return chosenByValidator;
+            }
             Map<String, Object> attributes = violation.getConstraintDescriptor().getAttributes();
             if (attributes.get(ERROR_CODE_ATTRIBUTE) instanceof FieldErrorCode custom) {
                 return custom;
@@ -73,6 +80,16 @@ final class FieldErrorMapper {
         String[] codes = error.getCodes();
         String constraint = codes == null || codes.length == 0 ? "" : codes[codes.length - 1];
         return codeFor(constraint, null, Map.of());
+    }
+
+    /** Code set by {@link FieldErrors#reject}, if the validator used it. */
+    private static FieldErrorCode dynamicCode(ConstraintViolation<?> violation) {
+        try {
+            HibernateConstraintViolation<?> hibernateViolation = violation.unwrap(HibernateConstraintViolation.class);
+            return hibernateViolation.getDynamicPayload(FieldErrorCode.class);
+        } catch (ValidationException ex) {
+            return null;
+        }
     }
 
     private static FieldErrorCode codeFor(String constraint, Object value, Map<String, Object> attributes) {
