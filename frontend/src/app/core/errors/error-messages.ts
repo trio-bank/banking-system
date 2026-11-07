@@ -5,7 +5,7 @@ export const ERROR_MESSAGES: Record<string, string> = {
   MALFORMED_REQUEST: 'The request could not be processed. Please try again.',
   IDEMPOTENCY_KEY_MISSING: 'The request could not be processed. Please try again.',
   UNAUTHENTICATED: 'Your session has expired. Please log in again.',
-  INVALID_CREDENTIALS: 'Wrong email or password.',
+  INVALID_CREDENTIALS: 'Invalid email or password.',
   USER_LOCKED: 'Too many failed login attempts. Your account is temporarily locked.',
   USER_BLOCKED: 'Your account is blocked. Please contact the bank.',
   ACCESS_DENIED: 'You do not have access to this page.',
