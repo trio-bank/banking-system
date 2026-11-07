@@ -48,6 +48,25 @@ export function checkPesel(pesel: string): PeselError | null {
   return checkDigit === Number(pesel[10]) ? null : 'INVALID_CHECKSUM';
 }
 
+/** True from the 18th birthday. An invalid PESEL is not a matter of age, so it gives false. */
+export function isUnderage(pesel: string, today = new Date()): boolean {
+  const birthDate = peselBirthDate(pesel);
+  if (!birthDate) {
+    return false;
+  }
+  const adultFrom = new Date(birthDate);
+  adultFrom.setFullYear(birthDate.getFullYear() + 18);
+  return adultFrom.getTime() > today.getTime();
+}
+
+/** For registration. Use together with `peselValidator`, which checks the number itself. */
+export const adultPeselValidator: ValidatorFn = (
+  control: AbstractControl,
+): ValidationErrors | null => {
+  const value: unknown = control.value;
+  return typeof value === 'string' && isUnderage(value.trim()) ? { underage: true } : null;
+};
+
 /** For forms. Empty field is OK here — use `Validators.required` for that. */
 export const peselValidator: ValidatorFn = (control: AbstractControl): ValidationErrors | null => {
   const value: unknown = control.value;

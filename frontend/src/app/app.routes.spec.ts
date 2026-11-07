@@ -41,9 +41,15 @@ describe('app routes', () => {
       expect(heading()).toBe('Log in');
     });
 
-    it('shows the register placeholder on /register', async () => {
+    it('shows the register form on /register', async () => {
       await harness.navigateByUrl('/register');
       expect(heading()).toBe('Register');
+    });
+
+    it('goes back to /register when /register/success has no result to show', async () => {
+      await harness.navigateByUrl('/register/success');
+      await harness.fixture.whenStable();
+      expect(url()).toBe('/register');
     });
 
     it.each(['/app', '/admin'])('cannot open %s and goes to /login', async (path) => {

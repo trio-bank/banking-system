@@ -19,6 +19,13 @@ export const routes: Routes = [
       import('./features/auth/register/register-page').then((m) => m.RegisterPage),
   },
   {
+    path: 'register/success',
+    canActivate: [guestGuard],
+    title: 'Account created · Trio Bank',
+    loadComponent: () =>
+      import('./features/auth/register/register-success-page').then((m) => m.RegisterSuccessPage),
+  },
+  {
     path: 'app',
     canActivate: [authGuard, roleGuard('CUSTOMER')],
     loadComponent: () =>
