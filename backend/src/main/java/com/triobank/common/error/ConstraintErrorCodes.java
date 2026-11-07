@@ -12,7 +12,8 @@ import java.util.Optional;
 final class ConstraintErrorCodes {
 
     private static final Map<String, ErrorCode> BY_CONSTRAINT = Map.of(
-            // e.g. "uk_users_email", ErrorCode.EMAIL_ALREADY_REGISTERED
+            "uk_users_email", ErrorCode.EMAIL_ALREADY_REGISTERED,
+            "uk_customers_pesel", ErrorCode.PESEL_ALREADY_REGISTERED
     );
 
     private ConstraintErrorCodes() {
