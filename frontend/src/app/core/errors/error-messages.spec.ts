@@ -45,7 +45,7 @@ describe('error messages', () => {
   });
 
   it('returns the text for a known code', () => {
-    expect(errorMessage('INVALID_CREDENTIALS')).toBe('Wrong email or password.');
+    expect(errorMessage('INVALID_CREDENTIALS')).toBe('Invalid email or password.');
     expect(fieldErrorMessage('REQUIRED')).toBe('This field is required.');
   });
 
