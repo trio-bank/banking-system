@@ -2,10 +2,49 @@
   <mat-card appearance="outlined" class="auth-card">
     <mat-card-header>
       <mat-card-title><h1>Log in</h1></mat-card-title>
+      <mat-card-subtitle>Welcome to Trio Bank</mat-card-subtitle>
     </mat-card-header>
+
     <mat-card-content>
-      <p>The login form will be available here soon.</p>
+      @if (notice(); as message) {
+        <p class="notice" role="status">{{ message }}</p>
+      }
+      @if (banner(); as message) {
+        <p class="banner" role="alert">
+          {{ message }}
+          @if (timeLeft(); as time) {
+            <span class="countdown">Try again in {{ time }}</span>
+          }
+        </p>
+      }
+
+      <form class="login-form" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+        <mat-form-field appearance="outline">
+          <mat-label>Email</mat-label>
+          <input matInput type="email" formControlName="email" autocomplete="username" />
+          <mat-error>{{ emailError() }}</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Password</mat-label>
+          <input
+            matInput
+            type="password"
+            formControlName="password"
+            autocomplete="current-password"
+          />
+          <mat-error>{{ passwordError() }}</mat-error>
+        </mat-form-field>
+
+        <button matButton="filled" type="submit" [disabled]="submitting() || locked()">
+          @if (submitting()) {
+            <mat-spinner diameter="18" aria-label="Logging in" />
+          }
+          Log in
+        </button>
+      </form>
     </mat-card-content>
+
     <mat-card-actions>
       <a mat-button routerLink="/register">Create an account</a>
     </mat-card-actions>

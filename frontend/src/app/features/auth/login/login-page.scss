@@ -1,0 +1,35 @@
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 16px;
+}
+
+mat-form-field {
+  width: 100%;
+}
+
+mat-spinner {
+  display: inline-block;
+  margin-right: 8px;
+  vertical-align: middle;
+}
+
+.notice {
+  margin: 16px 0 0;
+  padding: 12px 16px;
+  border-left: 4px solid var(--mat-sys-tertiary);
+  border-radius: 4px;
+  background: var(--mat-sys-surface-container-low);
+}
+
+.banner {
+  margin: 16px 0 0;
+}
+
+.countdown {
+  display: block;
+  margin-top: 4px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
