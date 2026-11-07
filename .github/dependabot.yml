@@ -4,10 +4,18 @@ updates:
     directory: "/frontend"
     schedule:
       interval: "weekly"
-  - package-ecosystem: "maven"   
+    open-pull-requests-limit: 3
+    groups:
+      angular:
+        patterns:
+          - "@angular/*"
+          - "@angular-devkit/*"
+          - "@schematics/*"
+  - package-ecosystem: "maven"
     directory: "/backend"
     schedule:
       interval: "weekly"
+    open-pull-requests-limit: 3
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
