@@ -1,5 +1,5 @@
 import { provideHttpClient } from '@angular/common/http';
-import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
@@ -33,6 +33,21 @@ describe('app routes', () => {
       expiresAt: '2099-01-01T00:00:00Z',
       user,
     });
+
+  /** Presses "Log out" and answers the request like the server does. */
+  const logOutWithButton = async () => {
+    const button = [...(harness.routeNativeElement?.querySelectorAll('button') ?? [])].find(
+      (element) => element.textContent?.includes('Log out'),
+    );
+    button?.click();
+
+    const request = TestBed.inject(HttpTestingController).expectOne((req) =>
+      req.url.endsWith('/auth/logout'),
+    );
+    expect(request.request.method).toBe('POST');
+    request.flush(null, { status: 204, statusText: 'No Content' });
+    await harness.fixture.whenStable();
+  };
 
   describe('guest', () => {
     it('redirects the root path to /login', async () => {
@@ -82,6 +97,17 @@ describe('app routes', () => {
       await harness.navigateByUrl('/app');
       expect(url()).toBe('/login');
     });
+
+    it('TC-11 the button in the toolbar logs out and closes the protected pages', async () => {
+      await harness.navigateByUrl('/app');
+      await logOutWithButton();
+
+      expect(store().isLoggedIn()).toBe(false);
+      expect(url()).toBe('/login');
+
+      await harness.navigateByUrl('/app');
+      expect(url()).toBe('/login');
+    });
   });
 
   describe('admin', () => {
@@ -96,6 +122,17 @@ describe('app routes', () => {
     it.each(['/app', '/login'])('cannot open %s', async (path) => {
       await harness.navigateByUrl(path);
       expect(url()).toBe('/admin/customers');
+    });
+
+    it('TC-11 the button in the toolbar logs out and closes the protected pages', async () => {
+      await harness.navigateByUrl('/admin');
+      await logOutWithButton();
+
+      expect(store().isLoggedIn()).toBe(false);
+      expect(url()).toBe('/login');
+
+      await harness.navigateByUrl('/admin');
+      expect(url()).toBe('/login');
     });
   });
 });
