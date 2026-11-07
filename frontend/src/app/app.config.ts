@@ -10,6 +10,7 @@ import { environment } from '../environments/environment';
 import { routes } from './app.routes';
 import { mockApiInterceptor } from './core/api/mocks/mock-api.interceptor';
 import { AuthStore } from './core/auth/auth.store';
+import { SessionTimer } from './core/auth/session-timer';
 import { authInterceptor } from './core/http/auth.interceptor';
 import { errorInterceptor } from './core/http/error.interceptor';
 
@@ -28,5 +29,9 @@ export const appConfig: ApplicationConfig = {
     ),
     // After a page reload: load the user before the guards check the first route.
     provideAppInitializer(() => inject(AuthStore).restore()),
+    // Creating it is enough: from then on it follows login and logout by itself.
+    provideAppInitializer(() => {
+      inject(SessionTimer);
+    }),
   ],
 };
