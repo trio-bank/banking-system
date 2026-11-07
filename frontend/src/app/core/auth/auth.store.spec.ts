@@ -57,6 +57,45 @@ describe('AuthStore', () => {
     expect(sessionStorage.getItem('trio.session')).toBeNull();
   });
 
+  describe('logout', () => {
+    it('TC-11 tells the server and forgets the session', async () => {
+      store.setSession(loginResponse());
+      const loggingOut = store.logout();
+
+      const req = backend.expectOne('/api/v1/auth/logout');
+      expect(req.request.method).toBe('POST');
+      expect(store.token()).toBe('token-123'); // still needed for this request
+
+      req.flush(null, { status: 204, statusText: 'No Content' });
+      await loggingOut;
+      expect(store.isLoggedIn()).toBe(false);
+      expect(sessionStorage.getItem('trio.session')).toBeNull();
+    });
+
+    it('forgets the session even when the server returns an error', async () => {
+      store.setSession(loginResponse());
+      const loggingOut = store.logout();
+      backend.expectOne('/api/v1/auth/logout').flush(null, { status: 500, statusText: 'Error' });
+      await loggingOut;
+      expect(store.isLoggedIn()).toBe(false);
+    });
+
+    it('does not wait forever when the server does not answer', async () => {
+      vi.useFakeTimers();
+      try {
+        store.setSession(loginResponse());
+        const loggingOut = store.logout();
+        backend.expectOne('/api/v1/auth/logout');
+
+        await vi.advanceTimersByTimeAsync(5000);
+        await loggingOut;
+        expect(store.isLoggedIn()).toBe(false);
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+  });
+
   it('restores the user via GET /me after a reload', async () => {
     store.setSession(loginResponse());
     createStore();

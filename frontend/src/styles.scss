@@ -97,8 +97,13 @@ body {
 }
 
 // Black header with a thin yellow line, the same on every page.
+// The toolbar passes its text color on to the buttons inside it.
 .mat-toolbar.shell-toolbar {
-  background: $ink;
-  color: #ffffff;
+  @include mat.toolbar-overrides(
+    (
+      container-background-color: $ink,
+      container-text-color: #ffffff,
+    )
+  );
   border-bottom: 3px solid $yellow;
 }

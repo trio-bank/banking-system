@@ -1,9 +1,10 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, timeout } from 'rxjs';
 import { AuthApi } from '../api/services/auth-api';
 import { CurrentUserDto, IsoDateTime, LoginResponse, Role } from '../api/models';
 
 const STORAGE_KEY = 'trio.session';
+const LOGOUT_TIMEOUT_MS = 5000;
 
 interface StoredSession {
   accessToken: string;
@@ -49,6 +50,17 @@ export class AuthStore {
     sessionStorage.removeItem(STORAGE_KEY);
     this.session.set(null);
     this.currentUser.set(null);
+  }
+
+  /** Tells the server, then forgets the session. The user gets out even if the server doesn't answer. */
+  async logout(): Promise<void> {
+    try {
+      await firstValueFrom(this.api.logout().pipe(timeout(LOGOUT_TIMEOUT_MS)));
+    } catch {
+      // Nothing to do: the token is only removed from the browser anyway.
+    } finally {
+      this.clear();
+    }
   }
 
   /** On app start: if a saved token is still valid, load the user again. */
