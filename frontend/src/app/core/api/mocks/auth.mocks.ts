@@ -6,7 +6,8 @@ import {
   RegisterRequest,
   RegistrationResponse,
 } from '../models';
-import { MOCK_PASSWORD, MOCK_USERS, NEW_PERSONAL_ACCOUNT } from './mock-data';
+import { isUnderage } from '../../../shared/validators';
+import { MOCK_CUSTOMERS, MOCK_PASSWORD, MOCK_USERS, NEW_PERSONAL_ACCOUNT } from './mock-data';
 import { isoNow, MockHandler, MockResult, ok, problem } from './mock-http';
 
 const TOKEN_PREFIX = 'mock-token.';
@@ -25,7 +26,7 @@ function currentUser(req: HttpRequest<unknown>): CurrentUserDto | undefined {
 const unauthenticated = (req: HttpRequest<unknown>) =>
   problem(req, 401, 'UNAUTHENTICATED', 'Unauthenticated', 'Missing or invalid token.');
 
-/** A1. Any new email works; an existing one gives 409. */
+/** A1. Any new email and PESEL work; taken ones give 409, a person under 18 gives 422. */
 export const register: MockHandler = (req) => {
   const body = req.body as RegisterRequest;
   if (findUser(body.email)) {
@@ -37,9 +38,27 @@ export const register: MockHandler = (req) => {
       'A user with this email already exists.',
     );
   }
+  if (MOCK_CUSTOMERS.some((customer) => customer.pesel === body.pesel)) {
+    return problem(
+      req,
+      409,
+      'PESEL_ALREADY_REGISTERED',
+      'PESEL already registered',
+      'A customer with this PESEL already exists.',
+    );
+  }
+  if (isUnderage(body.pesel)) {
+    return problem(
+      req,
+      422,
+      'CUSTOMER_UNDERAGE',
+      'Customer underage',
+      'The customer must be at least 18 years old.',
+    );
+  }
   const response: RegistrationResponse = {
     userId: '0b6f2a3e-8f44-4f0e-9a51-2c1e5d7b9a11',
-    customerNumber: '10000002',
+    customerNumber: '10000100',
     email: body.email.trim().toLowerCase(),
     account: { ...NEW_PERSONAL_ACCOUNT, openedAt: isoNow() },
   };

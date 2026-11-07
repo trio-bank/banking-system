@@ -1,5 +1,11 @@
 import { FormControl } from '@angular/forms';
-import { checkPesel, peselBirthDate, peselValidator } from './pesel.validator';
+import {
+  adultPeselValidator,
+  checkPesel,
+  isUnderage,
+  peselBirthDate,
+  peselValidator,
+} from './pesel.validator';
 
 const isoDate = (date: Date | null) =>
   date &&
@@ -15,6 +21,26 @@ describe('peselValidator', () => {
   ])('accepts %s and derives birth date %s', (pesel, birthDate) => {
     expect(checkPesel(pesel)).toBeNull();
     expect(isoDate(peselBirthDate(pesel))).toBe(birthDate);
+  });
+
+  describe('age', () => {
+    // 08310163967 = born 01.11.2008
+    it('is underage the day before the 18th birthday', () => {
+      expect(isUnderage('08310163967', new Date(2026, 9, 31))).toBe(true);
+    });
+
+    it('is an adult on the 18th birthday', () => {
+      expect(isUnderage('08310163967', new Date(2026, 10, 1))).toBe(false);
+    });
+
+    it('TC-04 adultPeselValidator rejects a person under 18', () => {
+      expect(adultPeselValidator(new FormControl('10270111119'))).toEqual({ underage: true });
+    });
+
+    it('adultPeselValidator accepts an adult and ignores an unreadable number', () => {
+      expect(adultPeselValidator(new FormControl('90051412343'))).toBeNull();
+      expect(adultPeselValidator(new FormControl('123'))).toBeNull();
+    });
   });
 
   it('TC-03 rejects a PESEL with an invalid check digit', () => {

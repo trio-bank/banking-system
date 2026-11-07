@@ -1,39 +1,104 @@
-// Include theming for Angular Material with `mat.theme()`.
-// This Sass mixin will define CSS variables that are used for styling Angular Material
-// components according to the Material 3 design spec.
-// Learn more about theming and how to use it for your application's
-// custom components at https://material.angular.dev/guide/theming
 @use '@angular/material' as mat;
+
+// Brand colors. Yellow is only for fills and accents: as text on white it's unreadable.
+$ink: #141414;
+$yellow: #ffd100;
+$yellow-hover: #f2c600;
 
 html {
   height: 100%;
   @include mat.theme(
     (
       color: (
-        primary: mat.$azure-palette,
-        tertiary: mat.$blue-palette,
+        theme-type: light,
+        primary: mat.$yellow-palette,
+        tertiary: mat.$yellow-palette,
       ),
       typography: Roboto,
       density: 0,
     )
   );
+
+  // Black, white and greys instead of the tinted colors Material generates.
+  @include mat.theme-overrides(
+    (
+      primary: $ink,
+      on-primary: #ffffff,
+      primary-container: $yellow,
+      on-primary-container: $ink,
+      secondary: #4d4d4d,
+      on-secondary: #ffffff,
+      secondary-container: #efefef,
+      on-secondary-container: $ink,
+      tertiary: $yellow,
+      on-tertiary: $ink,
+      tertiary-container: #fff4bf,
+      on-tertiary-container: $ink,
+      background: #f6f6f4,
+      on-background: $ink,
+      surface: #ffffff,
+      on-surface: $ink,
+      on-surface-variant: #4d4d4d,
+      surface-container-lowest: #ffffff,
+      surface-container-low: #fafafa,
+      surface-container: #f5f5f5,
+      surface-container-high: #efefef,
+      surface-container-highest: #e8e8e8,
+      outline: #767676,
+      outline-variant: #dedede,
+      corner-small: 6px,
+      corner-medium: 10px,
+      corner-large: 14px,
+    )
+  );
+
+  // The main action of every page: yellow button with black text.
+  @include mat.button-overrides(
+    (
+      filled-container-color: $yellow,
+      filled-label-text-color: $ink,
+      filled-state-layer-color: $ink,
+      filled-container-shape: 8px,
+      outlined-container-shape: 8px,
+      text-container-shape: 8px,
+    )
+  );
+
+  @include mat.stepper-overrides(
+    (
+      header-selected-state-icon-background-color: $yellow,
+      header-selected-state-icon-foreground-color: $ink,
+      header-edit-state-icon-background-color: $ink,
+      header-edit-state-icon-foreground-color: #ffffff,
+      header-done-state-icon-background-color: $ink,
+      header-done-state-icon-foreground-color: #ffffff,
+      header-selected-state-label-text-color: $ink,
+      container-color: transparent,
+    )
+  );
 }
 
 body {
-  // Default the application to a light color theme. This can be changed to
-  // `dark` to enable the dark color theme, or to `light dark` to defer to the
-  // user's system settings.
   color-scheme: light;
-
-  // Set a default background, font and text colors for the application using
-  // Angular Material's system-level CSS variables. Learn more about these
-  // variables at https://material.angular.dev/guide/system-variables
-  background-color: var(--mat-sys-surface);
-  color: var(--mat-sys-on-surface);
+  background-color: var(--mat-sys-background);
+  color: var(--mat-sys-on-background);
   font: var(--mat-sys-body-medium);
-
-  // Reset the user agent margin.
   margin: 0;
   height: 100%;
 }
-/* You can add global styles to this file, and also import other style files */
+
+// Three bars = "Trio". Used next to the bank name in all headers.
+.brand-mark {
+  display: inline-block;
+  flex: none;
+  width: 18px;
+  height: 18px;
+  background: repeating-linear-gradient(90deg, #{$yellow} 0 4px, transparent 4px 7px);
+}
+
+// Black header with a thin yellow line, the same on every page.
+.mat-toolbar.shell-toolbar {
+  background: $ink;
+  color: #ffffff;
+  border-bottom: 3px solid $yellow;
+}

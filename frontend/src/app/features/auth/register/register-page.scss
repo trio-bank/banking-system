@@ -1,0 +1,70 @@
+.register-card {
+  max-width: 640px;
+}
+
+.step-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-top: 8px;
+}
+
+mat-form-field {
+  width: 100%;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.birth-date {
+  color: var(--mat-sys-on-surface);
+  font-weight: 500;
+}
+
+.step-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding-top: 8px;
+}
+
+mat-spinner {
+  display: inline-block;
+  margin-right: 8px;
+  vertical-align: middle;
+}
+
+.summary {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 8px 24px;
+  margin: 0 0 16px;
+}
+
+.summary dt {
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.summary dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 600px) {
+  .row {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .summary {
+    grid-template-columns: 1fr;
+    gap: 2px;
+  }
+
+  .summary dd {
+    margin-bottom: 8px;
+  }
+}
