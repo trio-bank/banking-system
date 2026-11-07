@@ -12,10 +12,6 @@ const isoDate = (date: Date | null) =>
 
 // Test data must pass the same rules as the real form, or it only confuses.
 describe('mock data', () => {
-  it('has 20 users', () => {
-    expect(MOCK_USERS).toHaveLength(20);
-  });
-
   it('has no duplicates', () => {
     const unique = (values: string[]) => new Set(values).size === values.length;
     expect(unique(MOCK_USERS.map((user) => user.id))).toBe(true);

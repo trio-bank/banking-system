@@ -87,7 +87,7 @@ describe('mockApiInterceptor', () => {
       expect(errorCode(error)).toBe('EMAIL_ALREADY_REGISTERED');
     });
 
-    it.each(['90051412343', '94011684627'])(
+    it.each(['90051412343', '82031710413'])(
       'returns 409 PESEL_ALREADY_REGISTERED for the taken PESEL %s',
       async (pesel) => {
         const { error } = await register('new.user@example.com', pesel);

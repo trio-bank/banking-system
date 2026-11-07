@@ -1,78 +1,31 @@
 # Mock data
 
 Test data for working without a backend (`useMocks: true`). Everything here is fictional.
-The source is `src/app/core/api/mocks/mock-data.ts`. If you change it, update this file too.
+Existing users live in `src/app/core/api/mocks/mock-data.ts`. If you change them, update this file too.
 
 Nothing is saved: a newly registered user cannot log in, and every registration returns the same customer number and IBAN.
 
-## Log in
+## Register: free data to copy
 
-Password for all 20 users: `Str0ng!Passw0rd`
+None of this is taken, so each customer can be registered as many times as you want.
 
-Any other email or password gives `INVALID_CREDENTIALS`.
+Password for all of them: `Str0ng!Passw0rd`
 
-### Admins
-
-Admins have no customer profile.
-
-| Email                     | Last login       |
-| ------------------------- | ---------------- |
-| `admin@triobank.example`  | never            |
-| `teller@triobank.example` | 05.11.2026 08:30 |
-
-### Customers
-
-All of them log in normally, unless the "Use it for" column says otherwise.
-
-| Email                                           | Name                                         | PESEL         | Date of birth | Use it for                     |
-| ----------------------------------------------- | -------------------------------------------- | ------------- | ------------- | ------------------------------ |
-| `anna.nowak@example.com`                        | Anna Nowak                                   | `90051412343` | 14.05.1990    | Default customer               |
-| `locked@example.com`                            | Piotr Lis                                    | `82031710413` | 17.03.1982    | `USER_LOCKED` error, countdown |
-| `blocked@example.com`                           | Ewa Wrona                                    | `75090821123` | 08.09.1975    | `USER_BLOCKED` error           |
-| `tomasz.wisniewski@example.com`                 | Tomasz Wiśniewski                            | `88062331836` | 23.06.1988    | Polish letters                 |
-| `katarzyna.nowak-lewandowska@example.com`       | Katarzyna Nowak-Lewandowska                  | `93120142541` | 01.12.1993    | Double last name               |
-| `sean.oconnor@example.com`                      | Seán O'Connor                                | `79043053258` | 30.04.1979    | Apostrophe in the name         |
-| `aleksandra.wierzbicka-szczepanska@example.com` | Aleksandra Konstancja Wierzbicka-Szczepańska | `91071996000` | 19.07.1991    | Long values, layout on a phone |
-| `oliwia.mazur@example.com`                      | Oliwia Mazur                                 | `08310163967` | 01.11.2008    | Just turned 18                 |
-| `stanislaw.dabrowski@example.com`               | Stanisław Dąbrowski                          | `38021174679` | 11.02.1938    | The oldest customer            |
-| `zofia.kaminska@example.com`                    | Zofia Kamińska                               | `00210185386` | 01.01.2000    | First day of the 2000s         |
-| `adam.pawlak@example.com`                       | Adam Pawlak                                  | `00222939113` | 29.02.2000    | Leap day                       |
-| `michal.kaczmarek@example.com`                  | Michał Kaczmarek                             | `96100517797` | 05.10.1996    | First login, no "Last login"   |
-| `agnieszka.krol@example.com`                    | Agnieszka Król                               | `84052728426` | 27.05.1984    | No apartment number            |
-| `magdalena.wojcik@example.com`                  | Magdalena Wójcik                             | `87081440862` | 14.08.1987    | Different last login date      |
-| `olena.shevchenko@example.com`                  | Olena Shevchenko                             | `98030951542` | 09.03.1998    | Foreign phone number           |
-| `ab@example.com`                                | Ala Bąk                                      | `02292162288` | 21.09.2002    | Very short email               |
-| `grzegorz.zajac@example.com`                    | Grzegorz Zając                               | `69113073934` | 30.11.1969    | Building number with a slash   |
-| `natalia.sikora@example.com`                    | Natalia Sikora                               | `94011684627` | 16.01.1994    | Ordinary customer              |
-
-Phones and addresses of all customers are in `mock-data.ts`.
-
-## Register
-
-Emails and PESEL numbers from the tables above are already taken, so use the data below.
-
-### Valid customers
-
-| Field       | Customer 1                 | Customer 2                    |
-| ----------- | -------------------------- | ----------------------------- |
-| Email       | `jan.kowalski@example.com` | `maria.zielinska@example.com` |
-| Password    | `Str0ng!Passw0rd`          | `Str0ng!Passw0rd`             |
-| First name  | Jan                        | Maria                         |
-| Last name   | Kowalski                   | Zielińska                     |
-| PESEL       | `85110356782`              | `01222843219`                 |
-| Birth date  | 03.11.1985                 | 28.02.2001                    |
-| Phone       | `+48601234567`             | `+48701234567`                |
-| Street      | Polna                      | Leśna                         |
-| Building    | `5`                        | `10B`                         |
-| Apartment   | `2`                        | leave empty                   |
-| Postal code | `45-018`                   | `30-001`                      |
-| City        | Opole                      | Kraków                        |
+| Email                                           | First name            | Last name              | PESEL         | Phone           | Street                              | Building | Apartment | Postal code | City     | Use it for                   |
+| ----------------------------------------------- | --------------------- | ---------------------- | ------------- | --------------- | ----------------------------------- | -------- | --------- | ----------- | -------- | ---------------------------- |
+| `jan.kowalski@example.com`                      | Jan                   | Kowalski               | `85110356782` | `+48601234567`  | Polna                               | `5`      | `2`       | `45-018`    | Opole    | Ordinary customer            |
+| `maria.zielinska@example.com`                   | Maria                 | Zielińska              | `01222843219` | `+48701234567`  | Leśna                               | `10B`    |           | `30-001`    | Kraków   | No apartment                 |
+| `tomasz.wisniewski@example.com`                 | Tomasz                | Wiśniewski             | `88062331836` | `+48502000011`  | Świętokrzyska                       | `7/9`    | `7`       | `00-116`    | Warszawa | Polish letters, `/` building |
+| `sean.oconnor@example.com`                      | Seán                  | O'Connor               | `79043053258` | `+48502000012`  | 3 Maja                              | `82`     | `3`       | `80-244`    | Gdańsk   | Apostrophe, digit in street  |
+| `aleksandra.wierzbicka-szczepanska@example.com` | Aleksandra Konstancja | Wierzbicka-Szczepańska | `91071996000` | `+48502000013`  | Aleja Marszałka Józefa Piłsudskiego | `123B`   | `1045`    | `50-001`    | Wrocław  | Long values                  |
+| `oliwia.mazur@example.com`                      | Oliwia                | Mazur                  | `08310163967` | `+48502000014`  | Kwiatowa                            | `5`      |           | `40-001`    | Katowice | Just turned 18               |
+| `olena.shevchenko@example.com`                  | Olena                 | Shevchenko             | `98030951542` | `+380501234567` | Mickiewicza                         | `27`     | `5`       | `45-367`    | Opole    | Foreign phone number         |
 
 Every registration returns customer number `10000100` and IBAN `PL45 9990 0012 1000 0000 0000 0001`.
 
-### Error cases
+## Register: error cases
 
-Fill the other fields with a valid customer's data.
+Fill the other fields with free data from above.
 
 | Field    | Value                    | Result                                    | When                     |
 | -------- | ------------------------ | ----------------------------------------- | ------------------------ |
@@ -87,3 +40,15 @@ Fill the other fields with a valid customer's data.
 | Building | `abc`                    | Not a number, cannot go further           | Right away               |
 
 Taken email and PESEL can only be checked by the server, and the API does that when the form is sent.
+
+## Log in: existing users
+
+Password for all of them: `Str0ng!Passw0rd`. Any other email or password gives `INVALID_CREDENTIALS`.
+
+| Email                          | Role     | PESEL (taken) | Use it for                     |
+| ------------------------------ | -------- | ------------- | ------------------------------ |
+| `anna.nowak@example.com`       | CUSTOMER | `90051412343` | Default customer               |
+| `admin@triobank.example`       | ADMIN    |               | Default admin, no profile      |
+| `locked@example.com`           | CUSTOMER | `82031710413` | `USER_LOCKED` error, countdown |
+| `blocked@example.com`          | CUSTOMER | `75090821123` | `USER_BLOCKED` error           |
+| `michal.kaczmarek@example.com` | CUSTOMER | `96100517797` | First login, no "Last login"   |
