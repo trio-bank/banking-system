@@ -130,7 +130,7 @@ Every mutable entity (users, customers, account_products, accounts) has:
 | `updatedAt` | `updated_at` | `Instant` | `TIMESTAMPTZ NOT NULL` | Set on every update. |
 | `version` | `version` | `long` | `BIGINT NOT NULL DEFAULT 0` | JPA `@Version` — optimistic locking. |
 
-Immutable entities (transactions, ledger_entries, audit_events) have `id` and `created_at` only.
+Immutable entities (transactions, ledger_entries, audit_events) have only `id` and one insert timestamp: `created_at` for transactions and ledger_entries, `occurred_at` for audit_events (§5.8).
 
 ---
 
