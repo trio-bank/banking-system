@@ -1,0 +1,21 @@
+<app-auth-layout>
+  @if (registration; as result) {
+    <mat-card appearance="outlined" class="auth-card">
+      <mat-card-header>
+        <mat-card-title><h1>Your account is ready</h1></mat-card-title>
+        <mat-card-subtitle>Your customer number and first account number:</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <dl class="result">
+          <dt>Customer number</dt>
+          <dd>{{ result.customerNumber }}</dd>
+          <dt>Account number (IBAN)</dt>
+          <dd>{{ result.account.iban | iban }}</dd>
+        </dl>
+      </mat-card-content>
+      <mat-card-actions align="end">
+        <a matButton="filled" routerLink="/login">Go to login</a>
+      </mat-card-actions>
+    </mat-card>
+  }
+</app-auth-layout>

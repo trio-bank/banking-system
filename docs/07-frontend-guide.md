@@ -91,7 +91,7 @@ After login: `CUSTOMER` → `/app/dashboard`, `ADMIN` → `/admin/customers`. A 
 | Screen | Shows | Actions | API |
 |---|---|---|---|
 | Login | email, password, error banner, lock countdown | Log in, link to register | A2, then A4 |
-| Register | Stepper: 1) account data (email, password + strength meter), 2) personal data (name, PESEL → shows derived date of birth, phone), 3) address, 4) summary + consent checkbox "I confirm the data is fictional" | Submit | A1 |
+| Register | Stepper: 1) account data (email, password + strength meter), 2) personal data (name, PESEL → shows derived date of birth, phone), 3) address, 4) summary | Submit | A1 |
 | Register success | customer number, IBAN | Go to login | — |
 | Dashboard | Greeting, last login, total balance, account cards (name, type, IBAN, balance, status), last 5 operations of first account | Transfer, ATM, open account, go to details | C1, C5 |
 | Open account | Product cards with rules (rate, policy, ATM), name field | Open | P1, C2 |

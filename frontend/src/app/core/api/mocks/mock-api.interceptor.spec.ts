@@ -63,11 +63,11 @@ describe('mockApiInterceptor', () => {
   });
 
   describe('A1 POST /auth/register', () => {
-    const register = (email: string) =>
+    const register = (email: string, pesel = '85110356782') =>
       send(
         http.post<RegistrationResponse>(
           `${API}/auth/register`,
-          { email, password: MOCK_PASSWORD },
+          { email, password: MOCK_PASSWORD, pesel },
           { observe: 'response' },
         ),
       );
@@ -77,7 +77,7 @@ describe('mockApiInterceptor', () => {
       expect(res?.status).toBe(201);
       expect(res?.headers.get('Location')).toBe('/api/v1/me');
       expect(res?.body?.email).toBe('new.user@example.com');
-      expect(res?.body?.customerNumber).toBe('10000002');
+      expect(res?.body?.customerNumber).toBe('10000100');
       expect(res?.body?.account.iban).toBe('PL45999000121000000000000001');
     });
 
@@ -85,6 +85,21 @@ describe('mockApiInterceptor', () => {
       const { error } = await register(' Anna.Nowak@example.com ');
       expect(error?.status).toBe(409);
       expect(errorCode(error)).toBe('EMAIL_ALREADY_REGISTERED');
+    });
+
+    it.each(['90051412343', '82031710413'])(
+      'returns 409 PESEL_ALREADY_REGISTERED for the taken PESEL %s',
+      async (pesel) => {
+        const { error } = await register('new.user@example.com', pesel);
+        expect(error?.status).toBe(409);
+        expect(errorCode(error)).toBe('PESEL_ALREADY_REGISTERED');
+      },
+    );
+
+    it('TC-04 returns 422 CUSTOMER_UNDERAGE for a person under 18', async () => {
+      const { error } = await register('new.user@example.com', '10270111119');
+      expect(error?.status).toBe(422);
+      expect(errorCode(error)).toBe('CUSTOMER_UNDERAGE');
     });
   });
 
