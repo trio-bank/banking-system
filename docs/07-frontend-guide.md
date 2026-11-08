@@ -107,7 +107,7 @@ After login: `CUSTOMER` → `/app/dashboard`, `ADMIN` → `/admin/customers`. A 
 | Audit log | Filters, table, JSON details expandable | — | D12 |
 | Ledger | Integrity status (OK/FAIL), system accounts; demo jobs: date/month inputs + run buttons | Run jobs | D13–D15 |
 
-Wireframes: low-fidelity sketches go to `docs/diagrams/wireframes/` (photo or Figma export) during Sprint 1.
+Wireframes: low-fidelity sketches in [`docs/diagrams/wireframes/`](diagrams/wireframes/README.md) (SVG). Sprint 1: login, register, register success, toolbars, session warning.
 
 ## 5. Models and API services
 

@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="420" viewBox="0 0 600 420">
+  <title>Wireframe: Register success</title>
+  <style>
+    text { font-family: Arial, Helvetica, sans-serif; fill: #333; }
+    .muted { fill: #777; }
+    .light { fill: #fff; }
+    .card { fill: #fff; stroke: #888; }
+    .btn { fill: #bbb; }
+  </style>
+
+  <rect width="600" height="420" fill="#f4f4f4" />
+
+  <!-- Header -->
+  <rect width="600" height="52" fill="#444" />
+  <rect x="20" y="17" width="4" height="18" fill="#ccc" />
+  <rect x="27" y="17" width="4" height="18" fill="#ccc" />
+  <rect x="34" y="17" width="4" height="18" fill="#ccc" />
+  <text x="48" y="33" font-size="18" class="light">Trio Bank</text>
+
+  <!-- Card -->
+  <rect x="120" y="84" width="360" height="290" rx="8" class="card" />
+  <text x="144" y="124" font-size="22" font-weight="bold">Your account is ready</text>
+  <text x="144" y="148" font-size="12" class="muted">Your customer number and first account number:</text>
+
+  <rect x="144" y="166" width="312" height="104" fill="#eee" />
+  <rect x="144" y="166" width="4" height="104" fill="#666" />
+  <text x="162" y="190" font-size="11" class="muted">Customer number</text>
+  <text x="162" y="210" font-size="16" font-weight="bold">10000100</text>
+  <text x="162" y="236" font-size="11" class="muted">Account number (IBAN)</text>
+  <text x="162" y="256" font-size="14" font-weight="bold">PL45 9990 0012 1000 0000 0000 0001</text>
+
+  <rect x="316" y="300" width="140" height="38" rx="6" class="btn" />
+  <text x="386" y="324" font-size="14" font-weight="bold" text-anchor="middle">Go to login</text>
+</svg>
