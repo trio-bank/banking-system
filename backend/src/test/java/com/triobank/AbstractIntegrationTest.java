@@ -49,7 +49,11 @@ public abstract class AbstractIntegrationTest {
         clock.reset();
     }
 
-    protected long count(String sql, Object... args) {
+    /**
+     * Runs a "select count(*)" style query. Named countRows (not count) so that test classes
+     * can declare their own private count(...) helpers without clashing with this one.
+     */
+    protected long countRows(String sql, Object... args) {
         Long value = jdbc.queryForObject(sql, Long.class, args);
         return value == null ? 0 : value;
     }
