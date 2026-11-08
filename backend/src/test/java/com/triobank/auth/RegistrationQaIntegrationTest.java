@@ -61,16 +61,17 @@ class RegistrationQaIntegrationTest extends AbstractIntegrationTest {
                 String.class, userId)).isEqualTo(customerNumber);
         assertThat(jdbc.queryForObject("select date_of_birth from customers where user_id = ?",
                 LocalDate.class, userId)).isEqualTo(LocalDate.of(1990, 5, 14));
-        assertThat(count("select count(*) from accounts a join customers c on c.id = a.customer_id "
-                + "where c.user_id = ?", userId)).isEqualTo(1);
+        assertThat(countRows("select count(*) from accounts a join customers c on c.id = a.customer_id "
+        + "where c.user_id = ?", userId)).isEqualTo(1);
         assertThat(jdbc.queryForObject("select balance from accounts where iban = ?", BigDecimal.class, iban))
                 .isEqualByComparingTo(BigDecimal.ZERO);
 
         // audit events (US-01 AC)
-        assertThat(count("select count(*) from audit_events where action = 'USER_REGISTERED' "
-                + "and actor_user_id = ?", userId)).isEqualTo(1);
-        assertThat(count("select count(*) from audit_events where action = 'ACCOUNT_OPENED' "
-                + "and (actor_user_id = ? or target_id = ?)", userId, accountId)).isEqualTo(1);
+        assertThat(countRows("select count(*) from audit_events where action = 'USER_REGISTERED' "
+        + "and actor_user_id = ?", userId)).isEqualTo(1);
+        assertThat(countRows("select count(*) from audit_events where action = 'ACCOUNT_OPENED' "
+        + "and (actor_user_id = ? or target_id = ?)", userId, accountId)).isEqualTo(1);
+        
     }
 
     @Test
