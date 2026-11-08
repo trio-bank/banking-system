@@ -59,7 +59,7 @@ public class JwtService {
 
         JwsHeader header = JwsHeader.with(MacAlgorithm.HS256).build();
         String value = encoder.encode(JwtEncoderParameters.from(header, claims.build())).getTokenValue();
-        return new IssuedToken(value, expiresAt);
+        return new IssuedToken(value, issuedAt, expiresAt);
     }
 
 }

@@ -1,5 +1,7 @@
 package com.triobank.auth;
 
+import com.triobank.auth.dto.LoginRequest;
+import com.triobank.auth.dto.LoginResponse;
 import com.triobank.auth.dto.RegisterRequest;
 import com.triobank.auth.dto.RegistrationResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -27,9 +29,11 @@ public class AuthController {
     private static final String PROBLEM_JSON = "application/problem+json";
 
     private final RegistrationService registrationService;
+    private final LoginService loginService;
 
-    public AuthController(RegistrationService registrationService) {
+    public AuthController(RegistrationService registrationService, LoginService loginService) {
         this.registrationService = registrationService;
+        this.loginService = loginService;
     }
 
     @Operation(summary = "Register a customer",
@@ -48,6 +52,22 @@ public class AuthController {
                                                          HttpServletRequest httpRequest) {
         RegistrationResponse response = registrationService.register(request, httpRequest.getRemoteAddr());
         return ResponseEntity.created(ME).body(response);
+    }
+
+    @Operation(summary = "Log in",
+            description = "Returns an access token. Five wrong passwords in a row lock the user for 15 minutes. "
+                    + "A wrong password and an unknown email give the same error.")
+    @SecurityRequirements
+    @ApiResponse(responseCode = "200", description = "Logged in; user.lastLoginAt is the previous login")
+    @ApiResponse(responseCode = "400", description = "VALIDATION_ERROR",
+            content = @Content(mediaType = PROBLEM_JSON, schema = @Schema(implementation = ProblemDetail.class)))
+    @ApiResponse(responseCode = "401", description = "INVALID_CREDENTIALS",
+            content = @Content(mediaType = PROBLEM_JSON, schema = @Schema(implementation = ProblemDetail.class)))
+    @ApiResponse(responseCode = "403", description = "USER_LOCKED (with lockedUntil) or USER_BLOCKED",
+            content = @Content(mediaType = PROBLEM_JSON, schema = @Schema(implementation = ProblemDetail.class)))
+    @PostMapping("/login")
+    public LoginResponse login(@Valid @RequestBody LoginRequest request, HttpServletRequest httpRequest) {
+        return loginService.login(request, httpRequest.getRemoteAddr());
     }
 
 }

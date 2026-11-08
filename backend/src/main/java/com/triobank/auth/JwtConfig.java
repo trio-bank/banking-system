@@ -22,7 +22,7 @@ import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
  * with an {@code Authorization: Bearer} header.
  */
 @Configuration(proxyBeanMethods = false)
-@EnableConfigurationProperties(JwtProperties.class)
+@EnableConfigurationProperties({JwtProperties.class, LockoutProperties.class})
 public class JwtConfig {
 
     @Bean
