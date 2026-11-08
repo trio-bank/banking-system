@@ -3,7 +3,7 @@ import { AccountDto, AddressDto, CurrentUserDto, UserStatus } from '../models';
 /** One password for all test users. */
 export const MOCK_PASSWORD = 'Str0ng!Passw0rd';
 
-/** A customer who already exists in the bank. Free data for registering is in MOCK_DATA.md. */
+/** A customer for unit tests. Data for registering by hand is in MOCK_DATA.md. */
 export interface MockCustomer {
   email: string;
   firstName: string;
@@ -108,7 +108,7 @@ const ADMIN: CurrentUserDto = {
 
 const [ANNA, ...OTHER_CUSTOMERS] = MOCK_CUSTOMERS.map(toUser);
 
-/** Log in with any of these emails + MOCK_PASSWORD. The first two are the usual customer and admin. */
+/** Users for unit tests. The first two are the usual customer and admin. */
 export const MOCK_USERS: CurrentUserDto[] = [ANNA, ADMIN, ...OTHER_CUSTOMERS];
 
 /** The personal account every new customer gets (example from docs/05 A1). */
