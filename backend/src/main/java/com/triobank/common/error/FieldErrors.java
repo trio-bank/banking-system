@@ -23,4 +23,16 @@ public final class FieldErrors {
         return false;
     }
 
+    /**
+     * Same, but for a validator on a whole class that reports the error on one of its fields,
+     * e.g. a postal code that depends on the country.
+     */
+    public static boolean reject(ConstraintValidatorContext context, String field, FieldErrorCode code,
+                                 String message) {
+        context.unwrap(HibernateConstraintValidatorContext.class).withDynamicPayload(code);
+        context.disableDefaultConstraintViolation();
+        context.buildConstraintViolationWithTemplate(message).addPropertyNode(field).addConstraintViolation();
+        return false;
+    }
+
 }
