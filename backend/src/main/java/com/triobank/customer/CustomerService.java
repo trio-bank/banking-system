@@ -8,6 +8,7 @@ import com.triobank.common.pesel.PeselParser;
 import com.triobank.customer.dto.AddressDto;
 import java.time.Clock;
 import java.time.LocalDate;
+import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -58,6 +59,16 @@ public class CustomerService {
                 data.lastName().trim(), data.pesel(), PeselParser.birthDate(data.pesel()), data.phoneNumber(),
                 residentialAddress);
         return customers.save(customer);
+    }
+
+    /**
+     * @throws IllegalStateException if the user has no customer, which must not happen for role CUSTOMER
+     */
+    @Transactional(readOnly = true)
+    public UUID getIdByUserId(UUID userId) {
+        return customers.findByUserId(userId)
+                .map(Customer::getId)
+                .orElseThrow(() -> new IllegalStateException("User " + userId + " has no customer"));
     }
 
     private static String blankToNull(String value) {
