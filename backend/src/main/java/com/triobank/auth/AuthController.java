@@ -4,7 +4,10 @@ import com.triobank.auth.dto.LoginRequest;
 import com.triobank.auth.dto.LoginResponse;
 import com.triobank.auth.dto.RegisterRequest;
 import com.triobank.auth.dto.RegistrationResponse;
+import com.triobank.common.web.AuthenticatedUser;
+import com.triobank.common.web.CurrentUser;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -30,10 +33,13 @@ public class AuthController {
 
     private final RegistrationService registrationService;
     private final LoginService loginService;
+    private final CurrentUserService currentUserService;
 
-    public AuthController(RegistrationService registrationService, LoginService loginService) {
+    public AuthController(RegistrationService registrationService, LoginService loginService,
+                          CurrentUserService currentUserService) {
         this.registrationService = registrationService;
         this.loginService = loginService;
+        this.currentUserService = currentUserService;
     }
 
     @Operation(summary = "Register a customer",
@@ -68,6 +74,19 @@ public class AuthController {
     @PostMapping("/login")
     public LoginResponse login(@Valid @RequestBody LoginRequest request, HttpServletRequest httpRequest) {
         return loginService.login(request, httpRequest.getRemoteAddr());
+    }
+
+    @Operation(summary = "Log out",
+            description = "Records the logout. The token is not revoked and stays valid until it expires, "
+                    + "so the client must delete it.")
+    @ApiResponse(responseCode = "204", description = "Logged out")
+    @ApiResponse(responseCode = "401", description = "UNAUTHENTICATED",
+            content = @Content(mediaType = PROBLEM_JSON, schema = @Schema(implementation = ProblemDetail.class)))
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(@Parameter(hidden = true) @CurrentUser AuthenticatedUser caller,
+                                       HttpServletRequest httpRequest) {
+        currentUserService.logout(caller.userId(), httpRequest.getRemoteAddr());
+        return ResponseEntity.noContent().build();
     }
 
 }

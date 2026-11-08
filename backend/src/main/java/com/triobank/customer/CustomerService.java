@@ -6,6 +6,8 @@ import com.triobank.common.error.ApiException;
 import com.triobank.common.error.ErrorCode;
 import com.triobank.common.pesel.PeselParser;
 import com.triobank.customer.dto.AddressDto;
+import com.triobank.customer.dto.CustomerMapper;
+import com.triobank.customer.dto.CustomerProfileDto;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.util.UUID;
@@ -68,6 +70,16 @@ public class CustomerService {
     public UUID getIdByUserId(UUID userId) {
         return customers.findByUserId(userId)
                 .map(Customer::getId)
+                .orElseThrow(() -> new IllegalStateException("User " + userId + " has no customer"));
+    }
+
+    /**
+     * @throws IllegalStateException if the user has no customer, which must not happen for role CUSTOMER
+     */
+    @Transactional(readOnly = true)
+    public CustomerProfileDto getProfileByUserId(UUID userId) {
+        return customers.findByUserId(userId)
+                .map(CustomerMapper::toProfile)
                 .orElseThrow(() -> new IllegalStateException("User " + userId + " has no customer"));
     }
 
