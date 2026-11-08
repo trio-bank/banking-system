@@ -3,5 +3,5 @@
 export const environment = {
   apiUrl: '/api/v1',
   // true = mocked endpoints answer without a backend (core/api/mocks). Set false to use the real API.
-  useMocks: true,
+  useMocks: false,
 };
