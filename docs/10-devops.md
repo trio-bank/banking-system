@@ -100,7 +100,7 @@ Hosting for `demo` is decided in Sprint 1 by the QA/DevOps member and recorded a
 | `DB_URL` | backend | `jdbc:postgresql://db:5432/triobank` | no |
 | `DB_USER` / `DB_PASSWORD` | backend, db | `triobank` / `triobank` | yes in demo |
 | `DB_PORT` | db (host port in compose) | `5432` | no |
-| `JWT_SECRET` | backend | 32+ random bytes, base64 | **yes** |
+| `JWT_SECRET` | backend | at least 32 characters, e.g. `openssl rand -base64 32` | **yes** |
 | `ADMIN_EMAIL` / `ADMIN_PASSWORD` | backend bootstrap | `admin@triobank.local` / … | **yes** |
 | `CORS_ALLOWED_ORIGINS` | backend | `http://localhost:4200` | no |
 | `SPRING_PROFILES_ACTIVE` | backend | `local` | no |

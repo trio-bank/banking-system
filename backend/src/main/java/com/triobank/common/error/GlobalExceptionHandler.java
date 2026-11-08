@@ -18,6 +18,7 @@ import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -45,6 +46,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     private static final String VALIDATION_DETAIL = "One or more fields are invalid.";
     private static final String MALFORMED_DETAIL = "Request body is missing or is not valid JSON.";
     private static final String CONCURRENT_DETAIL = "The resource was modified by another request. Retry the operation.";
+    private static final String UNAUTHENTICATED_DETAIL = "A valid access token is required.";
     private static final String ACCESS_DENIED_DETAIL = "You are not allowed to perform this operation.";
     private static final String INTERNAL_DETAIL = "An unexpected error occurred.";
 
@@ -82,6 +84,11 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                     log.error("Unmapped data integrity violation (constraint {})", constraint, ex);
                     return respond(ErrorCode.INTERNAL_ERROR, INTERNAL_DETAIL, request);
                 });
+    }
+
+    @ExceptionHandler(AuthenticationException.class)
+    ResponseEntity<ProblemDetail> handleAuthentication(AuthenticationException ex, HttpServletRequest request) {
+        return respond(ErrorCode.UNAUTHENTICATED, UNAUTHENTICATED_DETAIL, request);
     }
 
     @ExceptionHandler(AccessDeniedException.class)
