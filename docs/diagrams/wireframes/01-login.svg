@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="540" viewBox="0 0 600 540">
+  <title>Wireframe: Login</title>
+  <style>
+    text { font-family: Arial, Helvetica, sans-serif; fill: #333; }
+    .muted { fill: #777; }
+    .light { fill: #fff; }
+    .card { fill: #fff; stroke: #888; }
+    .field { fill: #fff; stroke: #888; }
+    .btn { fill: #bbb; }
+    .dash { fill: none; stroke: #999; stroke-dasharray: 6 4; }
+  </style>
+
+  <rect width="600" height="540" fill="#f4f4f4" />
+
+  <!-- Header -->
+  <rect width="600" height="52" fill="#444" />
+  <rect x="20" y="17" width="4" height="18" fill="#ccc" />
+  <rect x="27" y="17" width="4" height="18" fill="#ccc" />
+  <rect x="34" y="17" width="4" height="18" fill="#ccc" />
+  <text x="48" y="33" font-size="18" class="light">Trio Bank</text>
+
+  <!-- Card -->
+  <rect x="120" y="84" width="360" height="420" rx="8" class="card" />
+  <text x="144" y="124" font-size="22" font-weight="bold">Log in</text>
+  <text x="144" y="148" font-size="13" class="muted">Welcome to Trio Bank</text>
+
+  <rect x="144" y="166" width="312" height="60" rx="4" class="dash" />
+  <text x="156" y="186" font-size="12" font-weight="bold">Notice / error banner (only when needed)</text>
+  <text x="156" y="202" font-size="11" class="muted">Session expired · inactive · invalid email or password ·</text>
+  <text x="156" y="217" font-size="11" class="muted">blocked · locked + "Try again in 14:32"</text>
+
+  <rect x="144" y="242" width="312" height="44" rx="4" class="field" />
+  <text x="156" y="269" font-size="14" class="muted">Email</text>
+
+  <rect x="144" y="302" width="312" height="44" rx="4" class="field" />
+  <text x="156" y="329" font-size="14" class="muted">Password</text>
+
+  <rect x="144" y="366" width="312" height="40" rx="6" class="btn" />
+  <text x="300" y="391" font-size="14" font-weight="bold" text-anchor="middle">Log in</text>
+
+  <text x="144" y="440" font-size="13" text-decoration="underline">Create an account</text>
+</svg>
