@@ -1,13 +1,12 @@
-# Mock data
+# Test data
 
-Test data for working without a backend (`useMocks: true`). Everything here is fictional.
-Existing users live in `src/app/core/api/mocks/mock-data.ts`. If you change them, update this file too.
+Data for trying the app by hand against the real backend. Everything here is fictional.
 
-Nothing is saved: a newly registered user cannot log in, and every registration returns the same customer number and IBAN.
+Registrations are saved in the database. To start over, run `docker compose down -v` from the repo root.
 
-## Register: free data to copy
+## Register: data to copy
 
-None of this is taken, so each customer can be registered as many times as you want.
+Each customer can be registered once.
 
 Password for all of them: `Str0ng!Passw0rd`
 
@@ -21,34 +20,32 @@ Password for all of them: `Str0ng!Passw0rd`
 | `oliwia.mazur@example.com`                      | Oliwia                | Mazur                  | `08310163967` | `+48502000014`  | Kwiatowa                            | `5`      |           | `40-001`    | Katowice | Just turned 18               |
 | `olena.shevchenko@example.com`                  | Olena                 | Shevchenko             | `98030951542` | `+380501234567` | Mickiewicza                         | `27`     | `5`       | `45-367`    | Opole    | Foreign phone number         |
 
-Every registration returns customer number `10000100` and IBAN `PL45 9990 0012 1000 0000 0000 0001`.
-
 ## Register: error cases
 
 Fill the other fields with free data from above.
 
-| Field    | Value                    | Result                                    | When                     |
-| -------- | ------------------------ | ----------------------------------------- | ------------------------ |
-| Email    | `anna.nowak@example.com` | Email taken, error under the field        | After **Create account** |
-| PESEL    | `90051412343`            | PESEL taken, error under the field        | After **Create account** |
-| PESEL    | `10270111119`            | Under 18, cannot go further               | Right away               |
-| PESEL    | `90051412344`            | Wrong check digit, cannot go further      | Right away               |
-| Password | `NoSpecialChar123`       | Weak password, cannot go further          | Right away               |
-| Phone    | `+48 501 234`            | Not 9 digits after +48, cannot go further | Right away               |
-| Phone    | `501234567`              | No country code, cannot go further        | Right away               |
-| Street   | `12345`                  | No letters, cannot go further             | Right away               |
-| Building | `abc`                    | Not a number, cannot go further           | Right away               |
+| Field    | Value                      | Result                                    | When                     |
+| -------- | -------------------------- | ----------------------------------------- | ------------------------ |
+| Email    | one you already registered | Email taken, error under the field        | After **Create account** |
+| PESEL    | one you already registered | PESEL taken, error under the field        | After **Create account** |
+| PESEL    | `10270111119`              | Under 18, cannot go further               | Right away               |
+| PESEL    | `90051412344`              | Wrong check digit, cannot go further      | Right away               |
+| Password | `NoSpecialChar123`         | Weak password, cannot go further          | Right away               |
+| Phone    | `+48 501 234`              | Not 9 digits after +48, cannot go further | Right away               |
+| Phone    | `501234567`                | No country code, cannot go further        | Right away               |
+| Street   | `12345`                    | No letters, cannot go further             | Right away               |
+| Building | `abc`                      | Not a number, cannot go further           | Right away               |
 
 Taken email and PESEL can only be checked by the server, and the API does that when the form is sent.
 
 ## Log in: existing users
 
-Password for all of them: `Str0ng!Passw0rd`. Any other email or password gives `INVALID_CREDENTIALS`.
+Customers exist only after you register them. The admin is created when the backend starts (`local` profile):
 
-| Email                          | Role     | PESEL (taken) | Use it for                     |
-| ------------------------------ | -------- | ------------- | ------------------------------ |
-| `anna.nowak@example.com`       | CUSTOMER | `90051412343` | Default customer               |
-| `admin@triobank.example`       | ADMIN    |               | Default admin, no profile      |
-| `locked@example.com`           | CUSTOMER | `82031710413` | `USER_LOCKED` error, countdown |
-| `blocked@example.com`          | CUSTOMER | `75090821123` | `USER_BLOCKED` error           |
-| `michal.kaczmarek@example.com` | CUSTOMER | `96100517797` | First login, no "Last login"   |
+| Email                  | Password         | Role  |
+| ---------------------- | ---------------- | ----- |
+| `admin@triobank.local` | `Adm1n!Passw0rd` | ADMIN |
+
+To see the lockout, enter a wrong password 5 times. The 6th attempt shows the countdown, and the lock lasts 15 minutes.
+
+A blocked user can't be made from the UI until the admin panel exists (US-18).
