@@ -25,6 +25,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MvcResult;
 
+
 /** US-02 login, lockout and /me: TC-07...TC-10 and TC-13 from docs/09-testing.md §5.1. */
 class LoginQaIntegrationTest extends AbstractIntegrationTest {
 
