@@ -12,6 +12,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.jayway.jsonpath.JsonPath;
+import com.triobank.auth.JwtConfig;
 import com.triobank.common.config.SecurityConfig;
 import com.triobank.common.web.TraceIdFilter;
 import java.time.Clock;
@@ -35,7 +36,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
 @WebMvcTest(controllers = ErrorTestController.class)
-@Import({SecurityConfig.class, GlobalExceptionHandlerTest.FixedClock.class})
+@Import({SecurityConfig.class, JwtConfig.class, GlobalExceptionHandlerTest.FixedClock.class})
 @ActiveProfiles("test")
 @WithMockUser
 @ExtendWith(OutputCaptureExtension.class)
