@@ -15,7 +15,21 @@
 }
 
 .toolbar-end {
+  display: flex;
+  align-items: center;
+  gap: 4px;
   margin-left: auto;
+}
+
+// Same light-on-black colors as the logout button.
+.toolbar-link {
+  --mat-button-text-label-text-color: var(--mat-sys-on-primary);
+  --mat-button-text-state-layer-color: var(--mat-sys-on-primary);
+}
+
+.toolbar-link.active {
+  text-decoration: underline;
+  text-underline-offset: 6px;
 }
 
 .shell-content {
