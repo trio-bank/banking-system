@@ -3,7 +3,12 @@
     <span class="brand-mark" aria-hidden="true"></span>
     Trio Bank
   </a>
-  <app-logout-button class="toolbar-end" />
+  <nav class="toolbar-end">
+    <a matButton class="toolbar-link" routerLink="/app/profile" routerLinkActive="active">
+      Profile
+    </a>
+    <app-logout-button />
+  </nav>
 </mat-toolbar>
 <main class="shell-content">
   <router-outlet />

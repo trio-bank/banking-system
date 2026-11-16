@@ -1,0 +1,35 @@
+<h1>My profile</h1>
+
+@if (loading()) {
+  <div class="state" role="status">
+    <mat-spinner diameter="40" />
+    <span>Loading your data…</span>
+  </div>
+} @else if (error(); as message) {
+  <div class="banner" role="alert">
+    <span>{{ message }}</span>
+    <button matButton type="button" (click)="load()">Try again</button>
+  </div>
+} @else if (profile(); as p) {
+  <mat-card appearance="outlined" class="profile-card">
+    <mat-card-content>
+      <dl class="fields">
+        <dt>Customer number</dt>
+        <dd>{{ p.customerNumber }}</dd>
+        <dt>Full name</dt>
+        <dd>{{ p.firstName }} {{ p.lastName }}</dd>
+        <dt>PESEL</dt>
+        <dd>{{ p.peselMasked }}</dd>
+        <dt>Date of birth</dt>
+        <dd>{{ p.dateOfBirth | date: 'dd.MM.yyyy' }}</dd>
+        <dt>Email</dt>
+        <dd>{{ p.email }}</dd>
+        <dt>Phone</dt>
+        <dd>{{ p.phoneNumber }}</dd>
+        <dt>Address</dt>
+        <dd>{{ formatAddress(p.address) }}</dd>
+      </dl>
+    </mat-card-content>
+  </mat-card>
+  <p class="hint">To change your data, please contact the bank.</p>
+}
