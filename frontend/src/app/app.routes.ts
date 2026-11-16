@@ -39,6 +39,14 @@ export const routes: Routes = [
           import('./features/dashboard/dashboard-page').then((m) => m.DashboardPage),
       },
       {
+        path: 'accounts/:accountId',
+        title: 'Account · Trio Bank',
+        loadComponent: () =>
+          import('./features/accounts/account-details/account-details-page').then(
+            (m) => m.AccountDetailsPage,
+          ),
+      },
+      {
         path: 'profile',
         title: 'My profile · Trio Bank',
         loadComponent: () => import('./features/profile/profile-page').then((m) => m.ProfilePage),
