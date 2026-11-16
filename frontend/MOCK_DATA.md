@@ -49,3 +49,27 @@ Customers exist only after you register them. The admin is created when the back
 To see the lockout, enter a wrong password 5 times. The 6th attempt shows the countdown, and the lock lasts 15 minutes.
 
 A blocked user can't be made from the UI until the admin panel exists (US-18).
+
+## Accounts and ATM: mocked data
+
+The backend doesn't have these endpoints yet, so with `useMocks: true` (`src/environments/environment.ts`) they are answered by `src/app/core/api/mocks`: P1, C1–C5, T3, T4. Log in with any real user first. Every user sees the same three accounts below. Changes (new account, rename, ATM) last until the page is reloaded.
+
+| Account               | IBAN                                 | Type     | Status  | Balance      | Use it for                              |
+| --------------------- | ------------------------------------ | -------- | ------- | ------------ | --------------------------------------- |
+| Trio Personal Account | `PL45 9990 0012 1000 0000 0000 0001` | PERSONAL | ACTIVE  | 10 420,51 zł | ATM, 25 history entries (2 pages of 20) |
+| Holiday savings       | `PL18 9990 0012 1000 0000 0000 0002` | SAVINGS  | ACTIVE  | 3 324,97 zł  | Interest and tax entries, no ATM        |
+| Old personal account  | `PL88 9990 0012 1000 0000 0000 0003` | PERSONAL | BLOCKED | 120,00 zł    | Blocked account                         |
+
+## Accounts and ATM: error cases
+
+| Where           | What to do                                  | Result                              |
+| --------------- | ------------------------------------------- | ----------------------------------- |
+| Open account    | Choose the personal account product         | `ACCOUNT_LIMIT_REACHED` (max 2)     |
+| Open / rename   | Name longer than 50 characters              | `VALIDATION_ERROR`, `TOO_LONG`      |
+| ATM             | Amount not in whole tens, e.g. `15`         | `CASH_AMOUNT_INVALID`               |
+| ATM deposit     | More than `20000`                           | `CASH_AMOUNT_INVALID`               |
+| ATM withdrawal  | More than `5000`                            | `CASH_AMOUNT_INVALID`               |
+| ATM withdrawal  | More than the balance (after a few `5000`s) | `INSUFFICIENT_FUNDS`                |
+| ATM             | Holiday savings                             | `OPERATION_NOT_ALLOWED_FOR_ACCOUNT` |
+| ATM             | Old personal account                        | `*_ACCOUNT_UNAVAILABLE`             |
+| History filters | "From" after "To"                           | `VALIDATION_ERROR`, `INVALID_DATE`  |

@@ -1,9 +1,10 @@
 import { HttpErrorResponse, HttpHeaders, HttpRequest, HttpResponse } from '@angular/common/http';
-import { ProblemDetail } from '../models';
+import { FieldError, ProblemDetail } from '../models';
 
 /** A mock returns either a normal response or an error, like a real server. */
 export type MockResult = HttpResponse<unknown> | HttpErrorResponse;
-export type MockHandler = (req: HttpRequest<unknown>) => MockResult;
+/** `params` = values from the path, e.g. `{ id: '7d1e…' }` for `/accounts/:id`. */
+export type MockHandler = (req: HttpRequest<unknown>, params: Record<string, string>) => MockResult;
 
 /** Current time (+ offset) in the API format: `2026-10-24T13:02:11Z`, no milliseconds. */
 export function isoNow(offsetSeconds = 0): string {
@@ -48,3 +49,29 @@ export function problem(
     error: body,
   });
 }
+
+/** 400 VALIDATION_ERROR for one field, like docs/05 §3. */
+export function validationError(
+  req: HttpRequest<unknown>,
+  field: string,
+  code: string,
+  message: string,
+): HttpErrorResponse {
+  const errors: FieldError[] = [{ field, code, message }];
+  return problem(
+    req,
+    400,
+    'VALIDATION_ERROR',
+    'Validation failed',
+    'One or more fields are invalid.',
+    {
+      errors,
+    },
+  );
+}
+
+export const unauthenticated = (req: HttpRequest<unknown>) =>
+  problem(req, 401, 'UNAUTHENTICATED', 'Unauthenticated', 'Missing or invalid token.');
+
+export const notFound = (req: HttpRequest<unknown>, what: string) =>
+  problem(req, 404, 'RESOURCE_NOT_FOUND', 'Resource not found', `${what} not found.`);
