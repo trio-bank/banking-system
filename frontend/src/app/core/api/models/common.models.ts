@@ -37,3 +37,17 @@ export type Role = 'CUSTOMER' | 'ADMIN';
 export type UserStatus = 'PENDING_VERIFICATION' | 'ACTIVE' | 'LOCKED' | 'BLOCKED' | 'CLOSED';
 export type AccountType = 'PERSONAL' | 'SAVINGS';
 export type AccountStatus = 'ACTIVE' | 'BLOCKED' | 'CLOSED';
+export type OutgoingTransferPolicy = 'ANY' | 'OWN_ACCOUNTS_ONLY';
+// `string & {}` = any other string is OK too (new values may come), but the editor still
+// suggests the known ones. Plain `| string` would swallow them.
+export type TransactionType =
+  | 'OWN_TRANSFER'
+  | 'INTERNAL_TRANSFER'
+  | 'CASH_DEPOSIT'
+  | 'CASH_WITHDRAWAL'
+  | 'INTEREST'
+  | 'TAX'
+  | (string & {});
+export type TransactionStatus = 'PENDING' | 'COMPLETED' | 'REJECTED' | 'CANCELLED';
+export type Channel = 'WEB' | 'ATM' | 'BRANCH' | 'SYSTEM' | (string & {});
+export type Direction = 'INCOMING' | 'OUTGOING';
