@@ -8,7 +8,8 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { TestBed } from '@angular/core/testing';
 import { firstValueFrom, Observable } from 'rxjs';
 import { AccountDto, ProblemDetail } from '../models';
-import { MOCK_DELAY_MS, mockApiInterceptor, resetMocks } from './mock-api.interceptor';
+import { MOCK_DELAY_MS, mockApiInterceptor } from './mock-api.interceptor';
+import { resetMocks } from './mock-routes';
 
 const API = '/api/v1';
 const AUTH = { headers: { Authorization: 'Bearer any-token' } };
@@ -17,6 +18,9 @@ const SAVINGS = '00000000-0000-4000-d000-000000000002';
 describe('mockApiInterceptor', () => {
   let http: HttpClient;
   let backend: HttpTestingController;
+
+  // The first import() of a file takes longer than one timer tick. Load it once up front.
+  beforeAll(() => import('./mock-routes'));
 
   beforeEach(() => {
     vi.useFakeTimers();
@@ -53,9 +57,15 @@ describe('mockApiInterceptor', () => {
     ['GET', '/me'],
     ['POST', '/transfers'],
     ['DELETE', '/accounts'],
-  ])('sends %s %s to the real backend', (method, path) => {
+  ])('sends %s %s to the real backend', async (method, path) => {
     http.request(method, `${API}${path}`).subscribe();
+    await vi.advanceTimersByTimeAsync(0); // the mock list is loaded first
     backend.expectOne({ method, url: `${API}${path}` }).flush(null);
+  });
+
+  it('passes other URLs on right away, without loading the mocks', () => {
+    http.get('/assets/config.json').subscribe();
+    backend.expectOne('/assets/config.json').flush(null);
   });
 
   it('answers a mocked endpoint after the delay, without the backend', async () => {
