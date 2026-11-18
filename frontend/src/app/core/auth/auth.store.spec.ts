@@ -50,6 +50,15 @@ describe('AuthStore', () => {
     expect(sessionStorage.getItem('trio.session')).toContain('token-123');
   });
 
+  it('keeps the previous login from the login answer, even after GET /me and a reload', () => {
+    store.setSession(loginResponse());
+    store.setUser({ ...ANNA, lastLoginAt: '2026-11-16T10:00:00Z' }); // /me = this login
+    expect(store.previousLoginAt()).toBe(ANNA.lastLoginAt);
+
+    createStore();
+    expect(store.previousLoginAt()).toBe(ANNA.lastLoginAt);
+  });
+
   it('forgets everything on clear', () => {
     store.setSession(loginResponse());
     store.clear();
