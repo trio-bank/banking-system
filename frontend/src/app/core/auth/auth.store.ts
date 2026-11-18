@@ -9,6 +9,7 @@ const LOGOUT_TIMEOUT_MS = 5000;
 interface StoredSession {
   accessToken: string;
   expiresAt: IsoDateTime;
+  previousLoginAt?: IsoDateTime | null;
 }
 
 /** Where each role lands after login, or when it opens a page it can't use. */
@@ -32,10 +33,19 @@ export class AuthStore {
   readonly expiresAt = computed(() => this.session()?.expiresAt ?? null);
   readonly isLoggedIn = computed(() => this.token() !== null && this.currentUser() !== null);
   readonly role = computed(() => this.currentUser()?.role ?? null);
+  /**
+   * "Last login" for the dashboard. Only the login answer has it: GET /me returns the current
+   * login, so it is kept with the session and survives setUser() and page reloads.
+   */
+  readonly previousLoginAt = computed(() => this.session()?.previousLoginAt ?? null);
 
   /** Call after a successful login. */
   setSession(response: LoginResponse): void {
-    const session = { accessToken: response.accessToken, expiresAt: response.expiresAt };
+    const session: StoredSession = {
+      accessToken: response.accessToken,
+      expiresAt: response.expiresAt,
+      previousLoginAt: response.user.lastLoginAt,
+    };
     sessionStorage.setItem(STORAGE_KEY, JSON.stringify(session));
     this.session.set(session);
     this.currentUser.set(response.user);

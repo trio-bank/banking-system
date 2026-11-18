@@ -1,0 +1,95 @@
+<header class="greeting">
+  <h1>Hello{{ firstName() ? ', ' + firstName() : '' }}</h1>
+  @if (previousLoginAt(); as at) {
+    <p class="muted">Last login: {{ at | date: 'dd.MM.yyyy, HH:mm' }}</p>
+  } @else {
+    <p class="muted">Welcome to Trio Bank! This is your first login.</p>
+  }
+</header>
+
+@if (loading()) {
+  <div class="state" role="status">
+    <mat-spinner diameter="40" />
+    <span>Loading your accounts…</span>
+  </div>
+} @else if (error(); as message) {
+  <div class="banner" role="alert">
+    <span>{{ message }}</span>
+    <button matButton type="button" (click)="load()">Try again</button>
+  </div>
+} @else if (accounts(); as list) {
+  <section class="summary">
+    <div>
+      <p class="muted">Total balance</p>
+      <p class="total" data-testid="total">{{ total() | money }}</p>
+      <p class="muted small">Active accounts only</p>
+    </div>
+    <div class="actions">
+      <a matButton="filled" routerLink="/app/atm">ATM</a>
+      <a matButton="outlined" routerLink="/app/accounts/new">Open account</a>
+    </div>
+  </section>
+
+  <h2>My accounts</h2>
+  @if (list.length === 0) {
+    <p class="muted">You have no accounts yet.</p>
+  } @else {
+    <ul class="cards">
+      @for (a of list; track a.id) {
+        <li>
+          <a
+            class="card"
+            [routerLink]="['/app/accounts', a.id]"
+            [class.inactive]="a.status !== 'ACTIVE'"
+          >
+            <span class="card-top">
+              <span class="card-name">{{ a.name }}</span>
+              <span class="status" [class]="'status-' + a.status.toLowerCase()">
+                {{ a.status | enumLabel }}
+              </span>
+            </span>
+            <span class="muted small">{{ a.type | enumLabel }}</span>
+            <span class="iban">{{ a.iban | iban }}</span>
+            <span class="card-balance">{{ a.balance | money: a.currency }}</span>
+          </a>
+        </li>
+      }
+    </ul>
+
+    @if (firstAccount(); as first) {
+      <h2>Last operations</h2>
+      <p class="muted small">{{ first.name }}</p>
+      @if (operationsLoading()) {
+        <div class="state" role="status">
+          <mat-spinner diameter="24" />
+          <span>Loading operations…</span>
+        </div>
+      } @else if (operationsError(); as message) {
+        <div class="banner" role="alert">
+          <span>{{ message }}</span>
+          <button matButton type="button" (click)="loadOperations()">Try again</button>
+        </div>
+      } @else if (operations(); as items) {
+        @if (items.length === 0) {
+          <p class="muted">No operations yet.</p>
+        } @else {
+          <ul class="operations">
+            @for (op of items; track op.entryId) {
+              <li class="operation">
+                <span class="op-date muted">{{ op.createdAt | date: 'dd.MM' }}</span>
+                <span class="op-text">
+                  <span>{{ op.title }}</span>
+                  <span class="muted small">{{ op.counterpartyName }}</span>
+                </span>
+                <span class="op-amount" [class.incoming]="op.direction === 'INCOMING'">
+                  {{ op.amount | signedAmount: op.direction : op.currency }}
+                </span>
+              </li>
+            }
+          </ul>
+          <a matButton [routerLink]="['/app/accounts', first.id]">Show all</a>
+        }
+      }
+    }
+  }
+}

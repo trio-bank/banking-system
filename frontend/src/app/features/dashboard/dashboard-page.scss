@@ -1,0 +1,175 @@
+h1 {
+  margin: 0;
+  font: var(--mat-sys-headline-small);
+}
+
+h2 {
+  margin: 32px 0 4px;
+  font: var(--mat-sys-title-large);
+}
+
+.muted {
+  margin: 0;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.small {
+  font: var(--mat-sys-body-small);
+}
+
+.greeting {
+  margin-bottom: 24px;
+}
+
+.state {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 0;
+}
+
+// Same banner as on the profile page.
+.banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 8px 8px 16px;
+  border-left: 4px solid var(--mat-sys-error);
+  border-radius: 4px;
+  background: var(--mat-sys-error-container);
+  color: var(--mat-sys-on-error-container);
+}
+
+.summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  max-width: 960px;
+}
+
+.total {
+  margin: 0;
+  font: var(--mat-sys-display-small);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 16px;
+  max-width: 960px;
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  height: 100%;
+  box-sizing: border-box;
+  padding: 16px;
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: 12px;
+  color: inherit;
+  text-decoration: none;
+  background: var(--mat-sys-surface);
+
+  &:hover,
+  &:focus-visible {
+    border-color: var(--mat-sys-primary);
+  }
+}
+
+// Blocked or closed: greyed out, the status badge says why.
+.card.inactive {
+  background: var(--mat-sys-surface-container);
+
+  .card-balance {
+    color: var(--mat-sys-on-surface-variant);
+  }
+}
+
+.card-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.card-name {
+  font: var(--mat-sys-title-medium);
+  overflow-wrap: anywhere;
+}
+
+.iban {
+  font: var(--mat-sys-body-medium);
+  font-variant-numeric: tabular-nums;
+}
+
+.card-balance {
+  margin-top: 8px;
+  font: var(--mat-sys-headline-small);
+}
+
+// Same badges as on the account details page.
+.status {
+  flex-shrink: 0;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font: var(--mat-sys-label-medium);
+  background: var(--mat-sys-surface-container-high);
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.status-active {
+  background: var(--mat-sys-primary-container);
+  color: var(--mat-sys-on-primary-container);
+}
+
+.status-blocked {
+  background: var(--mat-sys-error-container);
+  color: var(--mat-sys-on-error-container);
+}
+
+.operations {
+  max-width: 960px;
+  margin: 8px 0;
+  padding: 0;
+  list-style: none;
+}
+
+.operation {
+  display: grid;
+  grid-template-columns: 48px 1fr auto;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--mat-sys-outline-variant);
+}
+
+.op-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.op-amount {
+  font: var(--mat-sys-title-small);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.op-amount.incoming {
+  color: var(--mat-sys-primary);
+}
