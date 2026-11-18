@@ -1,5 +1,6 @@
 import { Clipboard } from '@angular/cdk/clipboard';
 import { TestBed } from '@angular/core/testing';
+import { FormControl } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { provideRouter, withComponentInputBinding } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
@@ -8,7 +9,7 @@ import { AccountDto, ProblemDetail } from '../../../core/api/models';
 import { mockAccounts, resetMockBank } from '../../../core/api/mocks/mock-bank';
 import { AccountsApi } from '../../../core/api/services/accounts-api';
 import { formatMoney } from '../../../shared/pipes';
-import { AccountDetailsPage, formatRate } from './account-details-page';
+import { accountNameValidator, AccountDetailsPage, formatRate } from './account-details-page';
 
 resetMockBank();
 const [PERSONAL, SAVINGS, BLOCKED] = mockAccounts().map((account) => ({ ...account }));
@@ -27,6 +28,7 @@ const problem = (code: string, status: number): ProblemDetail => ({
 
 describe('AccountDetailsPage', () => {
   const get = vi.fn();
+  const rename = vi.fn();
   let harness: RouterTestingHarness | undefined;
 
   const open = async (account: AccountDto | string) => {
@@ -41,13 +43,17 @@ describe('AccountDetailsPage', () => {
   beforeEach(() => {
     get.mockReset();
     get.mockImplementation((id: string) => of(mockAccounts().find((a) => a.id === id)));
+    rename.mockReset();
+    rename.mockImplementation((id: string, { name }: { name: string }) =>
+      of({ ...mockAccounts().find((a) => a.id === id)!, name }),
+    );
     TestBed.configureTestingModule({
       providers: [
         provideRouter(
           [{ path: 'app/accounts/:accountId', component: AccountDetailsPage }],
           withComponentInputBinding(),
         ),
-        { provide: AccountsApi, useValue: { get } },
+        { provide: AccountsApi, useValue: { get, rename } },
       ],
     });
     harness = undefined;
@@ -133,6 +139,168 @@ describe('AccountDetailsPage', () => {
 
     expect(get).toHaveBeenLastCalledWith(SAVINGS.id);
     expect(el.querySelector('h1')?.textContent).toContain('Holiday savings');
+  });
+
+  describe('rename (US-09)', () => {
+    const startRename = async (account = PERSONAL) => {
+      const el = await open(account);
+      el.querySelector<HTMLButtonElement>('[aria-label="Rename account"]')!.click();
+      harness!.detectChanges();
+      return el;
+    };
+
+    const type = (el: HTMLElement, value: string) => {
+      const input = el.querySelector<HTMLInputElement>('.rename input')!;
+      input.value = value;
+      input.dispatchEvent(new Event('input'));
+      harness!.detectChanges();
+    };
+
+    const submit = async (el: HTMLElement) => {
+      el.querySelector<HTMLButtonElement>('.rename [type="submit"]')!.click();
+      await harness!.fixture.whenStable();
+      harness!.detectChanges();
+    };
+
+    it('opens the field with the current name', async () => {
+      const el = await startRename();
+
+      expect(el.querySelector<HTMLInputElement>('.rename input')!.value).toBe(PERSONAL.name);
+      expect(el.querySelector('h1')).toBeNull();
+    });
+
+    it('TC-19 valid name: saves it trimmed and shows it in the header', async () => {
+      const snack = vi.spyOn(TestBed.inject(MatSnackBar), 'open');
+      const el = await startRename();
+
+      type(el, '  Daily expenses  ');
+      await submit(el);
+
+      expect(rename).toHaveBeenCalledWith(PERSONAL.id, { name: 'Daily expenses' });
+      expect(el.querySelector('.rename')).toBeNull();
+      expect(el.querySelector('h1')?.textContent).toContain('Daily expenses');
+      expect(snack).toHaveBeenCalledWith('Account renamed', undefined, { duration: 3000 });
+    });
+
+    it('TC-19 51 characters: error under the field, nothing sent', async () => {
+      const el = await startRename();
+
+      type(el, 'a'.repeat(51));
+      await submit(el);
+
+      expect(rename).not.toHaveBeenCalled();
+      expect(el.querySelector('mat-error')?.textContent).toContain('At most 50 characters.');
+    });
+
+    it('accepts exactly 50 characters', async () => {
+      const el = await startRename();
+
+      type(el, 'a'.repeat(50));
+      await submit(el);
+
+      expect(rename).toHaveBeenCalledWith(PERSONAL.id, { name: 'a'.repeat(50) });
+    });
+
+    it('only spaces → "required", nothing sent', async () => {
+      const el = await startRename();
+
+      type(el, '   ');
+      await submit(el);
+
+      expect(rename).not.toHaveBeenCalled();
+      expect(el.querySelector('mat-error')?.textContent).toContain('This field is required.');
+    });
+
+    it('same name → just closes, nothing sent', async () => {
+      const el = await startRename();
+
+      type(el, ` ${PERSONAL.name} `);
+      await submit(el);
+
+      expect(rename).not.toHaveBeenCalled();
+      expect(el.querySelector('.rename')).toBeNull();
+    });
+
+    it('Cancel and Escape keep the old name', async () => {
+      let el = await startRename();
+      type(el, 'Something else');
+      el.querySelector<HTMLButtonElement>('.rename [type="button"]')!.click();
+      harness!.detectChanges();
+
+      expect(el.querySelector('h1')?.textContent).toContain(PERSONAL.name);
+
+      el = await startRename();
+      type(el, 'Something else');
+      el.querySelector('.rename')!.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+      harness!.detectChanges();
+
+      expect(rename).not.toHaveBeenCalled();
+      expect(el.querySelector('h1')?.textContent).toContain(PERSONAL.name);
+    });
+
+    it('backend field error is shown under the field', async () => {
+      rename.mockReturnValue(
+        throwError(() => ({
+          ...problem('VALIDATION_ERROR', 400),
+          errors: [{ field: 'name', code: 'TOO_LONG', message: '' }],
+        })),
+      );
+      const el = await startRename();
+
+      type(el, 'New name');
+      await submit(el);
+
+      expect(el.querySelector('mat-error')?.textContent).toContain('Too long.');
+      expect(el.querySelector('.rename')).not.toBeNull();
+    });
+
+    it('other error is shown under the field, and saving again works', async () => {
+      rename.mockReturnValueOnce(throwError(() => problem('NETWORK_ERROR', 0)));
+      const el = await startRename();
+
+      type(el, 'New name');
+      await submit(el);
+
+      expect(el.querySelector('mat-error')?.textContent).toContain('Cannot reach the server');
+
+      await submit(el);
+
+      expect(rename).toHaveBeenCalledTimes(2);
+      expect(el.querySelector('h1')?.textContent).toContain('New name');
+    });
+
+    it('blocks the buttons while saving', async () => {
+      rename.mockReturnValue(new Subject<AccountDto>());
+      const el = await startRename();
+
+      type(el, 'New name');
+      await submit(el);
+
+      const buttons = el.querySelectorAll<HTMLButtonElement>('.rename button');
+      expect([...buttons].every((b) => b.disabled)).toBe(true);
+      expect(buttons[0].textContent).toContain('Saving…');
+    });
+  });
+});
+
+describe('accountNameValidator', () => {
+  const check = (value: string) =>
+    accountNameValidator(new FormControl(value, { nonNullable: true }));
+
+  it.each(['A', 'Daily expenses', 'a'.repeat(50), `  ${'a'.repeat(50)}  `])(
+    '"%s" is valid',
+    (name) => {
+      expect(check(name)).toBeNull();
+    },
+  );
+
+  it('empty or only spaces → required', () => {
+    expect(check('')).toEqual({ required: true });
+    expect(check('   ')).toEqual({ required: true });
+  });
+
+  it('51 characters → maxlength', () => {
+    expect(check('a'.repeat(51))).toEqual({ maxlength: { requiredLength: 50, actualLength: 51 } });
   });
 });
 
