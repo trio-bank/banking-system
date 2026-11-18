@@ -13,7 +13,8 @@ final class ConstraintErrorCodes {
 
     private static final Map<String, ErrorCode> BY_CONSTRAINT = Map.of(
             "uk_users_email", ErrorCode.EMAIL_ALREADY_REGISTERED,
-            "uk_customers_pesel", ErrorCode.PESEL_ALREADY_REGISTERED
+            "uk_customers_pesel", ErrorCode.PESEL_ALREADY_REGISTERED,
+            "uk_transactions_idempotency_key", ErrorCode.IDEMPOTENCY_KEY_REUSED
     );
 
     private ConstraintErrorCodes() {
