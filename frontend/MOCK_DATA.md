@@ -4,6 +4,8 @@ Data for trying the app by hand against the real backend. Everything here is fic
 
 Registrations are saved in the database. To start over, run `docker compose down -v` from the repo root.
 
+> **Quick start:** every test customer uses the same password, `Str0ng!Passw0rd`. Register one from the table below, then log in with its email and this password. Admin: `admin@triobank.local` / `Adm1n!Passw0rd`.
+
 ## Register: data to copy
 
 Each customer can be registered once.
@@ -65,7 +67,8 @@ The backend doesn't have these endpoints yet, so with `useMocks: true` (`src/env
 | Where           | What to do                                  | Result                              |
 | --------------- | ------------------------------------------- | ----------------------------------- |
 | Open account    | Choose the personal account product         | `ACCOUNT_LIMIT_REACHED` (max 2)     |
-| Open / rename   | Name longer than 50 characters              | `VALIDATION_ERROR`, `TOO_LONG`      |
+| Open account    | Name longer than 50 characters              | `VALIDATION_ERROR`, `TOO_LONG`      |
+| Rename          | Name longer than 50 characters or blank     | Error under the field, nothing sent |
 | ATM             | Amount not in whole tens, e.g. `15`         | `CASH_AMOUNT_INVALID`               |
 | ATM deposit     | More than `20000`                           | `CASH_AMOUNT_INVALID`               |
 | ATM withdrawal  | More than `5000`                            | `CASH_AMOUNT_INVALID`               |

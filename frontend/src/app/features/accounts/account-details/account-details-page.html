@@ -19,12 +19,34 @@
 } @else if (account(); as a) {
   <mat-card appearance="outlined" class="header-card">
     <mat-card-content>
-      <div class="title-row">
-        <h1>{{ a.name }}</h1>
-        <span class="status" [class]="'status-' + a.status.toLowerCase()">
-          {{ a.status | enumLabel }}
-        </span>
-      </div>
+      @if (editing()) {
+        <form class="rename" (submit)="saveName($event)" (keydown.escape)="stopEditing()">
+          <mat-form-field appearance="outline" class="name-field">
+            <mat-label>Account name</mat-label>
+            <input #nameInput matInput [formControl]="nameControl" [readonly]="saving()" />
+            <mat-hint align="end">{{ nameControl.value.trim().length }} / {{ nameMax }}</mat-hint>
+            <mat-error>{{ nameError() }}</mat-error>
+          </mat-form-field>
+          <div class="rename-actions">
+            <button matButton="filled" type="submit" [disabled]="saving()">
+              {{ saving() ? 'Saving…' : 'Save' }}
+            </button>
+            <button matButton type="button" [disabled]="saving()" (click)="stopEditing()">
+              Cancel
+            </button>
+          </div>
+        </form>
+      } @else {
+        <div class="title-row">
+          <h1>{{ a.name }}</h1>
+          <span class="status" [class]="'status-' + a.status.toLowerCase()">
+            {{ a.status | enumLabel }}
+          </span>
+          <button matButton type="button" aria-label="Rename account" (click)="startRename(a)">
+            Rename
+          </button>
+        </div>
+      }
 
       <p class="balance-label">Balance</p>
       <p class="balance">{{ a.balance | money: a.currency }}</p>
