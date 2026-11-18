@@ -13,6 +13,12 @@ class ConstraintErrorCodesTest {
     }
 
     @Test
+    void reusedIdempotencyKeyMapsToConflict() {
+        assertThat(ConstraintErrorCodes.forConstraint("uk_transactions_idempotency_key"))
+                .contains(ErrorCode.IDEMPOTENCY_KEY_REUSED);
+    }
+
+    @Test
     void lookupIgnoresCase() {
         assertThat(ConstraintErrorCodes.forConstraint("UK_USERS_EMAIL")).contains(ErrorCode.EMAIL_ALREADY_REGISTERED);
     }
