@@ -1,6 +1,7 @@
 package com.triobank.account;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -23,6 +24,8 @@ import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
+import java.util.List;
+import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
@@ -72,6 +75,35 @@ class AccountServiceTest {
         assertThat(audit.getValue().targetType()).isEqualTo("ACCOUNT");
         assertThat(audit.getValue().targetId()).isEqualTo(account.id());
         assertThat(audit.getValue().details()).containsEntry("iban", "PL45999000121000000000000001");
+    }
+
+    @Test
+    void postingAccountsComeBackAsSourceAndTarget() {
+        Account source = account();
+        Account target = account();
+        when(accounts.findAllById(List.of(source.getId(), target.getId()))).thenReturn(List.of(target, source));
+
+        PostingAccounts found = service.getForPosting(source.getId(), target.getId());
+
+        assertThat(found.source()).isSameAs(source);
+        assertThat(found.target()).isSameAs(target);
+    }
+
+    @Test
+    void missingPostingAccountIsABug() {
+        Account source = account();
+        UUID missing = UUID.randomUUID();
+        when(accounts.findAllById(List.of(source.getId(), missing))).thenReturn(List.of(source));
+
+        assertThatThrownBy(() -> service.getForPosting(source.getId(), missing))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining(missing.toString());
+    }
+
+    private static Account account() {
+        AccountProduct product = mock(AccountProduct.class);
+        when(product.getCurrency()).thenReturn("PLN");
+        return Account.openForCustomer(null, product, "PL45999000121000000000000001", "Trio Personal Account", NOW);
     }
 
 }
