@@ -14,8 +14,13 @@ import com.triobank.product.AccountProductService;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 import java.util.Map;
+import java.util.UUID;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
@@ -61,6 +66,26 @@ public class AccountService {
                 .details(Map.of("iban", iban, "productCode", product.getCode()))
                 .build());
         return AccountMapper.toDto(account);
+    }
+
+    /**
+     * Loads the two accounts of a posting. For the ledger only; callers have already checked ownership.
+     *
+     * @throws IllegalArgumentException if an account does not exist
+     */
+    @Transactional(propagation = Propagation.MANDATORY)
+    public PostingAccounts getForPosting(UUID sourceAccountId, UUID targetAccountId) {
+        Map<UUID, Account> found = accounts.findAllById(List.of(sourceAccountId, targetAccountId)).stream()
+                .collect(Collectors.toMap(Account::getId, Function.identity()));
+        return new PostingAccounts(require(found, sourceAccountId), require(found, targetAccountId));
+    }
+
+    private static Account require(Map<UUID, Account> found, UUID id) {
+        Account account = found.get(id);
+        if (account == null) {
+            throw new IllegalArgumentException("Account " + id + " does not exist");
+        }
+        return account;
     }
 
 }

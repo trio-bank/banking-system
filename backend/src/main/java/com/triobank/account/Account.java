@@ -90,4 +90,25 @@ public class Account extends BaseEntity {
         return account;
     }
 
+    public boolean isSystem() {
+        return category == AccountCategory.SYSTEM;
+    }
+
+    public boolean isActive() {
+        return status == AccountStatus.ACTIVE;
+    }
+
+    /**
+     * Takes money out. Only the ledger calls this, together with writing the ledger entries,
+     * so the balance always matches the entries. The ledger also checks that a customer account has enough money.
+     */
+    public void debit(BigDecimal amount) {
+        balance = balance.subtract(amount);
+    }
+
+    /** Puts money in. Only the ledger calls this, see {@link #debit}. */
+    public void credit(BigDecimal amount) {
+        balance = balance.add(amount);
+    }
+
 }
