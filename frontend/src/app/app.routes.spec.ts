@@ -93,6 +93,11 @@ describe('app routes', () => {
       expect(harness.routeNativeElement?.querySelector('app-account-details-page')).toBeNull();
     });
 
+    it('/app/atm opens the ATM page', async () => {
+      await harness.navigateByUrl('/app/atm');
+      expect(harness.routeNativeElement?.querySelector('app-atm-page')).not.toBeNull();
+    });
+
     it.each(['/admin', '/login', '/register'])('cannot open %s', async (path) => {
       await harness.navigateByUrl(path);
       expect(url()).toBe('/app/dashboard');

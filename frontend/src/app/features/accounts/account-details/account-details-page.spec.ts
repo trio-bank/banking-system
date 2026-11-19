@@ -28,7 +28,7 @@ const problem = (code: string, status: number): ProblemDetail => ({
 describe('AccountDetailsPage', () => {
   const get = vi.fn();
   const rename = vi.fn();
-  // The history tab has its own spec; here it only has to load something.
+  // The history has its own spec; here it only has to load something.
   const history = vi.fn(() =>
     of({ content: [], page: 0, size: 20, totalElements: 0, totalPages: 0 }),
   );
@@ -103,10 +103,11 @@ describe('AccountDetailsPage', () => {
     expect(snack).toHaveBeenCalledWith('IBAN copied', undefined, { duration: 3000 });
   });
 
-  it('History tab loads the history of this account', async () => {
+  it('the History section loads the history of this account', async () => {
     const el = await open(PERSONAL);
 
-    expect(el.querySelector('[role="tab"]')?.textContent).toContain('History');
+    expect(el.querySelector('#history-heading')?.textContent).toBe('History');
+    expect(el.querySelector('[role="tab"]')).toBeNull();
     expect(el.querySelector('app-account-history')).not.toBeNull();
     expect(history).toHaveBeenCalledWith(PERSONAL.id, { page: 0, size: 20 });
   });
