@@ -1,0 +1,73 @@
+<a matButton class="back" routerLink="/app/dashboard">← My accounts</a>
+
+<h1>Open an account</h1>
+
+@if (loading()) {
+  <div class="state" role="status">
+    <mat-spinner diameter="40" />
+    <span>Loading products…</span>
+  </div>
+} @else if (loadError(); as message) {
+  <div class="banner" role="alert">
+    <span>{{ message }}</span>
+    <button matButton type="button" (click)="loadProducts()">Try again</button>
+  </div>
+} @else if (products(); as list) {
+  @if (list.length === 0) {
+    <p class="muted">No products are available right now.</p>
+  } @else {
+    <form [formGroup]="form" (ngSubmit)="open()">
+      <fieldset class="products" [disabled]="saving()">
+        <legend>Choose an account type</legend>
+        @for (p of list; track p.code) {
+          <label class="product" [class.selected]="selected()?.code === p.code">
+            <span class="product-top">
+              <input type="radio" formControlName="productCode" [value]="p.code" />
+              <span class="product-name">{{ p.name }}</span>
+              <span class="type">{{ p.type | enumLabel }}</span>
+            </span>
+            @if (p.description) {
+              <span class="muted">{{ p.description }}</span>
+            }
+            <ul class="rules">
+              @for (rule of productRules(p); track rule) {
+                <li>{{ rule }}</li>
+              }
+            </ul>
+          </label>
+        }
+      </fieldset>
+      @if (form.controls.productCode.touched && form.controls.productCode.invalid) {
+        <p class="field-error" role="alert">Choose an account type.</p>
+      }
+
+      <mat-form-field appearance="outline" class="name-field">
+        <mat-label>Account name (optional)</mat-label>
+        <input
+          matInput
+          formControlName="name"
+          [placeholder]="selected()?.name ?? ''"
+          [readonly]="saving()"
+        />
+        <mat-hint>Leave empty to use the product name</mat-hint>
+        <mat-hint align="end">
+          {{ form.controls.name.value.trim().length }} / {{ nameMax }}
+        </mat-hint>
+        <mat-error>{{ nameError() }}</mat-error>
+      </mat-form-field>
+
+      @if (submitError(); as message) {
+        <div class="banner" role="alert">
+          <span>{{ message }}</span>
+        </div>
+      }
+
+      <div class="actions">
+        <button matButton="filled" type="submit" [disabled]="saving()">
+          {{ saving() ? 'Opening…' : 'Open account' }}
+        </button>
+        <a matButton routerLink="/app/dashboard">Cancel</a>
+      </div>
+    </form>
+  }
+}
