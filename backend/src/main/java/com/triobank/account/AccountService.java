@@ -7,6 +7,8 @@ import com.triobank.audit.AuditEventCommand;
 import com.triobank.audit.AuditService;
 import com.triobank.auth.Role;
 import com.triobank.auth.User;
+import com.triobank.common.error.ApiException;
+import com.triobank.common.error.ErrorCode;
 import com.triobank.common.iban.IbanGenerator;
 import com.triobank.customer.Customer;
 import com.triobank.product.AccountProduct;
@@ -76,6 +78,19 @@ public class AccountService {
         return accounts.findAllOfCustomer(customerId).stream()
                 .map(AccountMapper::toDto)
                 .toList();
+    }
+
+    /**
+     * One of the customer's accounts. Someone else's account looks exactly like a missing one,
+     * so the caller can't find out which ids exist.
+     *
+     * @throws ApiException RESOURCE_NOT_FOUND if the account is missing or not the customer's
+     */
+    @Transactional(readOnly = true)
+    public AccountDto getForCustomer(UUID customerId, UUID accountId) {
+        return accounts.findOfCustomer(accountId, customerId)
+                .map(AccountMapper::toDto)
+                .orElseThrow(() -> new ApiException(ErrorCode.RESOURCE_NOT_FOUND, "Account not found."));
     }
 
     /**
