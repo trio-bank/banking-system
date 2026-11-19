@@ -1,6 +1,5 @@
 import { Clipboard } from '@angular/cdk/clipboard';
 import { TestBed } from '@angular/core/testing';
-import { FormControl } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { provideRouter, withComponentInputBinding } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
@@ -9,7 +8,7 @@ import { AccountDto, ProblemDetail } from '../../../core/api/models';
 import { mockAccounts, resetMockBank } from '../../../core/api/mocks/mock-bank';
 import { AccountsApi } from '../../../core/api/services/accounts-api';
 import { formatMoney } from '../../../shared/pipes';
-import { accountNameValidator, AccountDetailsPage, formatRate } from './account-details-page';
+import { AccountDetailsPage } from './account-details-page';
 
 resetMockBank();
 const [PERSONAL, SAVINGS, BLOCKED] = mockAccounts().map((account) => ({ ...account }));
@@ -300,36 +299,5 @@ describe('AccountDetailsPage', () => {
       expect([...buttons].every((b) => b.disabled)).toBe(true);
       expect(buttons[0].textContent).toContain('Saving…');
     });
-  });
-});
-
-describe('accountNameValidator', () => {
-  const check = (value: string) =>
-    accountNameValidator(new FormControl(value, { nonNullable: true }));
-
-  it.each(['A', 'Daily expenses', 'a'.repeat(50), `  ${'a'.repeat(50)}  `])(
-    '"%s" is valid',
-    (name) => {
-      expect(check(name)).toBeNull();
-    },
-  );
-
-  it('empty or only spaces → required', () => {
-    expect(check('')).toEqual({ required: true });
-    expect(check('   ')).toEqual({ required: true });
-  });
-
-  it('51 characters → maxlength', () => {
-    expect(check('a'.repeat(51))).toEqual({ maxlength: { requiredLength: 50, actualLength: 51 } });
-  });
-});
-
-describe('formatRate', () => {
-  it.each([
-    ['4.0000', '4,00%'],
-    ['0.0000', '0,00%'],
-    ['3.1250', '3,125%'],
-  ])('%s → %s', (rate, expected) => {
-    expect(formatRate(rate)).toBe(expected);
   });
 });

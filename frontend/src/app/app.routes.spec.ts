@@ -87,6 +87,12 @@ describe('app routes', () => {
       expect(harness.routeNativeElement?.querySelector('app-dashboard-page')).not.toBeNull();
     });
 
+    it('/app/accounts/new opens the open-account page, not details of an account "new"', async () => {
+      await harness.navigateByUrl('/app/accounts/new');
+      expect(harness.routeNativeElement?.querySelector('app-open-account-page')).not.toBeNull();
+      expect(harness.routeNativeElement?.querySelector('app-account-details-page')).toBeNull();
+    });
+
     it.each(['/admin', '/login', '/register'])('cannot open %s', async (path) => {
       await harness.navigateByUrl(path);
       expect(url()).toBe('/app/dashboard');

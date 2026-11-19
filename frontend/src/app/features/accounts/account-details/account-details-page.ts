@@ -13,12 +13,7 @@ import {
   untracked,
   viewChild,
 } from '@angular/core';
-import {
-  AbstractControl,
-  FormControl,
-  ReactiveFormsModule,
-  ValidationErrors,
-} from '@angular/forms';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -33,29 +28,7 @@ import { AccountsApi } from '../../../core/api/services/accounts-api';
 import { errorMessage, fieldErrorMessage } from '../../../core/errors/error-messages';
 import { EnumLabelPipe, IbanPipe, MoneyPipe } from '../../../shared/pipes';
 import { AccountHistory } from '../../history/account-history/account-history';
-
-/** `"4.0000"` → `4,00%`. Keeps up to 4 decimals if the rate has them. */
-export function formatRate(rate: string): string {
-  const format = new Intl.NumberFormat('pl-PL', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 4,
-  });
-  return `${format.format(Number(rate))}%`;
-}
-
-export const ACCOUNT_NAME_MAX = 50; // BR-28
-
-/** BR-28: 1–50 characters, counted after trimming, like the backend does. */
-export function accountNameValidator(control: AbstractControl<string>): ValidationErrors | null {
-  const name = control.value.trim();
-  if (!name) {
-    return { required: true };
-  }
-  if (name.length > ACCOUNT_NAME_MAX) {
-    return { maxlength: { requiredLength: ACCOUNT_NAME_MAX, actualLength: name.length } };
-  }
-  return null;
-}
+import { ACCOUNT_NAME_MAX, accountNameValidator, formatRate } from '../account-rules';
 
 // No mat-icon here on purpose: it moves MatIcon into the first-load bundle (+10 kB).
 /** Account header with inline rename (US-08, US-09) and the history tab (US-12). */

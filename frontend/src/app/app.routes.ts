@@ -38,6 +38,15 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/dashboard/dashboard-page').then((m) => m.DashboardPage),
       },
+      // Before 'accounts/:accountId', or "new" would be taken as an id.
+      {
+        path: 'accounts/new',
+        title: 'Open account · Trio Bank',
+        loadComponent: () =>
+          import('./features/accounts/open-account/open-account-page').then(
+            (m) => m.OpenAccountPage,
+          ),
+      },
       {
         path: 'accounts/:accountId',
         title: 'Account · Trio Bank',
