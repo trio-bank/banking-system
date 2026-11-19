@@ -17,6 +17,17 @@ public interface AccountRepository extends JpaRepository<Account, UUID> {
     Optional<Account> findBySystemCode(SystemAccountCode systemCode);
 
     /**
+     * All accounts of a customer with their products loaded in the same query: personal ones first,
+     * then by opening time. The id at the end keeps the order stable when two accounts share a timestamp.
+     */
+    @Query("""
+            select a from Account a join fetch a.product p
+            where a.customer.id = :customerId
+            order by case when p.type = com.triobank.product.AccountType.PERSONAL then 0 else 1 end,
+                     a.openedAt, a.id""")
+    List<Account> findAllOfCustomer(@Param("customerId") UUID customerId);
+
+    /**
      * Takes the next account number from the database sequence. Used to build the IBAN of a new account.
      */
     @Query(value = "SELECT CAST(nextval('account_number_seq') AS VARCHAR)", nativeQuery = true)

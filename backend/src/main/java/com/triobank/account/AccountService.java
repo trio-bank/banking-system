@@ -69,6 +69,16 @@ public class AccountService {
     }
 
     /**
+     * The customer's accounts, blocked ones included: personal first, then by opening time.
+     */
+    @Transactional(readOnly = true)
+    public List<AccountDto> listForCustomer(UUID customerId) {
+        return accounts.findAllOfCustomer(customerId).stream()
+                .map(AccountMapper::toDto)
+                .toList();
+    }
+
+    /**
      * Loads and locks the two accounts of a posting until the end of the transaction.
      * For the ledger only; callers have already checked ownership.
      *

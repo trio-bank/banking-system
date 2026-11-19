@@ -44,6 +44,15 @@ public class SecurityConfig {
             "/v3/api-docs/**"
     };
 
+    // An admin has no accounts of their own, so these are for customers only.
+    private static final String[] CUSTOMER_PATHS = {
+            "/api/v1/account-products",
+            "/api/v1/accounts/**",
+            "/api/v1/atm/**",
+            "/api/v1/transfers/**",
+            "/api/v1/transactions/**"
+    };
+
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http, SecurityProblemHandler problems) throws Exception {
         return http
@@ -56,6 +65,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, PUBLIC_POSTS).permitAll()
                         .requestMatchers(PUBLIC_PATHS).permitAll()
                         .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
+                        .requestMatchers(CUSTOMER_PATHS).hasRole("CUSTOMER")
                         .anyRequest().authenticated())
                 .oauth2ResourceServer(server -> server
                         .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter()))
