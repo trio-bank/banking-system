@@ -29,6 +29,10 @@ const problem = (code: string, status: number): ProblemDetail => ({
 describe('AccountDetailsPage', () => {
   const get = vi.fn();
   const rename = vi.fn();
+  // The history tab has its own spec; here it only has to load something.
+  const history = vi.fn(() =>
+    of({ content: [], page: 0, size: 20, totalElements: 0, totalPages: 0 }),
+  );
   let harness: RouterTestingHarness | undefined;
 
   const open = async (account: AccountDto | string) => {
@@ -43,6 +47,7 @@ describe('AccountDetailsPage', () => {
   beforeEach(() => {
     get.mockReset();
     get.mockImplementation((id: string) => of(mockAccounts().find((a) => a.id === id)));
+    history.mockClear();
     rename.mockReset();
     rename.mockImplementation((id: string, { name }: { name: string }) =>
       of({ ...mockAccounts().find((a) => a.id === id)!, name }),
@@ -53,7 +58,7 @@ describe('AccountDetailsPage', () => {
           [{ path: 'app/accounts/:accountId', component: AccountDetailsPage }],
           withComponentInputBinding(),
         ),
-        { provide: AccountsApi, useValue: { get, rename } },
+        { provide: AccountsApi, useValue: { get, rename, history } },
       ],
     });
     harness = undefined;
@@ -99,10 +104,25 @@ describe('AccountDetailsPage', () => {
     expect(snack).toHaveBeenCalledWith('IBAN copied', undefined, { duration: 3000 });
   });
 
-  it('has an empty History tab for now', async () => {
+  it('History tab loads the history of this account', async () => {
     const el = await open(PERSONAL);
 
     expect(el.querySelector('[role="tab"]')?.textContent).toContain('History');
+    expect(el.querySelector('app-account-history')).not.toBeNull();
+    expect(history).toHaveBeenCalledWith(PERSONAL.id, { page: 0, size: 20 });
+  });
+
+  it('rename does not reload the history', async () => {
+    const el = await open(PERSONAL);
+    el.querySelector<HTMLButtonElement>('[aria-label="Rename account"]')!.click();
+    harness!.detectChanges();
+    const input = el.querySelector<HTMLInputElement>('.rename input')!;
+    input.value = 'Daily';
+    input.dispatchEvent(new Event('input'));
+    el.querySelector<HTMLButtonElement>('.rename [type="submit"]')!.click();
+    await harness!.fixture.whenStable();
+
+    expect(history).toHaveBeenCalledTimes(1);
   });
 
   it('shows a loader while waiting', async () => {

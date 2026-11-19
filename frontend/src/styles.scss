@@ -76,6 +76,9 @@ html {
       container-color: transparent,
     )
   );
+
+  // Incoming money (docs/07). Material has no "success" color; 5.4:1 on white.
+  --trio-income: #1b7a3a;
 }
 
 body {

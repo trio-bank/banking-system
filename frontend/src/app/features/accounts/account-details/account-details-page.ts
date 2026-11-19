@@ -32,6 +32,7 @@ import { AccountDto, ProblemDetail } from '../../../core/api/models';
 import { AccountsApi } from '../../../core/api/services/accounts-api';
 import { errorMessage, fieldErrorMessage } from '../../../core/errors/error-messages';
 import { EnumLabelPipe, IbanPipe, MoneyPipe } from '../../../shared/pipes';
+import { AccountHistory } from '../../history/account-history/account-history';
 
 /** `"4.0000"` → `4,00%`. Keeps up to 4 decimals if the rate has them. */
 export function formatRate(rate: string): string {
@@ -57,10 +58,11 @@ export function accountNameValidator(control: AbstractControl<string>): Validati
 }
 
 // No mat-icon here on purpose: it moves MatIcon into the first-load bundle (+10 kB).
-/** Account header with inline rename (US-08, US-09) and tabs. The history tab comes in #104. */
+/** Account header with inline rename (US-08, US-09) and the history tab (US-12). */
 @Component({
   selector: 'app-account-details-page',
   imports: [
+    AccountHistory,
     DatePipe,
     EnumLabelPipe,
     IbanPipe,
