@@ -19,8 +19,30 @@
       <a matButton="filled" routerLink="/app/accounts/new">Open account</a>
     </div>
   } @else {
-    <!-- One operation for now, so no tabs. #106 adds Withdraw and a switch between the two. -->
-    <h2>Deposit cash</h2>
-    <app-atm-operation kind="deposit" [accounts]="personal()" (accountChanged)="replace($event)" />
+    <!-- A switch, not tabs: it is one choice, and each side starts from an empty form. -->
+    <mat-button-toggle-group
+      class="mode"
+      aria-label="Operation"
+      [value]="kind()"
+      (change)="kind.set($event.value)"
+    >
+      <mat-button-toggle value="deposit">Deposit</mat-button-toggle>
+      <mat-button-toggle value="withdrawal">Withdraw</mat-button-toggle>
+    </mat-button-toggle-group>
+
+    <!-- @if, not one component with a changing kind: switching drops the typed amount. -->
+    @if (kind() === 'deposit') {
+      <app-atm-operation
+        kind="deposit"
+        [accounts]="personal()"
+        (accountChanged)="replace($event)"
+      />
+    } @else {
+      <app-atm-operation
+        kind="withdrawal"
+        [accounts]="personal()"
+        (accountChanged)="replace($event)"
+      />
+    }
   }
 }

@@ -12,9 +12,16 @@ h1 {
   font: var(--mat-sys-headline-small);
 }
 
-h2 {
+.mode {
   margin: 8px 0 0;
-  font: var(--mat-sys-title-large);
+  // The chosen operation: yellow like the main button, bold, and a check mark,
+  // so it's clear without relying on color only.
+  --mat-button-toggle-selected-state-background-color: var(--mat-sys-primary-container);
+  --mat-button-toggle-selected-state-text-color: var(--mat-sys-on-primary-container);
+
+  .mat-button-toggle-checked {
+    font-weight: 600;
+  }
 }
 
 .state {

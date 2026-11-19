@@ -51,13 +51,35 @@ describe('AtmPage', () => {
     });
   });
 
-  it('US-14 shows the deposit with personal accounts only (BR-20)', async () => {
+  it('US-14 starts with the deposit, personal accounts only (BR-20)', async () => {
     await render();
 
     expect(el.querySelector('h1')?.textContent).toBe('ATM');
-    expect(el.querySelector('h2')?.textContent).toBe('Deposit cash');
-    expect(el.querySelector('[role="tab"]')).toBeNull();
+    expect(operation()?.kind()).toBe('deposit');
     expect(operation()?.accounts()).toEqual([PERSONAL, BLOCKED]);
+  });
+
+  it('US-15 the switch opens the withdrawal with an empty form, and back', async () => {
+    await render();
+    const toggle = (label: string) =>
+      [...el.querySelectorAll<HTMLButtonElement>('.mode button')].find((b) =>
+        b.textContent?.includes(label),
+      )!;
+    const amount = () => el.querySelector<HTMLInputElement>('input[formcontrolname=amount]')!;
+    amount().value = '300';
+    amount().dispatchEvent(new Event('input'));
+
+    toggle('Withdraw').click();
+    fixture.detectChanges();
+    expect(operation()?.kind()).toBe('withdrawal');
+    expect(toggle('Withdraw').getAttribute('aria-checked')).toBe('true'); // single choice = radio
+    expect(toggle('Deposit').getAttribute('aria-checked')).toBe('false');
+    expect(amount().value).toBe('');
+
+    toggle('Deposit').click();
+    fixture.detectChanges();
+    expect(operation()?.kind()).toBe('deposit');
+    expect(amount().value).toBe('');
   });
 
   it('without an active personal account it says so and offers to open one', async () => {

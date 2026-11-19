@@ -19,6 +19,7 @@ import {
   FormControl,
   FormGroup,
   ReactiveFormsModule,
+  ValidationErrors,
   Validators,
 } from '@angular/forms';
 import { RouterLink } from '@angular/router';
@@ -28,30 +29,64 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { catchError, map, of, switchMap } from 'rxjs';
 import { newIdempotencyKey } from '../../../core/api/idempotency-key';
-import { AccountDto, ProblemDetail, TransactionDto } from '../../../core/api/models';
+import {
+  AccountDto,
+  Direction,
+  Money,
+  ProblemDetail,
+  TransactionDto,
+} from '../../../core/api/models';
 import { AccountsApi } from '../../../core/api/services/accounts-api';
 import { PaymentsApi } from '../../../core/api/services/payments-api';
 import { errorMessage } from '../../../core/errors/error-messages';
 import { formatMoney, IbanPipe, MoneyPipe, SignedAmountPipe } from '../../../shared/pipes';
 import { MoneyError, moneyValidator, normalizeAmount } from '../../../shared/validators';
 
-export type AtmKind = 'deposit';
+export type AtmKind = 'deposit' | 'withdrawal';
 
 /** BR-19: banknotes only, so whole tens of PLN. */
 export const ATM_LIMITS: Record<AtmKind, { min: number; max: number; step: number }> = {
   deposit: { min: 10, max: 20_000, step: 10 },
+  withdrawal: { min: 10, max: 5_000, step: 10 },
 };
 
 export const QUICK_AMOUNTS = ['50', '100', '200', '500'];
 
-const TEXTS: Record<AtmKind, { action: string; busy: string; done: string; again: string }> = {
+const TEXTS: Record<
+  AtmKind,
+  {
+    operation: string;
+    noun: string;
+    busy: string;
+    done: string;
+    again: string;
+    direction: Direction;
+  }
+> = {
   deposit: {
-    action: 'Deposit',
+    operation: 'ATM cash deposit',
+    noun: 'deposit',
     busy: 'Depositing…',
     done: 'Cash deposited',
     again: 'New deposit',
+    direction: 'INCOMING',
+  },
+  withdrawal: {
+    operation: 'ATM cash withdrawal',
+    noun: 'withdrawal',
+    busy: 'Withdrawing…',
+    done: 'Cash withdrawn',
+    again: 'New withdrawal',
+    direction: 'OUTGOING',
   },
 };
+
+/** Grosze, so the balance check has no rounding errors (docs/07 §6). */
+const grosze = (amount: Money) => Math.round(Number(amount) * 100);
+
+/** 1022051 grosze → "10220.51". */
+const fromGrosze = (value: number): Money =>
+  `${Math.floor(value / 100)}.${String(value % 100).padStart(2, '0')}`;
 
 type Step = 'form' | 'confirm' | 'result';
 
@@ -134,10 +169,29 @@ export class AtmOperation {
   );
   protected readonly amount = computed(() => normalizeAmount(this.value().amount ?? '') ?? '');
 
+  /**
+   * Live preview under the amount: the balance if this operation goes through.
+   * Null while the amount is empty or breaks a rule, the error under the field says why.
+   */
+  protected readonly balanceAfter = computed((): Money | null => {
+    const account = this.selected();
+    const amount = this.amount();
+    // value() changes on every key; validity is already updated by then.
+    if (!account || !amount || this.form.controls.amount.invalid) {
+      return null;
+    }
+    const sign = this.kind() === 'deposit' ? 1 : -1;
+    return fromGrosze(grosze(account.balance) + sign * grosze(amount));
+  });
+
   /** Step heading, or the amount field on the form. */
   private readonly focusTarget = viewChild<ElementRef<HTMLElement>>('focusTarget');
 
   constructor() {
+    // "Not above the balance" depends on the account, so check the amount again.
+    this.form.controls.accountId.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.form.controls.amount.updateValueAndValidity());
     // Pick the first active account, and keep the choice when the list is refreshed.
     effect(() => {
       const accounts = this.accounts();
@@ -179,8 +233,11 @@ export class AtmOperation {
     this.sending.set(true);
     this.error.set(null);
     const request = { accountId: account.id, amount: this.amount() };
-    this.payments
-      .atmDeposit(request, this.idempotencyKey)
+    const send =
+      this.kind() === 'deposit'
+        ? this.payments.atmDeposit(request, this.idempotencyKey)
+        : this.payments.atmWithdrawal(request, this.idempotencyKey);
+    send
       .pipe(
         // TransactionDto has no balance, so read the account again. If only that fails,
         // the money is still booked: show the result without the balance.
@@ -221,15 +278,27 @@ export class AtmOperation {
     const errors = this.form.controls.amount.errors ?? {};
     if (errors['required']) return 'Enter an amount.';
     if (errors['money']) return amountErrorText(errors['money'] as MoneyError, this.kind());
+    if (errors['balance']) return `You have only ${formatMoney(errors['balance'] as Money)}.`;
     return '';
   }
 
-  private checkLimits(control: AbstractControl) {
+  // Explicit types: the validator reads this.form, whose type depends on the validator.
+  private checkLimits(control: AbstractControl): ValidationErrors | null {
     // Runs once while the field is made, before kind() is set: empty needs no limits.
     if (!control.value) {
       return null;
     }
-    return moneyValidator(ATM_LIMITS[this.kind()])(control);
+    const limits = moneyValidator(ATM_LIMITS[this.kind()])(control);
+    if (limits || this.kind() !== 'withdrawal') {
+      return limits;
+    }
+    // BR-11. The backend checks it too (INSUFFICIENT_FUNDS), this only saves a round trip.
+    const accountId: string = this.form.controls.accountId.value;
+    const account = this.accounts().find((a) => a.id === accountId);
+    const amount = normalizeAmount(control.value as string);
+    return account && amount && grosze(amount) > grosze(account.balance)
+      ? { balance: account.balance }
+      : null;
   }
 
   /** New step: the clicked button is gone, so move the focus there (docs/07 §11). */

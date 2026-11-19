@@ -45,6 +45,18 @@
         <mat-error>{{ amountError() }}</mat-error>
       </mat-form-field>
 
+      @if (selected(); as a) {
+        <dl class="preview">
+          <dt>Balance now</dt>
+          <dd>{{ a.balance | money: a.currency }}</dd>
+          <dt>After this {{ texts().noun }}</dt>
+          <!-- Read out when it changes, so a screen reader hears it while typing. -->
+          <dd class="after" aria-live="polite" data-testid="balance-after">
+            {{ balanceAfter() ? (balanceAfter() | money: a.currency) : '—' }}
+          </dd>
+        </dl>
+      }
+
       <div class="actions">
         <button matButton="filled" type="submit">Next</button>
       </div>
@@ -52,11 +64,11 @@
   }
 
   @case ('confirm') {
-    <h3 #focusTarget tabindex="-1">Check and confirm</h3>
+    <h2 #focusTarget tabindex="-1">Check and confirm</h2>
     @if (selected(); as a) {
       <dl class="summary">
         <dt>Operation</dt>
-        <dd>ATM cash {{ texts().action.toLowerCase() }}</dd>
+        <dd>{{ texts().operation }}</dd>
         <dt>Account</dt>
         <dd>
           {{ a.name }}
@@ -64,6 +76,10 @@
         </dd>
         <dt>Amount</dt>
         <dd class="big">{{ amount() | money: a.currency }}</dd>
+        @if (balanceAfter(); as after) {
+          <dt>Balance after</dt>
+          <dd>{{ after | money: a.currency }}</dd>
+        }
       </dl>
     }
 
@@ -82,8 +98,10 @@
   @case ('result') {
     @if (transaction(); as t) {
       <div class="result" role="status">
-        <h3 #focusTarget tabindex="-1">{{ texts().done }}</h3>
-        <p class="big incoming">{{ t.amount | signedAmount: 'INCOMING' : t.currency }}</p>
+        <h2 #focusTarget tabindex="-1">{{ texts().done }}</h2>
+        <p class="big" [class.incoming]="texts().direction === 'INCOMING'">
+          {{ t.amount | signedAmount: texts().direction : t.currency }}
+        </p>
         <dl class="summary">
           <dt>Account</dt>
           <dd>{{ selected()?.name }}</dd>
