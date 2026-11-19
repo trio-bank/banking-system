@@ -78,6 +78,29 @@ class AccountServiceTest {
     }
 
     @Test
+    void listsCustomerAccountsInRepositoryOrder() {
+        UUID customerId = UUID.randomUUID();
+        Account personal = account(AccountType.PERSONAL, "Trio Personal Account");
+        Account savings = account(AccountType.SAVINGS, "Holiday savings");
+        when(accounts.findAllOfCustomer(customerId)).thenReturn(List.of(personal, savings));
+
+        List<AccountDto> found = service.listForCustomer(customerId);
+
+        assertThat(found).extracting(AccountDto::id).containsExactly(personal.getId(), savings.getId());
+        assertThat(found).extracting(AccountDto::type).containsExactly(AccountType.PERSONAL, AccountType.SAVINGS);
+        assertThat(found.get(0).accruedInterest()).isNull();
+        assertThat(found.get(1).accruedInterest()).isEqualByComparingTo("0");
+    }
+
+    @Test
+    void customerWithoutAccountsGetsEmptyList() {
+        UUID customerId = UUID.randomUUID();
+        when(accounts.findAllOfCustomer(customerId)).thenReturn(List.of());
+
+        assertThat(service.listForCustomer(customerId)).isEmpty();
+    }
+
+    @Test
     void postingAccountsComeBackAsSourceAndTarget() {
         Account source = account();
         Account target = account();
@@ -104,6 +127,13 @@ class AccountServiceTest {
         AccountProduct product = mock(AccountProduct.class);
         when(product.getCurrency()).thenReturn("PLN");
         return Account.openForCustomer(null, product, "PL45999000121000000000000001", "Trio Personal Account", NOW);
+    }
+
+    private static Account account(AccountType type, String name) {
+        AccountProduct product = mock(AccountProduct.class);
+        when(product.getType()).thenReturn(type);
+        when(product.getCurrency()).thenReturn("PLN");
+        return Account.openForCustomer(null, product, "PL45999000121000000000000001", name, NOW);
     }
 
 }
