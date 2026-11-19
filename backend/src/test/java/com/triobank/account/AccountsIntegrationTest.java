@@ -21,7 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 
 /**
- * GET /api/v1/accounts against a real database. Extra accounts are inserted with SQL,
+ * GET /api/v1/accounts and /api/v1/accounts/{id} against a real database. Extra accounts are inserted with SQL,
  * because opening and blocking accounts through the API does not exist yet.
  */
 class AccountsIntegrationTest extends AbstractIntegrationTest {
@@ -73,6 +73,44 @@ class AccountsIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
+    void TC18_returnsOwnSavingsAccountWithRateAndAccruedInterest() throws Exception {
+        String savings = insertAccount(customerIdOf(anna.userId()), SAVINGS_STANDARD, "Holiday savings",
+                "ACTIVE", "+1 day");
+        jdbc.update("UPDATE accounts SET accrued_interest = 0.012345 WHERE iban = ?", savings);
+
+        mockMvc.perform(get(ACCOUNTS + "/" + accountIdOf(savings))
+                        .header(HttpHeaders.AUTHORIZATION, TestDataFactory.bearer(annaToken)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.iban").value(savings))
+                .andExpect(jsonPath("$.name").value("Holiday savings"))
+                .andExpect(jsonPath("$.type").value("SAVINGS"))
+                .andExpect(jsonPath("$.balance").value("0.00"))
+                .andExpect(jsonPath("$.interestRate").value("4.0000"))
+                .andExpect(jsonPath("$.accruedInterest").value("0.012345"));
+    }
+
+    @Test
+    void TC18_anotherCustomersAccountLooksMissing() throws Exception {
+        RegisteredCustomer other = data.registerCustomer();
+        String bearer = TestDataFactory.bearer(annaToken);
+
+        for (UUID id : new UUID[] {accountIdOf(other.iban()), UUID.randomUUID()}) {
+            mockMvc.perform(get(ACCOUNTS + "/" + id).header(HttpHeaders.AUTHORIZATION, bearer))
+                    .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.code").value("RESOURCE_NOT_FOUND"))
+                    .andExpect(jsonPath("$.detail").value("Account not found."));
+        }
+    }
+
+    @Test
+    void malformedAccountIdIsBadRequest() throws Exception {
+        mockMvc.perform(get(ACCOUNTS + "/not-a-uuid")
+                        .header(HttpHeaders.AUTHORIZATION, TestDataFactory.bearer(annaToken)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("MALFORMED_REQUEST"));
+    }
+
+    @Test
     void adminGets403OnCustomerEndpoints() throws Exception {
         String admin = TestDataFactory.bearer(jwtService.issue(UUID.randomUUID(), Role.ADMIN, null).value());
 
@@ -100,6 +138,10 @@ class AccountsIntegrationTest extends AbstractIntegrationTest {
 
     private UUID customerIdOf(UUID userId) {
         return jdbc.queryForObject("SELECT id FROM customers WHERE user_id = ?", UUID.class, userId);
+    }
+
+    private UUID accountIdOf(String iban) {
+        return jdbc.queryForObject("SELECT id FROM accounts WHERE iban = ?", UUID.class, iban);
     }
 
     /** @param openedShift shift from the opening time of the customer's first account, as a Postgres interval */

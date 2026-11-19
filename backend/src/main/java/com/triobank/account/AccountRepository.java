@@ -28,6 +28,15 @@ public interface AccountRepository extends JpaRepository<Account, UUID> {
     List<Account> findAllOfCustomer(@Param("customerId") UUID customerId);
 
     /**
+     * One account of a customer with its product. Empty both when the account does not exist
+     * and when it belongs to someone else.
+     */
+    @Query("""
+            select a from Account a join fetch a.product
+            where a.id = :accountId and a.customer.id = :customerId""")
+    Optional<Account> findOfCustomer(@Param("accountId") UUID accountId, @Param("customerId") UUID customerId);
+
+    /**
      * Takes the next account number from the database sequence. Used to build the IBAN of a new account.
      */
     @Query(value = "SELECT CAST(nextval('account_number_seq') AS VARCHAR)", nativeQuery = true)

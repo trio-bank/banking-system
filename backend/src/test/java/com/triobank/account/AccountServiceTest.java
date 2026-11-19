@@ -14,6 +14,8 @@ import com.triobank.audit.AuditService;
 import com.triobank.auth.Role;
 import com.triobank.auth.User;
 import com.triobank.common.config.BankProperties;
+import com.triobank.common.error.ApiException;
+import com.triobank.common.error.ErrorCode;
 import com.triobank.common.iban.IbanGenerator;
 import com.triobank.customer.Customer;
 import com.triobank.product.AccountProduct;
@@ -25,6 +27,7 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -98,6 +101,30 @@ class AccountServiceTest {
         when(accounts.findAllOfCustomer(customerId)).thenReturn(List.of());
 
         assertThat(service.listForCustomer(customerId)).isEmpty();
+    }
+
+    @Test
+    void returnsOwnAccount() {
+        UUID customerId = UUID.randomUUID();
+        Account account = account();
+        when(account.getProduct().getType()).thenReturn(AccountType.PERSONAL);
+        when(accounts.findOfCustomer(account.getId(), customerId)).thenReturn(Optional.of(account));
+
+        AccountDto found = service.getForCustomer(customerId, account.getId());
+
+        assertThat(found.id()).isEqualTo(account.getId());
+        assertThat(found.iban()).isEqualTo(account.getIban());
+    }
+
+    @Test
+    void foreignOrMissingAccountIsNotFound() {
+        UUID customerId = UUID.randomUUID();
+        UUID accountId = UUID.randomUUID();
+        when(accounts.findOfCustomer(accountId, customerId)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> service.getForCustomer(customerId, accountId))
+                .isInstanceOfSatisfying(ApiException.class,
+                        ex -> assertThat(ex.getCode()).isEqualTo(ErrorCode.RESOURCE_NOT_FOUND));
     }
 
     @Test
