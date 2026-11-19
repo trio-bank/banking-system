@@ -81,7 +81,7 @@ class AccountServiceTest {
     void postingAccountsComeBackAsSourceAndTarget() {
         Account source = account();
         Account target = account();
-        when(accounts.findAllById(List.of(source.getId(), target.getId()))).thenReturn(List.of(target, source));
+        when(accounts.findAllForUpdate(List.of(source.getId(), target.getId()))).thenReturn(List.of(target, source));
 
         PostingAccounts found = service.getForPosting(source.getId(), target.getId());
 
@@ -93,7 +93,7 @@ class AccountServiceTest {
     void missingPostingAccountIsABug() {
         Account source = account();
         UUID missing = UUID.randomUUID();
-        when(accounts.findAllById(List.of(source.getId(), missing))).thenReturn(List.of(source));
+        when(accounts.findAllForUpdate(List.of(source.getId(), missing))).thenReturn(List.of(source));
 
         assertThatThrownBy(() -> service.getForPosting(source.getId(), missing))
                 .isInstanceOf(IllegalArgumentException.class)

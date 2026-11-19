@@ -74,7 +74,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(DataIntegrityViolationException.class)
     ResponseEntity<ProblemDetail> handleDataIntegrity(DataIntegrityViolationException ex,
                                                       HttpServletRequest request) {
-        String constraint = constraintName(ex);
+        String constraint = ConstraintViolations.nameOf(ex);
         return ConstraintErrorCodes.forConstraint(constraint)
                 .map(code -> {
                     log.warn("Constraint {} violated, mapped to {}", constraint, code);
@@ -192,15 +192,6 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     private static String path(WebRequest request) {
         return request instanceof ServletWebRequest servlet ? servlet.getRequest().getRequestURI() : null;
-    }
-
-    private static String constraintName(Throwable ex) {
-        for (Throwable cause = ex; cause != null; cause = cause.getCause()) {
-            if (cause instanceof org.hibernate.exception.ConstraintViolationException violation) {
-                return violation.getConstraintName();
-            }
-        }
-        return null;
     }
 
 }

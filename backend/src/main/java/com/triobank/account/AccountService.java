@@ -69,13 +69,14 @@ public class AccountService {
     }
 
     /**
-     * Loads the two accounts of a posting. For the ledger only; callers have already checked ownership.
+     * Loads and locks the two accounts of a posting until the end of the transaction.
+     * For the ledger only; callers have already checked ownership.
      *
      * @throws IllegalArgumentException if an account does not exist
      */
     @Transactional(propagation = Propagation.MANDATORY)
     public PostingAccounts getForPosting(UUID sourceAccountId, UUID targetAccountId) {
-        Map<UUID, Account> found = accounts.findAllById(List.of(sourceAccountId, targetAccountId)).stream()
+        Map<UUID, Account> found = accounts.findAllForUpdate(List.of(sourceAccountId, targetAccountId)).stream()
                 .collect(Collectors.toMap(Account::getId, Function.identity()));
         return new PostingAccounts(require(found, sourceAccountId), require(found, targetAccountId));
     }

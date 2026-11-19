@@ -1,9 +1,14 @@
 package com.triobank.account;
 
+import jakarta.persistence.LockModeType;
+import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface AccountRepository extends JpaRepository<Account, UUID> {
 
@@ -16,5 +21,13 @@ public interface AccountRepository extends JpaRepository<Account, UUID> {
      */
     @Query(value = "SELECT CAST(nextval('account_number_seq') AS VARCHAR)", nativeQuery = true)
     String nextAccountNumber();
+
+    /**
+     * Loads the accounts with {@code SELECT ... FOR UPDATE}. Rows are locked in id order,
+     * so two postings over the same pair of accounts never wait for each other in a circle.
+     */
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("select a from Account a where a.id in :ids order by a.id")
+    List<Account> findAllForUpdate(@Param("ids") Collection<UUID> ids);
 
 }
