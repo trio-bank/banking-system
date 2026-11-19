@@ -36,17 +36,32 @@ const DEPOSIT = {
   title: 'ATM cash deposit',
 } as TransactionDto;
 
-describe('AtmOperation (deposit)', () => {
+/** A personal account with little money, for "not above the balance" (BR-11). */
+const LOW: AccountDto = { ...PERSONAL, id: 'low-account', name: 'Pocket money', balance: '120.00' };
+
+const WITHDRAWAL = {
+  ...DEPOSIT,
+  id: 'tx-2',
+  reference: 'TB202611200000000043',
+  type: 'CASH_WITHDRAWAL',
+  title: 'ATM cash withdrawal',
+} as TransactionDto;
+
+describe('AtmOperation', () => {
   const atmDeposit = vi.fn();
+  const atmWithdrawal = vi.fn();
   const get = vi.fn();
   let fixture: ComponentFixture<AtmOperation>;
   let el: HTMLElement;
   let changed: AccountDto[];
 
-  const render = async () => {
+  const render = async (
+    kind: 'deposit' | 'withdrawal' = 'deposit',
+    accounts: AccountDto[] = [PERSONAL, BLOCKED],
+  ) => {
     fixture = TestBed.createComponent(AtmOperation);
-    fixture.componentRef.setInput('kind', 'deposit');
-    fixture.componentRef.setInput('accounts', [PERSONAL, BLOCKED]);
+    fixture.componentRef.setInput('kind', kind);
+    fixture.componentRef.setInput('accounts', accounts);
     changed = [];
     fixture.componentInstance.accountChanged.subscribe((a) => changed.push(a));
     el = fixture.nativeElement;
@@ -81,12 +96,14 @@ describe('AtmOperation (deposit)', () => {
   beforeEach(() => {
     atmDeposit.mockReset();
     atmDeposit.mockReturnValue(of(DEPOSIT));
+    atmWithdrawal.mockReset();
+    atmWithdrawal.mockReturnValue(of(WITHDRAWAL));
     get.mockReset();
     get.mockReturnValue(of({ ...PERSONAL, balance: '10620.51' }));
     TestBed.configureTestingModule({
       providers: [
         provideRouter([]),
-        { provide: PaymentsApi, useValue: { atmDeposit } },
+        { provide: PaymentsApi, useValue: { atmDeposit, atmWithdrawal } },
         { provide: AccountsApi, useValue: { get } },
       ],
     });
@@ -241,5 +258,123 @@ describe('AtmOperation (deposit)', () => {
     expect(amountInput().value).toBe('');
     expect(el.querySelector('mat-select')?.textContent).toContain(PERSONAL.name);
     expect(el.querySelector('mat-error')).toBeNull();
+  });
+
+  describe('balance preview', () => {
+    const after = () => el.querySelector('[data-testid=balance-after]')?.textContent?.trim() ?? '';
+
+    it('deposit: changes while typing, "—" for an empty or wrong amount', async () => {
+      await render('deposit');
+      expect(text()).toContain(`Balance now${formatMoney(PERSONAL.balance)}`);
+      expect(after()).toBe('—');
+
+      await typeAmount('200');
+      expect(after()).toBe(formatMoney('10620.51'));
+
+      await typeAmount('2000');
+      expect(after()).toBe(formatMoney('12420.51'));
+
+      await typeAmount('15');
+      expect(after()).toBe('—');
+    });
+
+    it('withdrawal: the balance goes down; above the balance shows "—"', async () => {
+      await render('withdrawal', [LOW, PERSONAL]);
+      await typeAmount('100');
+      expect(after()).toBe(formatMoney('20'));
+
+      await typeAmount('130');
+      expect(after()).toBe('—'); // the error under the field says why
+    });
+
+    it('is shown on the confirmation too', async () => {
+      await render('withdrawal');
+      await toConfirm('200');
+      expect(text()).toContain(`Balance after${formatMoney('10220.51')}`);
+    });
+  });
+
+  describe('withdrawal', () => {
+    const chooseAccount = async (name: string) => {
+      el.querySelector<HTMLElement>('.mat-mdc-select-trigger')!.click();
+      await settle();
+      [...document.querySelectorAll<HTMLElement>('mat-option')]
+        .find((o) => o.textContent?.includes(name))!
+        .click();
+      await settle();
+    };
+
+    it.each([
+      ['5010', `From ${formatMoney('10')} to ${formatMoney('5000')}.`],
+      ['15', 'Only whole tens: the ATM works with banknotes.'],
+    ])('TC-35 amount "%s" → "%s"', async (amount, message) => {
+      await render('withdrawal');
+      await toConfirm(amount);
+
+      expect(el.querySelector('mat-error')?.textContent).toContain(message);
+      expect(atmWithdrawal).not.toHaveBeenCalled();
+    });
+
+    it('5 000 is the most you can take at once', async () => {
+      await render('withdrawal');
+      await toConfirm('5000');
+      expect(text()).toContain('Check and confirm');
+    });
+
+    it('TC-37 more than the balance is not sent; another account is checked again', async () => {
+      await render('withdrawal', [LOW, PERSONAL]);
+      await toConfirm('200');
+
+      expect(el.querySelector('mat-error')?.textContent).toContain(
+        `You have only ${formatMoney('120')}.`,
+      );
+      expect(atmWithdrawal).not.toHaveBeenCalled();
+
+      await chooseAccount(PERSONAL.name);
+      expect(el.querySelector('mat-error')).toBeNull();
+      await press('Next');
+      expect(text()).toContain('Check and confirm');
+    });
+
+    it('a deposit is not limited by the balance', async () => {
+      await render('deposit', [LOW]);
+      await toConfirm('500');
+      expect(text()).toContain('Check and confirm');
+    });
+
+    it('withdraws 200: T4 with a key → "Cash withdrawn" with a minus and the new balance', async () => {
+      get.mockReturnValue(of({ ...PERSONAL, balance: '10220.51' }));
+      await render('withdrawal');
+      await toConfirm('200');
+      expect(text()).toContain('ATM cash withdrawal');
+
+      await press('Confirm');
+
+      expect(atmWithdrawal).toHaveBeenCalledWith(
+        { accountId: PERSONAL.id, amount: '200.00' },
+        expect.stringMatching(UUID),
+      );
+      expect(atmDeposit).not.toHaveBeenCalled();
+      expect(text()).toContain('Cash withdrawn');
+      const amount = el.querySelector('p.big')!;
+      expect(amount.textContent).toContain(`−${formatMoney('200')}`);
+      expect(amount.classList).not.toContain('incoming'); // outgoing: normal text color
+      expect(text()).toContain(formatMoney('10220.51'));
+      expect(text()).toContain('TB202611200000000043');
+      expect(button('New withdrawal')).toBeDefined();
+    });
+
+    it.each([
+      ['INSUFFICIENT_FUNDS', 'You do not have enough money on this account.'],
+      ['OPERATION_NOT_ALLOWED_FOR_ACCOUNT', 'This operation is not allowed for this account.'],
+    ])('%s from the server is shown on the confirmation', async (code, message) => {
+      // E.g. the balance changed after the page was loaded: only the backend knows.
+      atmWithdrawal.mockReturnValue(throwError(() => problem(code)));
+      await render('withdrawal');
+      await toConfirm('200');
+      await press('Confirm');
+
+      expect(el.querySelector('[role=alert]')?.textContent).toContain(message);
+    });
   });
 });

@@ -4,7 +4,7 @@
   padding-top: 16px;
 }
 
-h3 {
+h2 {
   margin: 0 0 16px;
   font: var(--mat-sys-title-medium);
 
@@ -89,6 +89,30 @@ p.big {
   border-radius: 4px;
   background: var(--mat-sys-error-container);
   color: var(--mat-sys-on-error-container);
+}
+
+.preview {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 4px 16px;
+  margin: 4px 0 16px;
+  padding: 12px 16px;
+  border-radius: 8px;
+  background: var(--mat-sys-surface-container);
+
+  dt {
+    color: var(--mat-sys-on-surface-variant);
+  }
+
+  dd {
+    margin: 0;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .after {
+    font: var(--mat-sys-title-medium);
+  }
 }
 
 // Phone (< 600 px): 4 amount buttons don't fit in one row at 360 px, labels above values,

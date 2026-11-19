@@ -2,16 +2,23 @@ import { Component, computed, DestroyRef, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { AccountDto, ProblemDetail } from '../../core/api/models';
 import { AccountsApi } from '../../core/api/services/accounts-api';
 import { errorMessage } from '../../core/errors/error-messages';
-import { AtmOperation } from './atm-operation/atm-operation';
+import { AtmKind, AtmOperation } from './atm-operation/atm-operation';
 
-/** ATM (US-14): loads the accounts once for the operation. Withdraw comes in #106. */
+/** ATM (US-14, US-15): loads the accounts once, deposit and withdrawal share them. */
 @Component({
   selector: 'app-atm-page',
-  imports: [AtmOperation, MatButtonModule, MatProgressSpinnerModule, RouterLink],
+  imports: [
+    AtmOperation,
+    MatButtonModule,
+    MatButtonToggleModule,
+    MatProgressSpinnerModule,
+    RouterLink,
+  ],
   templateUrl: './atm-page.html',
   styleUrl: './atm-page.scss',
 })
@@ -22,6 +29,7 @@ export class AtmPage {
   protected readonly accounts = signal<AccountDto[] | null>(null);
   protected readonly loading = signal(false);
   protected readonly error = signal<string | null>(null);
+  protected readonly kind = signal<AtmKind>('deposit');
 
   /** BR-20: the ATM works with personal accounts only. */
   protected readonly personal = computed(
