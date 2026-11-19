@@ -56,6 +56,11 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'atm',
+        title: 'ATM · Trio Bank',
+        loadComponent: () => import('./features/atm/atm-page').then((m) => m.AtmPage),
+      },
+      {
         path: 'profile',
         title: 'My profile · Trio Bank',
         loadComponent: () => import('./features/profile/profile-page').then((m) => m.ProfilePage),

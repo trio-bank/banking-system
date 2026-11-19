@@ -21,7 +21,6 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { MatTabsModule } from '@angular/material/tabs';
 import { Subscription } from 'rxjs';
 import { AccountDto, ProblemDetail } from '../../../core/api/models';
 import { AccountsApi } from '../../../core/api/services/accounts-api';
@@ -44,7 +43,6 @@ import { ACCOUNT_NAME_MAX, accountNameValidator, formatRate } from '../account-r
     MatFormFieldModule,
     MatInputModule,
     MatProgressSpinnerModule,
-    MatTabsModule,
     MoneyPipe,
     ReactiveFormsModule,
     RouterLink,

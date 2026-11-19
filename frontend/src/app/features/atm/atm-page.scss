@@ -1,0 +1,42 @@
+:host {
+  display: block;
+  max-width: 960px;
+}
+
+.back {
+  margin: 0 0 8px -12px;
+}
+
+h1 {
+  margin: 0 0 8px;
+  font: var(--mat-sys-headline-small);
+}
+
+h2 {
+  margin: 8px 0 0;
+  font: var(--mat-sys-title-large);
+}
+
+.state {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 0;
+}
+
+.empty p {
+  margin: 0 0 16px;
+}
+
+// Same banner as on the dashboard.
+.banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 8px 8px 16px;
+  border-left: 4px solid var(--mat-sys-error);
+  border-radius: 4px;
+  background: var(--mat-sys-error-container);
+  color: var(--mat-sys-on-error-container);
+}

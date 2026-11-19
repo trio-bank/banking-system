@@ -79,9 +79,9 @@
     </mat-card-content>
   </mat-card>
 
-  <mat-tab-group class="tabs" animationDuration="0ms">
-    <mat-tab label="History">
-      <app-account-history [accountId]="a.id" />
-    </mat-tab>
-  </mat-tab-group>
+  <!-- A heading, not a tab: with one tab there is nothing to switch to. -->
+  <section class="history" aria-labelledby="history-heading">
+    <h2 id="history-heading">History</h2>
+    <app-account-history [accountId]="a.id" />
+  </section>
 }
