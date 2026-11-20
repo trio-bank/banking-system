@@ -13,6 +13,7 @@ import { AuthStore } from './core/auth/auth.store';
 import { SessionTimer } from './core/auth/session-timer';
 import { authInterceptor } from './core/http/auth.interceptor';
 import { errorInterceptor } from './core/http/error.interceptor';
+import { ThemeService } from './core/theme/theme.service';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -32,6 +33,10 @@ export const appConfig: ApplicationConfig = {
     // Creating it is enough: from then on it follows login and logout by itself.
     provideAppInitializer(() => {
       inject(SessionTimer);
+    }),
+    // Applies the saved light/dark choice before the first page renders.
+    provideAppInitializer(() => {
+      inject(ThemeService);
     }),
   ],
 };

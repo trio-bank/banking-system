@@ -33,6 +33,8 @@ src/app
 │   │   ├── auth.guard.ts    # requires login
 │   │   ├── role.guard.ts    # requires role CUSTOMER / ADMIN
 │   │   └── session-timer.service.ts
+│   ├── theme
+│   │   └── theme.service.ts         # light / dark / system, choice kept in localStorage
 │   ├── http
 │   │   ├── auth.interceptor.ts          # adds Bearer token
 │   │   ├── error.interceptor.ts         # 401 → logout; maps ProblemDetail
@@ -233,7 +235,7 @@ Only account cards and form cards have a shadow.
 
 - **Space Grotesk 700:** headings, balance, amounts. **Inter:** everything else. All amounts use `font-variant-numeric: tabular-nums`.
 - Space Grotesk has no Cyrillic; for a localized UI (PKG-15) the heading font must change.
-- **Icons:** Material Symbols Rounded through `mat-icon` with `fontSet`; weight 400, outlined. Filled only for active navigation.
+- **Icons:** Material Symbols Rounded through `mat-icon`. The font set is provided once in each shell (`MAT_ICON_DEFAULT_OPTIONS`), not in `app.config`, to keep MatIcon out of the first-load bundle. Weight 400, outlined; add `.filled` for active navigation only.
 - **Motion:** 150–200 ms for hover, appearance and skeletons. Nothing animates with `prefers-reduced-motion`.
 
 ### 13.5 Tokens
