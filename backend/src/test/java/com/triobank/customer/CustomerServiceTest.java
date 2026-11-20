@@ -18,6 +18,8 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
+import java.util.Optional;
+import java.util.UUID;
 import org.junit.jupiter.api.Test;
 
 class CustomerServiceTest {
@@ -29,6 +31,25 @@ class CustomerServiceTest {
     private static final String PESEL_2008_11_08 = "08310812342";
 
     private final CustomerRepository customers = mock(CustomerRepository.class);
+
+    @Test
+    void lockReturnsTheCustomer() {
+        Customer customer = mock(Customer.class);
+        UUID id = UUID.randomUUID();
+        when(customers.findByIdForUpdate(id)).thenReturn(Optional.of(customer));
+
+        assertThat(service("2026-11-08T12:00:00Z").lockForAccountOpening(id)).isSameAs(customer);
+    }
+
+    @Test
+    void lockingAMissingCustomerIsABug() {
+        UUID id = UUID.randomUUID();
+        when(customers.findByIdForUpdate(id)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> service("2026-11-08T12:00:00Z").lockForAccountOpening(id))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining(id.toString());
+    }
 
     @Test
     void adultWithNewPeselCanRegister() {
