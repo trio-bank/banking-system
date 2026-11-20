@@ -262,7 +262,7 @@ Response `200 AccountProductDto[]` (active products only).
     "description": "Savings account with daily accrual and monthly capitalization.",
     "type": "SAVINGS", "currency": "PLN", "interestRate": "4.0000",
     "outgoingTransferPolicy": "OWN_ACCOUNTS_ONLY", "atmAllowed": false,
-    "maxAccountsPerCustomer": 5, "prerequisiteType": "PERSONAL"
+    "maxAccountsPerCustomer": 2, "prerequisiteType": "PERSONAL"
   }
 ]
 ```

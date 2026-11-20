@@ -99,7 +99,7 @@ Parameterized test that calls every customer endpoint with a token of another cu
 |---|---|---|---|---|
 | TC-14 | US-05 | View profile | Masked PESEL, all fields | I, E |
 | TC-15 | US-07 | Open savings with active personal | 201; new IBAN unique and valid; name defaults to product name | I, E |
-| TC-16 | US-07 | Open 3rd personal account | 422 `ACCOUNT_LIMIT_REACHED` | I |
+| TC-16 | US-07 | Open 3rd personal account; open 3rd savings account | 422 `ACCOUNT_LIMIT_REACHED` (blocked accounts count, closed ones do not) | I |
 | TC-17 | US-07 | Open savings when personal is blocked | 422 `PREREQUISITE_ACCOUNT_REQUIRED` | I |
 | TC-18 | US-06/08 | List & details | Only own accounts; savings shows rate and accrued interest | I |
 | TC-19 | US-09 | Rename to 51 chars / valid name | 400 / 200 | I |

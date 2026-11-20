@@ -468,7 +468,9 @@ Valid test PESELs (fictional): `90051412343` (born 1990-05-14), `85110356782` (1
 | code | name | type | rate | policy | atmAllowed | max per customer | prerequisite |
 |---|---|---|---|---|---|---|---|
 | `PERSONAL_STANDARD` | Trio Personal Account | PERSONAL | 0.0000 | ANY | true | 2 | — |
-| `SAVINGS_STANDARD` | Trio Savings Account | SAVINGS | 4.0000 | OWN_ACCOUNTS_ONLY | false | 5 | PERSONAL |
+| `SAVINGS_STANDARD` | Trio Savings Account | SAVINGS | 4.0000 | OWN_ACCOUNTS_ONLY | false | 2 | PERSONAL |
+
+The savings limit was 5 in `V002` and was lowered to 2 by `V006__lower_savings_account_limit.sql`.
 
 ### 9.2 System accounts
 
