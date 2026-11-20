@@ -25,6 +25,7 @@ import com.triobank.customer.CustomerService;
 import com.triobank.product.AccountProduct;
 import com.triobank.product.AccountProductService;
 import com.triobank.product.AccountType;
+import jakarta.persistence.EntityManager;
 import java.math.BigDecimal;
 import java.time.Clock;
 import java.time.Instant;
@@ -48,9 +49,10 @@ class AccountServiceTest {
             new IbanGenerator(new BankProperties("99900012", "PLN", ZoneId.of("Europe/Warsaw")));
 
     private final CustomerService customerService = mock(CustomerService.class);
+    private final EntityManager entityManager = mock(EntityManager.class);
 
     private final AccountService service = new AccountService(accounts, productService, customerService,
-            ibanGenerator, auditService, Clock.fixed(NOW, ZoneOffset.UTC));
+            ibanGenerator, auditService, entityManager, Clock.fixed(NOW, ZoneOffset.UTC));
 
     @Test
     void opensPersonalAccountWithZeroBalanceAndAudits() {
@@ -258,22 +260,27 @@ class AccountServiceTest {
     }
 
     @Test
-    void postingAccountsComeBackAsSourceAndTarget() {
+    void postingAccountsAreLockedThenReadAgain() {
         Account source = account();
         Account target = account();
-        when(accounts.findAllForUpdate(List.of(source.getId(), target.getId()))).thenReturn(List.of(target, source));
+        when(entityManager.find(Account.class, source.getId())).thenReturn(source);
+        when(entityManager.find(Account.class, target.getId())).thenReturn(target);
 
         PostingAccounts found = service.getForPosting(source.getId(), target.getId());
 
         assertThat(found.source()).isSameAs(source);
         assertThat(found.target()).isSameAs(target);
+        InOrder order = inOrder(accounts, entityManager);
+        order.verify(accounts).lockForUpdate(List.of(source.getId(), target.getId()));
+        order.verify(entityManager).refresh(source);
+        order.verify(entityManager).refresh(target);
     }
 
     @Test
     void missingPostingAccountIsABug() {
         Account source = account();
         UUID missing = UUID.randomUUID();
-        when(accounts.findAllForUpdate(List.of(source.getId(), missing))).thenReturn(List.of(source));
+        when(entityManager.find(Account.class, source.getId())).thenReturn(source);
 
         assertThatThrownBy(() -> service.getForPosting(source.getId(), missing))
                 .isInstanceOf(IllegalArgumentException.class)

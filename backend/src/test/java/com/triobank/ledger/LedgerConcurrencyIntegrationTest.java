@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.triobank.AbstractIntegrationTest;
+import com.triobank.account.AccountRepository;
 import com.triobank.common.error.ApiException;
 import com.triobank.common.error.ErrorCode;
 import java.math.BigDecimal;
@@ -19,6 +20,9 @@ import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.OptimisticLockingFailureException;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.TransactionTemplate;
 
 /**
  * Account locking and idempotency keys against a real PostgreSQL, with requests running in parallel.
@@ -32,6 +36,16 @@ class LedgerConcurrencyIntegrationTest extends AbstractIntegrationTest {
 
     @Autowired
     private IdempotentExecutor idempotent;
+
+    @Autowired
+    private AccountRepository accounts;
+
+    private TransactionTemplate inTransaction;
+
+    @Autowired
+    void setTransactionManager(PlatformTransactionManager transactionManager) {
+        this.inTransaction = new TransactionTemplate(transactionManager);
+    }
 
     private UUID userId;
     private UUID accountId;
@@ -110,6 +124,31 @@ class LedgerConcurrencyIntegrationTest extends AbstractIntegrationTest {
         });
 
         assertThat(outcomes).filteredOn("OK"::equals).hasSize(10);
+        assertThat(outcomes).filteredOn(ErrorCode.INSUFFICIENT_FUNDS.name()::equals).hasSize(10);
+        assertThat(balance(accountId)).isEqualByComparingTo("0.00");
+        LedgerInvariants.assertLedgerBalanced(jdbc);
+    }
+
+    @Test
+    void accountReadBeforePostingIsReloadedAfterTheLock() throws Exception {
+        post(TransactionType.CASH_DEPOSIT, BANK_CASH, accountId, "100.00");
+
+        // services read the account (ownership, product rules) in the same transaction before posting
+        List<String> outcomes = inParallel(20, () -> {
+            try {
+                return inTransaction.execute(status -> {
+                    accounts.findById(accountId).orElseThrow();
+                    post(TransactionType.CASH_WITHDRAWAL, accountId, BANK_CASH, "10.00");
+                    return "OK";
+                });
+            } catch (ApiException ex) {
+                return ex.getCode().name();
+            } catch (OptimisticLockingFailureException ex) {
+                return "STALE";
+            }
+        });
+
+        assertThat(outcomes).filteredOn("OK"::equals).as(outcomes.toString()).hasSize(10);
         assertThat(outcomes).filteredOn(ErrorCode.INSUFFICIENT_FUNDS.name()::equals).hasSize(10);
         assertThat(balance(accountId)).isEqualByComparingTo("0.00");
         LedgerInvariants.assertLedgerBalanced(jdbc);

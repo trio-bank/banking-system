@@ -29,6 +29,7 @@ public class AtmService {
 
     static final BigDecimal MIN_AMOUNT = new BigDecimal("10.00");
     static final BigDecimal MAX_DEPOSIT = new BigDecimal("20000.00");
+    static final BigDecimal MAX_WITHDRAWAL = new BigDecimal("5000.00");
     /** The ATM only takes and gives out banknotes. */
     static final BigDecimal BANKNOTE_STEP = BigDecimal.TEN;
 
@@ -62,22 +63,18 @@ public class AtmService {
     @Transactional
     public TransactionDto deposit(UUID userId, UUID customerId, CashOperationRequest request,
                                   String idempotencyKey, String requestHash) {
-        Account account = accountService.getOfCustomerForOperation(customerId, request.accountId());
-        String currency = checkCurrency(request.currency());
-        checkAmount(request.amount(), MAX_DEPOSIT);
-        checkAtmAllowed(account);
+        Account account = checkCashOperation(customerId, request, MAX_DEPOSIT);
 
-        Customer owner = account.getCustomer();
         Transaction transaction = ledgerService.post(PostingCommand.builder()
                 .type(TransactionType.CASH_DEPOSIT)
                 .channel(Channel.ATM)
-                .sourceAccountId(accountService.getSystemAccountId(SystemAccountCode.BANK_CASH))
+                .sourceAccountId(bankCashId())
                 .targetAccountId(account.getId())
                 .amount(request.amount())
-                .currency(currency)
+                .currency(resolveCurrency(request.currency()))
                 .title(DefaultTitles.ATM_DEPOSIT)
                 .senderName(DefaultTitles.BANK_NAME)
-                .recipientName(owner.getFirstName() + " " + owner.getLastName())
+                .recipientName(fullName(account.getCustomer()))
                 .initiatedByUserId(userId)
                 .idempotencyKey(idempotencyKey)
                 .requestHash(requestHash)
@@ -85,13 +82,60 @@ public class AtmService {
         return TransactionMapper.toDto(transaction, customerId);
     }
 
-    private String checkCurrency(String requested) {
-        String currency = resolveCurrency(requested);
-        if (!currency.equals(bank.currency())) {
+    /**
+     * Takes cash from one of the customer's personal accounts. Status and balance are checked by the ledger,
+     * after the account is locked, so two withdrawals at once can't both spend the same money.
+     *
+     * @param userId         who is at the ATM, stored on the transaction
+     * @param idempotencyKey checked key from the header
+     * @param requestHash    hash of the request, see {@link com.triobank.ledger.RequestHash}
+     * @throws ApiException RESOURCE_NOT_FOUND, CURRENCY_NOT_SUPPORTED, CASH_AMOUNT_INVALID,
+     *                      OPERATION_NOT_ALLOWED_FOR_ACCOUNT, SOURCE_ACCOUNT_UNAVAILABLE, INSUFFICIENT_FUNDS
+     */
+    @Transactional
+    public TransactionDto withdraw(UUID userId, UUID customerId, CashOperationRequest request,
+                                   String idempotencyKey, String requestHash) {
+        Account account = checkCashOperation(customerId, request, MAX_WITHDRAWAL);
+
+        Transaction transaction = ledgerService.post(PostingCommand.builder()
+                .type(TransactionType.CASH_WITHDRAWAL)
+                .channel(Channel.ATM)
+                .sourceAccountId(account.getId())
+                .targetAccountId(bankCashId())
+                .amount(request.amount())
+                .currency(resolveCurrency(request.currency()))
+                .title(DefaultTitles.ATM_WITHDRAWAL)
+                .senderName(fullName(account.getCustomer()))
+                .recipientName(DefaultTitles.BANK_NAME)
+                .initiatedByUserId(userId)
+                .idempotencyKey(idempotencyKey)
+                .requestHash(requestHash)
+                .build());
+        return TransactionMapper.toDto(transaction, customerId);
+    }
+
+    /** Checks shared by deposits and withdrawals, in the order the errors are reported. */
+    private Account checkCashOperation(UUID customerId, CashOperationRequest request, BigDecimal max) {
+        Account account = accountService.getOfCustomerForOperation(customerId, request.accountId());
+        checkCurrency(request.currency());
+        checkAmount(request.amount(), max);
+        checkAtmAllowed(account);
+        return account;
+    }
+
+    private UUID bankCashId() {
+        return accountService.getSystemAccountId(SystemAccountCode.BANK_CASH);
+    }
+
+    private static String fullName(Customer customer) {
+        return customer.getFirstName() + " " + customer.getLastName();
+    }
+
+    private void checkCurrency(String requested) {
+        if (!resolveCurrency(requested).equals(bank.currency())) {
             throw new ApiException(ErrorCode.CURRENCY_NOT_SUPPORTED,
                     "Only " + bank.currency() + " is supported.");
         }
-        return currency;
     }
 
     private static void checkAmount(BigDecimal amount, BigDecimal max) {
