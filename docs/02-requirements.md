@@ -101,7 +101,7 @@ Business rules are enforced **on the backend** (always) and mirrored on the fron
 
 | ID | Rule | Error code |
 |---|---|---|
-| BR-07 | A customer may hold at most `maxAccountsPerCustomer` non-closed accounts of a given product (`PERSONAL_STANDARD`: 2, `SAVINGS_STANDARD`: 5). | `ACCOUNT_LIMIT_REACHED` |
+| BR-07 | A customer may hold at most `maxAccountsPerCustomer` non-closed accounts of a given product (`PERSONAL_STANDARD`: 2, `SAVINGS_STANDARD`: 2). | `ACCOUNT_LIMIT_REACHED` |
 | BR-08 | Opening a product with a prerequisite (savings requires personal) is only possible if the customer has an active account of the required type. | `PREREQUISITE_ACCOUNT_REQUIRED` |
 | BR-22 | Accounts are never deleted. They can be closed only with a zero balance (PKG-05). | — |
 | BR-28 | Account name: 1–50 characters, trimmed. Default: the product name (set by backend). | `VALIDATION_ERROR` |
