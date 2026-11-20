@@ -38,6 +38,15 @@ public interface AccountRepository extends JpaRepository<Account, UUID> {
     Optional<Account> findOfCustomer(@Param("accountId") UUID accountId, @Param("customerId") UUID customerId);
 
     /**
+     * Same as {@link #findOfCustomer}, with the owner loaded too.
+     */
+    @Query("""
+            select a from Account a join fetch a.product join fetch a.customer
+            where a.id = :accountId and a.customer.id = :customerId""")
+    Optional<Account> findOfCustomerWithOwner(@Param("accountId") UUID accountId,
+                                              @Param("customerId") UUID customerId);
+
+    /**
      * How many accounts of the product the customer has that are not closed. Blocked accounts count too.
      */
     @Query("""

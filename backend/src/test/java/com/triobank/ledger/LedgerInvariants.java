@@ -7,12 +7,12 @@ import java.util.UUID;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 /** The three ledger invariants: total is zero, balances match entries, every transaction is balanced. */
-final class LedgerInvariants {
+public final class LedgerInvariants {
 
     private LedgerInvariants() {
     }
 
-    static void assertLedgerBalanced(JdbcTemplate jdbc) {
+    public static void assertLedgerBalanced(JdbcTemplate jdbc) {
         assertThat(jdbc.queryForObject("SELECT COALESCE(SUM(balance), 0) FROM accounts", BigDecimal.class))
                 .as("sum of all balances").isEqualByComparingTo("0.00");
         assertThat(jdbc.queryForList("""
