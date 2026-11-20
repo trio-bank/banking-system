@@ -1,8 +1,29 @@
-.shell-toolbar {
+// Yellow on top of the page; after scrolling the bar turns into the page surface (docs/07 §13.1).
+.topbar {
+  --bar-bg: var(--tb-brand);
+  --bar-fg: var(--tb-on-brand);
+  // The yellow logo mark would vanish on the yellow bar: draw it in the text color.
+  --brand-mark-color: currentColor;
+
   position: sticky;
   top: 0;
   z-index: 10; // above Material tabs/tables (they use 1–2), or they slide over it on scroll
-  gap: 12px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  height: 64px;
+  padding: 0 24px;
+  background: var(--bar-bg);
+  color: var(--bar-fg);
+  transition:
+    background-color 150ms ease,
+    box-shadow 150ms ease;
+
+  &.scrolled {
+    --bar-bg: var(--tb-surface);
+    --bar-fg: var(--tb-ink);
+    box-shadow: 0 1px 0 var(--tb-line);
+  }
 }
 
 .brand {
@@ -12,28 +33,138 @@
   color: inherit;
   text-decoration: none;
   font: var(--mat-sys-title-large);
+  white-space: nowrap;
 }
 
-.toolbar-end {
+.links {
+  display: flex;
+  gap: 4px;
+  height: 100%;
+  margin-left: auto;
+
+  a {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0 12px;
+    color: inherit;
+    opacity: 0.75;
+    text-decoration: none;
+    font: var(--mat-sys-label-large);
+
+    &:hover,
+    &.active {
+      opacity: 1;
+    }
+
+    // Bold + underline, so the active link isn't marked by color alone.
+    // The line spans the whole link, padding included, and sits on the bar's bottom edge.
+    &.active {
+      font-weight: 700;
+
+      &::after {
+        content: '';
+        position: absolute;
+        inset: auto 0 0;
+        height: 3px;
+        border-radius: 3px 3px 0 0;
+        background: currentColor;
+      }
+    }
+  }
+}
+
+.end {
   display: flex;
   align-items: center;
-  gap: 4px;
-  margin-left: auto;
+  gap: 8px;
+  padding-left: 16px;
+  border-left: 1px solid color-mix(in srgb, currentColor 25%, transparent);
 }
 
-// Same light-on-black colors as the logout button.
-.toolbar-link {
-  --mat-button-text-label-text-color: var(--tb-on-toolbar);
-  --mat-button-text-state-layer-color: var(--tb-on-toolbar);
-}
-
-.toolbar-link.active {
-  text-decoration: underline;
-  text-underline-offset: 6px;
+.avatar {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--bar-fg);
+  color: var(--bar-bg);
+  font: var(--mat-sys-label-large);
+  font-weight: 700;
+  text-decoration: none;
 }
 
 .shell-content {
   max-width: 1200px;
   margin: 0 auto;
   padding: 24px 16px;
+}
+
+.tabs {
+  display: none;
+}
+
+// Phones: the links go to the bottom tabs, the bar keeps logo, theme, avatar, logout.
+@media (max-width: 767.98px) {
+  .topbar {
+    gap: 8px;
+    height: 56px;
+    padding: 0 8px 0 16px;
+  }
+
+  .links {
+    display: none;
+  }
+
+  .end {
+    margin-left: auto;
+    padding-left: 0;
+    border-left: 0;
+    gap: 0;
+  }
+
+  // Room for the tabs, so they don't cover the end of the page.
+  .shell-content {
+    padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .tabs {
+    position: fixed;
+    inset: auto 0 0;
+    z-index: 10;
+    display: flex;
+    justify-content: space-around;
+    padding: 8px 4px calc(10px + env(safe-area-inset-bottom, 0px));
+    background: var(--tb-surface);
+    border-top: 1px solid var(--tb-line);
+
+    a {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      min-width: 64px;
+      color: var(--tb-muted);
+      text-decoration: none;
+      font: var(--mat-sys-label-medium);
+
+      mat-icon {
+        width: auto;
+        padding: 2px 18px;
+        border-radius: 999px;
+      }
+
+      &.active {
+        color: var(--tb-ink);
+        font-weight: 700;
+
+        mat-icon {
+          background: var(--tb-brand);
+          color: var(--tb-on-brand);
+        }
+      }
+    }
+  }
 }

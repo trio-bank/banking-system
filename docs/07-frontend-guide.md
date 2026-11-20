@@ -46,7 +46,8 @@ src/app
 │   ├── pipes/               # money.pipe, iban.pipe, signed-amount.pipe, enum-label.pipe
 │   └── validators/          # iban.validator, pesel.validator, money.validator, password.validator
 ├── layout
-│   ├── customer-shell/      # top bar, side nav for customers
+│   ├── customer-shell/      # yellow top bar (links on the right), bottom tabs on phones
+│   ├── theme-toggle/        # light / dark button in the toolbars
 │   └── admin-shell/
 └── features
     ├── auth/                # login, register
@@ -214,8 +215,12 @@ Direction and alternatives: [ADR-0015](adr/0015-ui-visual-direction.md). Custome
 
 ### 13.2 Navigation
 
-- **≥ 768px:** logo on the left; links with icons on the right (Home, ATM, Accounts, Transfers); a divider; theme toggle, avatar, logout. The active link is bold, underlined, and has a filled icon.
-- **< 768px:** the toolbar keeps the logo and avatar. Sections move to bottom tabs (Home, ATM, Accounts, Profile). The active tab gets a yellow pill and a filled icon.
+- **≥ 768px:** logo on the left; links with icons on the right; a divider; theme toggle, avatar (opens Profile), "Log out". The active link is bold, has a filled icon, `aria-current="page"` and a 3px line across its full width on the bar's bottom edge.
+- The logo mark is drawn in the bar's text color on the yellow bar (black) and stays yellow on the black bars (guest, admin).
+- **< 768px:** the bar keeps the logo, theme toggle, avatar and "Log out". The links move to bottom tabs; the active tab gets a yellow pill and a filled icon.
+- Links today: **Home** (also active on account details) and **ATM**. Tabs: Home, ATM, Profile. There is no separate accounts page: accounts are the cards on the dashboard. **Transfer** (`/app/transfer`) is added to the links and tabs in `customer-shell.ts` with its page in Sprint 3.
+- The theme toggle switches between light and dark and remembers the choice. Until it is pressed, the app follows the system.
+- Icons: `MAT_ICON_DEFAULT_OPTIONS` is provided in the shell, so `<mat-icon>home</mat-icon>` is enough inside it.
 
 ### 13.3 Components
 
@@ -235,7 +240,7 @@ Only account cards and form cards have a shadow.
 
 - **Space Grotesk 700:** headings, balance, amounts. **Inter:** everything else. All amounts use `font-variant-numeric: tabular-nums`.
 - Space Grotesk has no Cyrillic; for a localized UI (PKG-15) the heading font must change.
-- **Icons:** Material Symbols Rounded through `mat-icon`. The font set is provided once in each shell (`MAT_ICON_DEFAULT_OPTIONS`), not in `app.config`, to keep MatIcon out of the first-load bundle. Weight 400, outlined; add `.filled` for active navigation only.
+- **Icons:** Material Symbols Rounded through `mat-icon`. The font set (`MAT_ICON_DEFAULT_OPTIONS`) is provided in the customer shell, not in `app.config`, to keep MatIcon out of the first-load bundle. The admin shell adds the same provider when it gets its first icon. Weight 400, outlined; add `.filled` for active navigation only.
 - **Motion:** 150–200 ms for hover, appearance and skeletons. Nothing animates with `prefers-reduced-motion`.
 
 ### 13.5 Tokens
