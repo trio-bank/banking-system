@@ -115,6 +115,27 @@ public class AccountService {
     }
 
     /**
+     * One of the customer's accounts with its product and owner loaded, for services that move money.
+     *
+     * @throws ApiException RESOURCE_NOT_FOUND if the account is missing or not the customer's
+     */
+    @Transactional(propagation = Propagation.MANDATORY)
+    public Account getOfCustomerForOperation(UUID customerId, UUID accountId) {
+        return accounts.findOfCustomerWithOwner(accountId, customerId)
+                .orElseThrow(() -> new ApiException(ErrorCode.RESOURCE_NOT_FOUND, "Account not found."));
+    }
+
+    /**
+     * Id of one of the bank's own accounts. They are created by the migrations, so a missing one is a bug.
+     */
+    @Transactional(readOnly = true)
+    public UUID getSystemAccountId(SystemAccountCode code) {
+        return accounts.findBySystemCode(code)
+                .map(Account::getId)
+                .orElseThrow(() -> new IllegalStateException("System account " + code + " does not exist"));
+    }
+
+    /**
      * Loads and locks the two accounts of a posting until the end of the transaction.
      * For the ledger only; callers have already checked ownership.
      *
