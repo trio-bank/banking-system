@@ -23,8 +23,8 @@
 
 // Same light-on-black colors as the logout button.
 .toolbar-link {
-  --mat-button-text-label-text-color: var(--mat-sys-on-primary);
-  --mat-button-text-state-layer-color: var(--mat-sys-on-primary);
+  --mat-button-text-label-text-color: var(--tb-on-toolbar);
+  --mat-button-text-state-layer-color: var(--tb-on-toolbar);
 }
 
 .toolbar-link.active {

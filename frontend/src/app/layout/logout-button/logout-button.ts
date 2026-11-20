@@ -13,7 +13,7 @@ import { AuthStore } from '../../core/auth/auth.store';
   styles: `
     /* The toolbar is black: the default hover and disabled colors are dark too. */
     :host {
-      --mat-button-text-state-layer-color: var(--mat-sys-on-primary);
+      --mat-button-text-state-layer-color: var(--tb-on-toolbar);
       --mat-button-text-disabled-label-text-color: var(--mat-sys-outline);
     }
   `,

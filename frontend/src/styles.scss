@@ -1,93 +1,144 @@
 @use '@angular/material' as mat;
 
-// Brand colors. Yellow is only for fills and accents: as text on white it's unreadable.
-$ink: #141414;
-$yellow: #ffd100;
-$yellow-hover: #f2c600;
-
+// Design tokens (docs/07 §13.5). light-dark() picks the value by color-scheme:
+// "light dark" follows the system, ThemeService pins one of them when the user chooses.
+// Yellow is only for fills and accents: as text on white it's unreadable.
 html {
   height: 100%;
+  color-scheme: light dark;
+
+  --tb-brand: #ffd100;
+  --tb-on-brand: #141414;
+  --tb-ink: light-dark(#141414, #f2f1ea);
+  --tb-on-ink: light-dark(#ffffff, #141414);
+  --tb-muted: light-dark(#6b6a62, #a3a297);
+  --tb-background: light-dark(#f6f5f0, #11110f);
+  --tb-surface: light-dark(#ffffff, #1a1a17);
+  --tb-line: light-dark(#e3e2da, #2b2b26);
+  --tb-chip: light-dark(#ecebe4, #272722);
+  --tb-card: light-dark(#141414, #262620);
+  --tb-card-alt: light-dark(#3b3a35, #33332c);
+  --tb-card-off: light-dark(#e4e3dc, #1c1c19);
+  // Material has no "success" color. 5.0:1 on the light page, 9.6:1 on the dark one.
+  --tb-income: light-dark(#12804a, #6fd69a);
+
+  // Black in both themes until the yellow toolbar (#159) replaces it.
+  --tb-toolbar: #141414;
+  --tb-on-toolbar: #ffffff;
+
   @include mat.theme(
     (
       color: (
-        theme-type: light,
+        theme-type: color-scheme,
         primary: mat.$yellow-palette,
         tertiary: mat.$yellow-palette,
       ),
-      typography: Roboto,
+      // Headings and titles use the brand family, everything else the plain one.
+      typography: (
+          plain-family: 'Inter, system-ui, sans-serif',
+          brand-family: "'Space Grotesk', Inter, system-ui, sans-serif",
+          bold-weight: 700,
+          medium-weight: 500,
+          regular-weight: 400,
+        ),
       density: 0,
     )
   );
 
-  // Black, white and greys instead of the tinted colors Material generates.
+  // Our neutrals instead of the tinted colors Material generates.
   @include mat.theme-overrides(
     (
-      primary: $ink,
-      on-primary: #ffffff,
-      primary-container: $yellow,
-      on-primary-container: $ink,
-      secondary: #4d4d4d,
-      on-secondary: #ffffff,
-      secondary-container: #efefef,
-      on-secondary-container: $ink,
-      tertiary: $yellow,
-      on-tertiary: $ink,
-      tertiary-container: #fff4bf,
-      on-tertiary-container: $ink,
-      background: #f6f6f4,
-      on-background: $ink,
-      surface: #ffffff,
-      on-surface: $ink,
-      on-surface-variant: #4d4d4d,
-      surface-container-lowest: #ffffff,
-      surface-container-low: #fafafa,
-      surface-container: #f5f5f5,
-      surface-container-high: #efefef,
-      surface-container-highest: #e8e8e8,
-      outline: #767676,
-      outline-variant: #dedede,
+      primary: var(--tb-ink),
+      on-primary: var(--tb-on-ink),
+      primary-container: var(--tb-brand),
+      on-primary-container: var(--tb-on-brand),
+      secondary: var(--tb-muted),
+      on-secondary: var(--tb-on-ink),
+      secondary-container: var(--tb-chip),
+      on-secondary-container: var(--tb-ink),
+      tertiary: var(--tb-brand),
+      on-tertiary: var(--tb-on-brand),
+      tertiary-container: light-dark(#fff4bf, #3a3310),
+      on-tertiary-container: var(--tb-ink),
+      background: var(--tb-background),
+      on-background: var(--tb-ink),
+      surface: var(--tb-surface),
+      on-surface: var(--tb-ink),
+      on-surface-variant: var(--tb-muted),
+      surface-container-lowest: var(--tb-surface),
+      surface-container-low: light-dark(#fafaf7, #161613),
+      surface-container: light-dark(#f3f2ec, #1e1e1b),
+      surface-container-high: var(--tb-chip),
+      surface-container-highest: light-dark(#e4e3dc, #2f2f2a),
+      outline: light-dark(#76756d, #8d8c83),
+      outline-variant: var(--tb-line),
       corner-small: 6px,
       corner-medium: 10px,
       corner-large: 14px,
     )
   );
 
-  // The main action of every page: yellow button with black text.
+  // The main action of every page: yellow pill with black text, readable in both themes.
   @include mat.button-overrides(
     (
-      filled-container-color: $yellow,
-      filled-label-text-color: $ink,
-      filled-state-layer-color: $ink,
-      filled-container-shape: 8px,
-      outlined-container-shape: 8px,
-      text-container-shape: 8px,
+      filled-container-color: var(--tb-brand),
+      filled-label-text-color: var(--tb-on-brand),
+      filled-state-layer-color: var(--tb-on-brand),
+      filled-container-shape: 999px,
+      outlined-container-shape: 999px,
+      text-container-shape: 999px,
     )
   );
 
   @include mat.stepper-overrides(
     (
-      header-selected-state-icon-background-color: $yellow,
-      header-selected-state-icon-foreground-color: $ink,
-      header-edit-state-icon-background-color: $ink,
-      header-edit-state-icon-foreground-color: #ffffff,
-      header-done-state-icon-background-color: $ink,
-      header-done-state-icon-foreground-color: #ffffff,
-      header-selected-state-label-text-color: $ink,
+      header-selected-state-icon-background-color: var(--tb-brand),
+      header-selected-state-icon-foreground-color: var(--tb-on-brand),
+      header-edit-state-icon-background-color: var(--tb-ink),
+      header-edit-state-icon-foreground-color: var(--tb-on-ink),
+      header-done-state-icon-background-color: var(--tb-ink),
+      header-done-state-icon-foreground-color: var(--tb-on-ink),
+      header-selected-state-label-text-color: var(--tb-ink),
       container-color: transparent,
     )
   );
-
-  // Incoming money (docs/07). Material has no "success" color; 5.4:1 on white.
-  --trio-income: #1b7a3a;
 }
 
 body {
-  color-scheme: light;
   background-color: var(--mat-sys-background);
   color: var(--mat-sys-on-background);
   font: var(--mat-sys-body-medium);
+  // Digits of equal width, so amounts and IBANs line up in columns.
+  font-variant-numeric: tabular-nums;
   margin: 0;
   height: 100%;
+}
+
+// mat-icon uses this font set (MAT_ICON_DEFAULT_OPTIONS in the shells, not app.config: +13 kB).
+// Outlined by default; add .filled for the active navigation item.
+.material-symbols-rounded {
+  font-variation-settings:
+    'FILL' 0,
+    'wght' 400,
+    'GRAD' 0,
+    'opsz' 24;
+
+  &.filled {
+    font-variation-settings:
+      'FILL' 1,
+      'wght' 400,
+      'GRAD' 0,
+      'opsz' 24;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
 // Three bars = "Trio". Used next to the bank name in all headers.
@@ -96,7 +147,7 @@ body {
   flex: none;
   width: 18px;
   height: 18px;
-  background: repeating-linear-gradient(90deg, #{$yellow} 0 4px, transparent 4px 7px);
+  background: repeating-linear-gradient(90deg, var(--tb-brand) 0 4px, transparent 4px 7px);
 }
 
 // Black header with a thin yellow line, the same on every page.
@@ -104,9 +155,9 @@ body {
 .mat-toolbar.shell-toolbar {
   @include mat.toolbar-overrides(
     (
-      container-background-color: $ink,
-      container-text-color: #ffffff,
+      container-background-color: var(--tb-toolbar),
+      container-text-color: var(--tb-on-toolbar),
     )
   );
-  border-bottom: 3px solid $yellow;
+  border-bottom: 3px solid var(--tb-brand);
 }
