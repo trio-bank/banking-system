@@ -192,3 +192,74 @@ export const FALLBACK_MESSAGE = 'Something went wrong. Please try again.';
 3. Loading, empty and error states handled; error codes have messages.
 4. Responsive check at 360 px.
 5. Unit tests for validators/logic; e2e scenario added to the QA backlog.
+6. Follows the visual rules in §13 (header type, yellow rule, tokens instead of hex values).
+
+## 13. Visual design
+
+Direction and alternatives: [ADR-0015](adr/0015-ui-visual-direction.md). Customer app = "yellow header"; admin app = dense style.
+
+### 13.1 Yellow header
+
+| Page | Header |
+|---|---|
+| Dashboard | Tall: greeting, total balance, main actions. Account cards overlap it by 48px. |
+| Other customer pages | Compact: page title + one-line subtitle. A form card overlaps it by 28px. |
+| Admin pages | None. Black toolbar. |
+
+- One yellow surface per screen: the header. Below it, yellow appears only on the card chip and the active bottom tab.
+- On yellow, text and icons are always `on-brand` (black), in both themes. Yellow is never a text color.
+- The toolbar is sticky. Once the header scrolls away, it switches to `surface` with a shadow.
+
+### 13.2 Navigation
+
+- **≥ 768px:** logo on the left; links with icons on the right (Home, ATM, Accounts, Transfers); a divider; theme toggle, avatar, logout. The active link is bold, underlined, and has a filled icon.
+- **< 768px:** the toolbar keeps the logo and avatar. Sections move to bottom tabs (Home, ATM, Accounts, Profile). The active tab gets a yellow pill and a filled icon.
+
+### 13.3 Components
+
+| Component | Rules |
+|---|---|
+| Buttons | Primary: black pill with yellow text, the same on yellow and on white. Secondary: outlined in the text color. Links to more items: text + `chevron_right` ("Show all ›"). |
+| Account card | Aspect ratio 1.586 (a real bank card). `ACTIVE` is `card`, further active accounts are `card-alt`, `BLOCKED` is `card-off` with a lock icon, `CLOSED` is `card-off` at 50% opacity. Shows name · currency, the last 4 IBAN digits and the balance; a long name gets an ellipsis. The full IBAN is on the details page. |
+| Open account card | The last card in the row: see-through, dashed outline, `add` icon. |
+| Card row | On phones the row scrolls sideways. |
+| Lists (operations, history) | Rows directly on the page background, no box: icon in a circle, title + date, amount on the right, `line` divider. |
+| Forms | On a `surface` card with 16px radius. |
+| Loading | Skeletons, not spinners. |
+
+Only account cards and form cards have a shadow.
+
+### 13.4 Typography and icons
+
+- **Space Grotesk 700:** headings, balance, amounts. **Inter:** everything else. All amounts use `font-variant-numeric: tabular-nums`.
+- Space Grotesk has no Cyrillic; for a localized UI (PKG-15) the heading font must change.
+- **Icons:** Material Symbols Rounded through `mat-icon` with `fontSet`; weight 400, outlined. Filled only for active navigation.
+- **Motion:** 150–200 ms for hover, appearance and skeletons. Nothing animates with `prefers-reduced-motion`.
+
+### 13.5 Tokens
+
+Defined once in `styles.scss` (`mat.theme-overrides`, `theme-type: color-scheme`). Components use the tokens, never hex values.
+
+| Token | Use | Light | Dark |
+|---|---|---|---|
+| `brand` | Header, card chip, active tab | `#ffd100` | `#ffd100` |
+| `on-brand` | Text and icons on yellow | `#141414` | `#141414` |
+| `ink` | Main text | `#141414` | `#f2f1ea` |
+| `muted` | Captions, dates, inactive items | `#6b6a62` | `#a3a297` |
+| `background` | Page below the header | `#f6f5f0` | `#11110f` |
+| `surface` | Forms, scrolled toolbar, bottom tabs | `#ffffff` | `#1a1a17` |
+| `line` | Row dividers, field borders | `#e3e2da` | `#2b2b26` |
+| `chip` | Icon circles, segmented controls | `#ecebe4` | `#272722` |
+| `card` | Active account card | `#141414` | `#262620` (+ 1px light border) |
+| `card-alt` | Further active accounts | `#3b3a35` | `#33332c` |
+| `card-off` | Blocked / closed account | `#e4e3dc` | `#1c1c19` |
+| `income` | Incoming amounts (§6) | `#12804a` | `#6fd69a` |
+
+The theme follows the system by default; the toolbar toggle overrides it and the choice is saved.
+
+### 13.6 Rollout
+
+1. Foundation: tokens, fonts, icons, dark theme.
+2. Shell: yellow toolbar, bottom tabs, theme toggle.
+3. `shared/page-hero`, `shared/account-card`, dashboard.
+4. After that: new screens are built in this style; existing ones move to it the next time they are touched.
