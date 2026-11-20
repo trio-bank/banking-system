@@ -35,12 +35,12 @@ html {
       ),
       // Headings and titles use the brand family, everything else the plain one.
       typography: (
-          plain-family: 'Inter, system-ui, sans-serif',
-          brand-family: "'Space Grotesk', Inter, system-ui, sans-serif",
-          bold-weight: 700,
-          medium-weight: 500,
-          regular-weight: 400,
-        ),
+        plain-family: 'Inter, system-ui, sans-serif',
+        brand-family: "'Space Grotesk', Inter, system-ui, sans-serif",
+        bold-weight: 700,
+        medium-weight: 500,
+        regular-weight: 400,
+      ),
       density: 0,
     )
   );
