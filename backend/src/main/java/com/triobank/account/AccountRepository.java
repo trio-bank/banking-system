@@ -1,13 +1,11 @@
 package com.triobank.account;
 
 import com.triobank.product.AccountType;
-import jakarta.persistence.LockModeType;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -71,11 +69,14 @@ public interface AccountRepository extends JpaRepository<Account, UUID> {
     String nextAccountNumber();
 
     /**
-     * Loads the accounts with {@code SELECT ... FOR UPDATE}. Rows are locked in id order,
-     * so two postings over the same pair of accounts never wait for each other in a circle.
+     * Locks the account rows with {@code SELECT ... FOR UPDATE} until the end of the transaction.
+     * Rows are locked in id order, so two postings over the same pair of accounts never wait for each
+     * other in a circle. Only ids come back: if an account was already read in this transaction,
+     * Hibernate would refuse a locked row with a newer version, so the accounts are loaded afterwards.
+     *
+     * @return ids of the accounts that exist
      */
-    @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @Query("select a from Account a where a.id in :ids order by a.id")
-    List<Account> findAllForUpdate(@Param("ids") Collection<UUID> ids);
+    @Query(value = "SELECT id FROM accounts WHERE id IN (:ids) ORDER BY id FOR UPDATE", nativeQuery = true)
+    List<UUID> lockForUpdate(@Param("ids") Collection<UUID> ids);
 
 }

@@ -136,13 +136,14 @@ public class ApiException extends RuntimeException {
 - `@Transactional` on **service** methods (public use cases), never on controllers or repositories.
 - Read-only use cases: `@Transactional(readOnly = true)`.
 - `LedgerService.post()` runs in the caller's transaction (`Propagation.REQUIRED`); `TransferService.transfer()` is the transactional boundary.
-- Account locking: repository method
+- Account locking: a native query that locks the rows and returns only ids, then each account is loaded and refreshed (`AccountService.getForPosting`):
 
 ```java
-@Lock(LockModeType.PESSIMISTIC_WRITE)
-@Query("select a from Account a where a.id in :ids order by a.id")
-List<Account> findAllForUpdate(@Param("ids") Collection<UUID> ids);
+@Query(value = "SELECT id FROM accounts WHERE id IN (:ids) ORDER BY id FOR UPDATE", nativeQuery = true)
+List<UUID> lockForUpdate(@Param("ids") Collection<UUID> ids);
 ```
+
+  Callers usually read the account before posting (ownership, product rules), so it is already in the persistence context with the balance and version from before the lock. A JPQL lock query returning entities would then fail with a version conflict, and without a refresh the posting would work on the old balance. Locking ids first and then `find` + `refresh` gives the current row.
 
 - Interest jobs process each account in **its own transaction** (one failing account does not roll back others).
 

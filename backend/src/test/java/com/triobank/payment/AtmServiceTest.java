@@ -164,6 +164,61 @@ class AtmServiceTest {
                 ErrorCode.OPERATION_NOT_ALLOWED_FOR_ACCOUNT);
     }
 
+    @Test
+    void withdrawalPostsFromTheAccountToBankCash() {
+        Transaction posted = postedTransaction();
+        when(ledgerService.post(any())).thenReturn(posted);
+
+        service.withdraw(USER_ID, CUSTOMER_ID, request("50.00", null), KEY, HASH);
+
+        ArgumentCaptor<PostingCommand> command = ArgumentCaptor.forClass(PostingCommand.class);
+        verify(ledgerService).post(command.capture());
+        assertThat(command.getValue().type()).isEqualTo(TransactionType.CASH_WITHDRAWAL);
+        assertThat(command.getValue().channel()).isEqualTo(Channel.ATM);
+        assertThat(command.getValue().sourceAccountId()).isEqualTo(ACCOUNT_ID);
+        assertThat(command.getValue().targetAccountId()).isEqualTo(BANK_CASH_ID);
+        assertThat(command.getValue().amount()).isEqualByComparingTo("50.00");
+        assertThat(command.getValue().currency()).isEqualTo("PLN");
+        assertThat(command.getValue().title()).isEqualTo("ATM cash withdrawal");
+        assertThat(command.getValue().senderName()).isEqualTo("Anna Nowak");
+        assertThat(command.getValue().recipientName()).isEqualTo("Trio Bank");
+        assertThat(command.getValue().initiatedByUserId()).isEqualTo(USER_ID);
+        assertThat(command.getValue().idempotencyKey()).isEqualTo(KEY);
+        assertThat(command.getValue().requestHash()).isEqualTo(HASH);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"9.99", "15.00", "5000.01", "5010.00", "20000.00"})
+    void withdrawalOutsideAtmLimitsIsRejected(String amount) {
+        assertCode(() -> service.withdraw(USER_ID, CUSTOMER_ID, request(amount, null), KEY, HASH),
+                ErrorCode.CASH_AMOUNT_INVALID);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"10.00", "5000.00"})
+    void withdrawalWithinAtmLimitsIsPosted(String amount) {
+        Transaction posted = postedTransaction();
+        when(ledgerService.post(any())).thenReturn(posted);
+
+        service.withdraw(USER_ID, CUSTOMER_ID, request(amount, null), KEY, HASH);
+
+        verify(ledgerService).post(any());
+    }
+
+    @Test
+    void withdrawalChecksCurrencyBeforeAmount() {
+        assertCode(() -> service.withdraw(USER_ID, CUSTOMER_ID, request("5010.00", "EUR"), KEY, HASH),
+                ErrorCode.CURRENCY_NOT_SUPPORTED);
+    }
+
+    @Test
+    void withdrawalFromAccountWithoutAtmIsRejected() {
+        when(product.isAtmAllowed()).thenReturn(false);
+
+        assertCode(() -> service.withdraw(USER_ID, CUSTOMER_ID, request("50.00", null), KEY, HASH),
+                ErrorCode.OPERATION_NOT_ALLOWED_FOR_ACCOUNT);
+    }
+
     private void assertCode(Runnable call, ErrorCode code) {
         assertThatThrownBy(call::run)
                 .isInstanceOfSatisfying(ApiException.class, ex -> assertThat(ex.getCode()).isEqualTo(code));

@@ -16,6 +16,7 @@ import com.triobank.customer.CustomerService;
 import com.triobank.product.AccountProduct;
 import com.triobank.product.AccountProductService;
 import com.triobank.product.AccountType;
+import jakarta.persistence.EntityManager;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -23,8 +24,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,16 +36,18 @@ public class AccountService {
     private final CustomerService customerService;
     private final IbanGenerator ibanGenerator;
     private final AuditService auditService;
+    private final EntityManager entityManager;
     private final Clock clock;
 
     public AccountService(AccountRepository accounts, AccountProductService productService,
                           CustomerService customerService, IbanGenerator ibanGenerator, AuditService auditService,
-                          Clock clock) {
+                          EntityManager entityManager, Clock clock) {
         this.accounts = accounts;
         this.productService = productService;
         this.customerService = customerService;
         this.ibanGenerator = ibanGenerator;
         this.auditService = auditService;
+        this.entityManager = entityManager;
         this.clock = clock;
     }
 
@@ -143,9 +144,22 @@ public class AccountService {
      */
     @Transactional(propagation = Propagation.MANDATORY)
     public PostingAccounts getForPosting(UUID sourceAccountId, UUID targetAccountId) {
-        Map<UUID, Account> found = accounts.findAllForUpdate(List.of(sourceAccountId, targetAccountId)).stream()
-                .collect(Collectors.toMap(Account::getId, Function.identity()));
-        return new PostingAccounts(require(found, sourceAccountId), require(found, targetAccountId));
+        accounts.lockForUpdate(List.of(sourceAccountId, targetAccountId));
+        return new PostingAccounts(loadLocked(sourceAccountId), loadLocked(targetAccountId));
+    }
+
+    /**
+     * The caller may have read the account earlier in this transaction (to check the owner, for example).
+     * Hibernate then gives back that object with the balance from before the lock, so it is read again
+     * here. The row is already locked, so nobody can change it until we commit.
+     */
+    private Account loadLocked(UUID id) {
+        Account account = entityManager.find(Account.class, id);
+        if (account == null) {
+            throw new IllegalArgumentException("Account " + id + " does not exist");
+        }
+        entityManager.refresh(account);
+        return account;
     }
 
     private Account createAccount(Customer customer, AccountProduct product, String name, String ipAddress) {
@@ -165,14 +179,6 @@ public class AccountService {
                 .ipAddress(ipAddress)
                 .details(Map.of("iban", iban, "productCode", product.getCode()))
                 .build());
-        return account;
-    }
-
-    private static Account require(Map<UUID, Account> found, UUID id) {
-        Account account = found.get(id);
-        if (account == null) {
-            throw new IllegalArgumentException("Account " + id + " does not exist");
-        }
         return account;
     }
 
