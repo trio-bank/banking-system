@@ -84,6 +84,16 @@ Stories: US-16 … US-24.
 - Demo script (§5) rehearsed.
 - If time remains: one **S** package from Tier 1 (§4).
 
+### Parallel track — UI redesign (from 20.11, not tied to a sprint)
+
+Three frontend tasks from [ADR-0015](adr/0015-ui-visual-direction.md) and [07 §13](07-frontend-guide.md#13-visual-design), done in order next to sprint work:
+
+1. Theme, fonts, icons, dark mode (#158).
+2. Customer shell: yellow toolbar, bottom tabs (#159).
+3. Page hero, account card, dashboard (#160).
+
+Sprint work comes first: the track never blocks a sprint goal or a release. Screens built after step 2 use the new style straight away.
+
 ## 3. Scenarios
 
 | Scenario | Trigger | Plan |
