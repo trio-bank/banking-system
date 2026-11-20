@@ -11,9 +11,10 @@ import { AuthStore } from '../../core/auth/auth.store';
     <button matButton type="button" [disabled]="busy()" (click)="logOut()">Log out</button>
   `,
   styles: `
-    /* The toolbar is black: the default hover and disabled colors are dark too. */
+    /* Takes the toolbar's text color: white on the admin bar, black on the yellow one. */
     :host {
-      --mat-button-text-state-layer-color: var(--tb-on-toolbar);
+      --mat-button-text-label-text-color: currentColor;
+      --mat-button-text-state-layer-color: currentColor;
       --mat-button-text-disabled-label-text-color: var(--mat-sys-outline);
     }
   `,

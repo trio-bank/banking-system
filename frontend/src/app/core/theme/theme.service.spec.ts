@@ -53,6 +53,54 @@ describe('ThemeService', () => {
     expect(localStorage.getItem('trio.theme')).toBeNull();
   });
 
+  it('toggles to the other theme', () => {
+    const theme = create();
+    theme.set('light');
+
+    theme.toggle();
+    expect(theme.mode()).toBe('dark');
+    expect(theme.isDark()).toBe(true);
+
+    theme.toggle();
+    expect(theme.mode()).toBe('light');
+    expect(theme.isDark()).toBe(false);
+  });
+
+  describe('with the system theme', () => {
+    let listeners: ((event: { matches: boolean }) => void)[];
+
+    beforeEach(() => {
+      listeners = [];
+      vi.stubGlobal(
+        'matchMedia',
+        vi.fn(() => ({
+          matches: true,
+          addEventListener: (_: string, fn: (event: { matches: boolean }) => void) =>
+            listeners.push(fn),
+        })),
+      );
+    });
+
+    afterEach(() => vi.unstubAllGlobals());
+
+    it('knows the system is dark and follows its changes', () => {
+      const theme = create();
+      expect(theme.isDark()).toBe(true);
+
+      listeners.forEach((fn) => fn({ matches: false }));
+
+      expect(theme.isDark()).toBe(false);
+    });
+
+    it('toggles away from a dark system to light', () => {
+      const theme = create();
+
+      theme.toggle();
+
+      expect(theme.mode()).toBe('light');
+    });
+  });
+
   it('still switches when storage is blocked', () => {
     vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => {
       throw new Error('blocked');

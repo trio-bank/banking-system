@@ -1,3 +1,4 @@
+@use 'sass:list';
 @use '@angular/material' as mat;
 
 // Design tokens (docs/07 §13.5). light-dark() picks the value by color-scheme:
@@ -19,10 +20,11 @@ html {
   --tb-card: light-dark(#141414, #262620);
   --tb-card-alt: light-dark(#3b3a35, #33332c);
   --tb-card-off: light-dark(#e4e3dc, #1c1c19);
-  // Material has no "success" color. 5.0:1 on the light page, 9.6:1 on the dark one.
+  // Material has no "success" color. Contrast: 4.6:1 on the light page, 5.0:1 on white,
+  // 10.6:1 on the dark page.
   --tb-income: light-dark(#12804a, #6fd69a);
 
-  // Black in both themes until the yellow toolbar (#159) replaces it.
+  // Admin and guest pages keep a black bar in both themes; customers get the yellow one.
   --tb-toolbar: #141414;
   --tb-on-toolbar: #ffffff;
 
@@ -77,6 +79,27 @@ html {
       corner-large: 14px,
     )
   );
+
+  // Headings and big amounts: Space Grotesk 700 (docs/07 §13.4). Material builds these
+  // with the regular weight, so the shorthand and the weight token are both replaced.
+  $brand-font: "'Space Grotesk', Inter, system-ui, sans-serif";
+  $headings: (
+    display-large: 3.562rem 4rem,
+    display-medium: 2.812rem 3.25rem,
+    display-small: 2.25rem 2.75rem,
+    headline-large: 2rem 2.5rem,
+    headline-medium: 1.75rem 2.25rem,
+    headline-small: 1.5rem 2rem,
+    title-large: 1.375rem 1.75rem,
+  );
+  @each $name, $size in $headings {
+    @include mat.theme-overrides(
+      (
+        $name: 700 list.nth($size, 1) #{'/'} list.nth($size, 2) #{$brand-font},
+        #{$name}-weight: 700,
+      )
+    );
+  }
 
   // The main action of every page: yellow pill with black text, readable in both themes.
   @include mat.button-overrides(
@@ -142,12 +165,17 @@ body {
 }
 
 // Three bars = "Trio". Used next to the bank name in all headers.
+// Yellow by default; a yellow bar sets --brand-mark-color to its text color.
 .brand-mark {
   display: inline-block;
   flex: none;
   width: 18px;
   height: 18px;
-  background: repeating-linear-gradient(90deg, var(--tb-brand) 0 4px, transparent 4px 7px);
+  background: repeating-linear-gradient(
+    90deg,
+    var(--brand-mark-color, var(--tb-brand)) 0 4px,
+    transparent 4px 7px
+  );
 }
 
 // Black header with a thin yellow line, the same on every page.
