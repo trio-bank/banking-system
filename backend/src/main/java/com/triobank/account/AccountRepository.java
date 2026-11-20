@@ -1,5 +1,6 @@
 package com.triobank.account;
 
+import com.triobank.product.AccountType;
 import jakarta.persistence.LockModeType;
 import java.util.Collection;
 import java.util.List;
@@ -35,6 +36,24 @@ public interface AccountRepository extends JpaRepository<Account, UUID> {
             select a from Account a join fetch a.product
             where a.id = :accountId and a.customer.id = :customerId""")
     Optional<Account> findOfCustomer(@Param("accountId") UUID accountId, @Param("customerId") UUID customerId);
+
+    /**
+     * How many accounts of the product the customer has that are not closed. Blocked accounts count too.
+     */
+    @Query("""
+            select count(a) from Account a
+            where a.customer.id = :customerId and a.product.id = :productId
+              and a.status <> com.triobank.account.AccountStatus.CLOSED""")
+    long countNotClosed(@Param("customerId") UUID customerId, @Param("productId") UUID productId);
+
+    /**
+     * Whether the customer has at least one active account of the given type.
+     */
+    @Query("""
+            select count(a) > 0 from Account a
+            where a.customer.id = :customerId and a.product.type = :type
+              and a.status = com.triobank.account.AccountStatus.ACTIVE""")
+    boolean existsActiveOfType(@Param("customerId") UUID customerId, @Param("type") AccountType type);
 
     /**
      * Takes the next account number from the database sequence. Used to build the IBAN of a new account.

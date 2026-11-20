@@ -68,7 +68,7 @@ class MigrationsTest {
         assertThat(savings.getInterestRate()).isEqualByComparingTo("4.0000");
         assertThat(savings.getOutgoingTransferPolicy()).isEqualTo(OutgoingTransferPolicy.OWN_ACCOUNTS_ONLY);
         assertThat(savings.isAtmAllowed()).isFalse();
-        assertThat(savings.getMaxAccountsPerCustomer()).isEqualTo(5);
+        assertThat(savings.getMaxAccountsPerCustomer()).isEqualTo(2);
         assertThat(savings.getPrerequisiteType()).isEqualTo(AccountType.PERSONAL);
     }
 

@@ -3,7 +3,9 @@ package com.triobank.account;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -17,7 +19,9 @@ import com.triobank.common.config.BankProperties;
 import com.triobank.common.error.ApiException;
 import com.triobank.common.error.ErrorCode;
 import com.triobank.common.iban.IbanGenerator;
+import com.triobank.account.dto.OpenAccountRequest;
 import com.triobank.customer.Customer;
+import com.triobank.customer.CustomerService;
 import com.triobank.product.AccountProduct;
 import com.triobank.product.AccountProductService;
 import com.triobank.product.AccountType;
@@ -31,6 +35,7 @@ import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InOrder;
 
 class AccountServiceTest {
 
@@ -42,8 +47,10 @@ class AccountServiceTest {
     private final IbanGenerator ibanGenerator =
             new IbanGenerator(new BankProperties("99900012", "PLN", ZoneId.of("Europe/Warsaw")));
 
-    private final AccountService service = new AccountService(accounts, productService, ibanGenerator,
-            auditService, Clock.fixed(NOW, ZoneOffset.UTC));
+    private final CustomerService customerService = mock(CustomerService.class);
+
+    private final AccountService service = new AccountService(accounts, productService, customerService,
+            ibanGenerator, auditService, Clock.fixed(NOW, ZoneOffset.UTC));
 
     @Test
     void opensPersonalAccountWithZeroBalanceAndAudits() {
@@ -78,6 +85,129 @@ class AccountServiceTest {
         assertThat(audit.getValue().targetType()).isEqualTo("ACCOUNT");
         assertThat(audit.getValue().targetId()).isEqualTo(account.id());
         assertThat(audit.getValue().details()).containsEntry("iban", "PL45999000121000000000000001");
+    }
+
+    @Test
+    void opensSavingsAccountWithGivenName() {
+        UUID customerId = UUID.randomUUID();
+        AccountProduct savings = savingsProduct();
+        User user = new User("anna@example.com", "hash", Role.CUSTOMER);
+        lockReturnsCustomerOf(customerId, user);
+        when(accounts.existsActiveOfType(customerId, AccountType.PERSONAL)).thenReturn(true);
+        when(accounts.countNotClosed(customerId, savings.getId())).thenReturn(1L);
+        stubAccountCreation();
+
+        AccountDto account = service.open(customerId, new OpenAccountRequest("SAVINGS_STANDARD", "  Holiday  "),
+                "203.0.113.7");
+
+        assertThat(account.name()).isEqualTo("Holiday");
+        assertThat(account.type()).isEqualTo(AccountType.SAVINGS);
+        assertThat(account.productCode()).isEqualTo("SAVINGS_STANDARD");
+        assertThat(account.balance()).isEqualByComparingTo("0.00");
+        assertThat(account.status()).isEqualTo(AccountStatus.ACTIVE);
+        assertThat(account.openedAt()).isEqualTo(NOW);
+
+        ArgumentCaptor<AuditEventCommand> audit = ArgumentCaptor.forClass(AuditEventCommand.class);
+        verify(auditService).record(audit.capture());
+        assertThat(audit.getValue().action()).isEqualTo(AuditAction.ACCOUNT_OPENED);
+        assertThat(audit.getValue().actorUserId()).isEqualTo(user.getId());
+        assertThat(audit.getValue().targetId()).isEqualTo(account.id());
+        assertThat(audit.getValue().ipAddress()).isEqualTo("203.0.113.7");
+        assertThat(audit.getValue().details()).containsEntry("productCode", "SAVINGS_STANDARD");
+    }
+
+    @Test
+    void missingOrBlankNameBecomesProductName() {
+        UUID customerId = UUID.randomUUID();
+        savingsProduct();
+        lockReturnsCustomerOf(customerId, new User("anna@example.com", "hash", Role.CUSTOMER));
+        when(accounts.existsActiveOfType(customerId, AccountType.PERSONAL)).thenReturn(true);
+        stubAccountCreation();
+
+        for (String name : new String[] {null, "", "   "}) {
+            AccountDto account = service.open(customerId, new OpenAccountRequest("SAVINGS_STANDARD", name), null);
+
+            assertThat(account.name()).isEqualTo("Trio Savings Account");
+        }
+    }
+
+    @Test
+    void limitIsCheckedAfterTheCustomerIsLocked() {
+        UUID customerId = UUID.randomUUID();
+        AccountProduct savings = savingsProduct();
+        lockReturnsCustomerOf(customerId, new User("anna@example.com", "hash", Role.CUSTOMER));
+        when(accounts.existsActiveOfType(customerId, AccountType.PERSONAL)).thenReturn(true);
+        stubAccountCreation();
+
+        service.open(customerId, new OpenAccountRequest("SAVINGS_STANDARD", null), null);
+
+        InOrder order = inOrder(customerService, accounts);
+        order.verify(customerService).lockForAccountOpening(customerId);
+        order.verify(accounts).countNotClosed(customerId, savings.getId());
+    }
+
+    @Test
+    void accountOverTheLimitIsRejected() {
+        UUID customerId = UUID.randomUUID();
+        AccountProduct savings = savingsProduct();
+        lockReturnsCustomerOf(customerId, new User("anna@example.com", "hash", Role.CUSTOMER));
+        when(accounts.existsActiveOfType(customerId, AccountType.PERSONAL)).thenReturn(true);
+        when(accounts.countNotClosed(customerId, savings.getId())).thenReturn(2L);
+
+        assertThatThrownBy(() -> service.open(customerId, new OpenAccountRequest("SAVINGS_STANDARD", null), null))
+                .isInstanceOfSatisfying(ApiException.class, ex -> {
+                    assertThat(ex.getCode()).isEqualTo(ErrorCode.ACCOUNT_LIMIT_REACHED);
+                    assertThat(ex.getMessage()).isEqualTo("You can have at most 2 accounts of this product.");
+                });
+        verify(accounts, never()).save(any());
+        verify(auditService, never()).record(any());
+    }
+
+    @Test
+    void savingsWithoutActivePersonalAccountIsRejected() {
+        UUID customerId = UUID.randomUUID();
+        savingsProduct();
+        lockReturnsCustomerOf(customerId, new User("anna@example.com", "hash", Role.CUSTOMER));
+        when(accounts.existsActiveOfType(customerId, AccountType.PERSONAL)).thenReturn(false);
+
+        assertThatThrownBy(() -> service.open(customerId, new OpenAccountRequest("SAVINGS_STANDARD", null), null))
+                .isInstanceOfSatisfying(ApiException.class, ex -> {
+                    assertThat(ex.getCode()).isEqualTo(ErrorCode.PREREQUISITE_ACCOUNT_REQUIRED);
+                    assertThat(ex.getMessage()).isEqualTo("You need an active personal account to open this product.");
+                });
+        verify(accounts, never()).save(any());
+    }
+
+    @Test
+    void productWithoutPrerequisiteSkipsThatCheck() {
+        UUID customerId = UUID.randomUUID();
+        AccountProduct personal = mock(AccountProduct.class);
+        when(personal.getId()).thenReturn(UUID.randomUUID());
+        when(personal.getCode()).thenReturn("PERSONAL_STANDARD");
+        when(personal.getName()).thenReturn("Trio Personal Account");
+        when(personal.getType()).thenReturn(AccountType.PERSONAL);
+        when(personal.getCurrency()).thenReturn("PLN");
+        when(personal.getMaxAccountsPerCustomer()).thenReturn(2);
+        when(productService.getActive("PERSONAL_STANDARD")).thenReturn(personal);
+        lockReturnsCustomerOf(customerId, new User("anna@example.com", "hash", Role.CUSTOMER));
+        when(accounts.countNotClosed(customerId, personal.getId())).thenReturn(1L);
+        stubAccountCreation();
+
+        AccountDto account = service.open(customerId, new OpenAccountRequest("PERSONAL_STANDARD", null), null);
+
+        assertThat(account.type()).isEqualTo(AccountType.PERSONAL);
+        verify(accounts, never()).existsActiveOfType(any(), any());
+    }
+
+    @Test
+    void productErrorsStopBeforeLocking() {
+        when(productService.getActive("NOPE"))
+                .thenThrow(new ApiException(ErrorCode.RESOURCE_NOT_FOUND, "Product not found."));
+
+        assertThatThrownBy(() -> service.open(UUID.randomUUID(), new OpenAccountRequest("NOPE", null), null))
+                .isInstanceOfSatisfying(ApiException.class,
+                        ex -> assertThat(ex.getCode()).isEqualTo(ErrorCode.RESOURCE_NOT_FOUND));
+        verify(customerService, never()).lockForAccountOpening(any());
     }
 
     @Test
@@ -148,6 +278,31 @@ class AccountServiceTest {
         assertThatThrownBy(() -> service.getForPosting(source.getId(), missing))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining(missing.toString());
+    }
+
+    private AccountProduct savingsProduct() {
+        AccountProduct product = mock(AccountProduct.class);
+        when(product.getId()).thenReturn(UUID.randomUUID());
+        when(product.getCode()).thenReturn("SAVINGS_STANDARD");
+        when(product.getName()).thenReturn("Trio Savings Account");
+        when(product.getType()).thenReturn(AccountType.SAVINGS);
+        when(product.getCurrency()).thenReturn("PLN");
+        when(product.getInterestRate()).thenReturn(new BigDecimal("4.0000"));
+        when(product.getMaxAccountsPerCustomer()).thenReturn(2);
+        when(product.getPrerequisiteType()).thenReturn(AccountType.PERSONAL);
+        when(productService.getActive("SAVINGS_STANDARD")).thenReturn(product);
+        return product;
+    }
+
+    private void lockReturnsCustomerOf(UUID customerId, User user) {
+        Customer customer = mock(Customer.class);
+        when(customer.getUser()).thenReturn(user);
+        when(customerService.lockForAccountOpening(customerId)).thenReturn(customer);
+    }
+
+    private void stubAccountCreation() {
+        when(accounts.nextAccountNumber()).thenReturn("1000000000000001");
+        when(accounts.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
     }
 
     private static Account account() {
