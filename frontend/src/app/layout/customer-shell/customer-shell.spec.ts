@@ -11,6 +11,7 @@ class EmptyPage {}
 
 describe('CustomerShell', () => {
   const currentUser = signal<CurrentUserDto | null>(MOCK_USERS[0]);
+  const logout = vi.fn();
 
   const render = async (url: string) => {
     const fixture = TestBed.createComponent(CustomerShell);
@@ -27,7 +28,17 @@ describe('CustomerShell', () => {
       a.getAttribute('aria-current'),
     ]);
 
+  // The menu panel is rendered in the CDK overlay at the end of <body>, not in the shell.
+  const openMenu = (el: HTMLElement) => {
+    el.querySelector<HTMLButtonElement>('button.phone-only')!.click();
+    TestBed.tick();
+    return document.querySelector<HTMLElement>('.account-menu')!;
+  };
+
   beforeEach(() => {
+    logout.mockReset().mockResolvedValue(undefined);
+    localStorage.clear();
+    document.documentElement.style.removeProperty('color-scheme');
     currentUser.set(MOCK_USERS[0]);
     TestBed.configureTestingModule({
       providers: [
@@ -38,7 +49,7 @@ describe('CustomerShell', () => {
           { path: 'app/atm-history', component: EmptyPage },
           { path: 'app/profile', component: EmptyPage },
         ]),
-        { provide: AuthStore, useValue: { currentUser, logout: vi.fn() } },
+        { provide: AuthStore, useValue: { currentUser, logout } },
       ],
     });
   });
@@ -110,5 +121,42 @@ describe('CustomerShell', () => {
     window.dispatchEvent(new Event('scroll'));
     TestBed.tick();
     expect(bar?.classList).not.toContain('scrolled');
+  });
+
+  describe('account menu (phones)', () => {
+    it('shows who is logged in and links to the profile', async () => {
+      const customer = MOCK_USERS[0].customer!;
+      const menu = openMenu(await render('/app/dashboard'));
+
+      expect(menu.querySelector('.menu-name')?.textContent).toContain(
+        `${customer.firstName} ${customer.lastName}`,
+      );
+      expect(menu.querySelector('.menu-email')?.textContent).toContain(MOCK_USERS[0].email);
+      expect(menu.querySelector('a[mat-menu-item]')?.getAttribute('href')).toBe('/app/profile');
+    });
+
+    it('switches the theme', async () => {
+      const menu = openMenu(await render('/app/dashboard'));
+      const themeItem = menu.querySelectorAll<HTMLButtonElement>('button[mat-menu-item]')[0];
+      const before = themeItem.textContent;
+
+      themeItem.click();
+      TestBed.tick();
+
+      expect(document.documentElement.style.getPropertyValue('color-scheme')).not.toBe('');
+      expect(themeItem.textContent).not.toBe(before);
+    });
+
+    it('logs out and goes to /login', async () => {
+      const navigate = vi.spyOn(TestBed.inject(Router), 'navigateByUrl');
+      const menu = openMenu(await render('/app/dashboard'));
+
+      menu.querySelectorAll<HTMLButtonElement>('button[mat-menu-item]')[1].click();
+      await Promise.resolve();
+      await Promise.resolve();
+
+      expect(logout).toHaveBeenCalledTimes(1);
+      expect(navigate).toHaveBeenCalledWith('/login');
+    });
   });
 });

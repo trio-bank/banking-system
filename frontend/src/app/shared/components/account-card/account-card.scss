@@ -1,0 +1,106 @@
+:host {
+  display: block;
+}
+
+// Proportions of a real bank card. If the IBAN wraps on a narrow card, the card grows.
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  box-sizing: border-box;
+  aspect-ratio: 1.586;
+  padding: 16px 18px;
+  border-radius: 16px;
+  background: var(--tb-card);
+  color: var(--tb-on-card);
+  text-decoration: none;
+  // A dark drop shadow in light mode, a soft yellow glow in dark mode.
+  box-shadow: 0 14px 28px -14px var(--tb-card-shadow);
+  transition: transform 150ms ease;
+
+  &:hover {
+    transform: translateY(-2px);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--tb-ink);
+    outline-offset: 3px;
+  }
+}
+
+.alt {
+  background: var(--tb-card-alt);
+}
+
+// Blocked and closed: grey, full-strength text (muted grey is below AA on this grey).
+.inactive {
+  background: var(--tb-card-off);
+  color: var(--tb-ink);
+  box-shadow: inset 0 0 0 1px var(--tb-line);
+}
+
+.closed {
+  box-shadow: inset 0 0 0 1.5px var(--tb-line);
+  outline: 1.5px dashed var(--tb-muted);
+  outline-offset: -6px;
+}
+
+.top,
+.bottom {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.top {
+  align-items: center;
+}
+
+.bottom {
+  align-items: flex-end;
+}
+
+.name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font: var(--mat-sys-title-medium);
+}
+
+.status {
+  flex: none;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: color-mix(in srgb, currentColor 14%, transparent);
+  font: var(--mat-sys-label-small);
+}
+
+.type {
+  font: var(--mat-sys-body-small);
+  opacity: 0.8;
+}
+
+.iban {
+  margin-top: auto;
+  font: var(--mat-sys-body-small);
+  letter-spacing: 0.02em;
+  opacity: 0.85;
+}
+
+.balance {
+  font: var(--mat-sys-headline-small);
+  white-space: nowrap;
+}
+
+.chip {
+  flex: none;
+  width: 28px;
+  height: 20px;
+  border-radius: 4px;
+  background: var(--tb-card-chip);
+}
+
+mat-icon {
+  flex: none;
+}

@@ -1,0 +1,30 @@
+:host {
+  display: block;
+  // Starts right under the toolbar: cancels the top padding of .shell-content.
+  margin-top: -24px;
+  padding: 16px 0 44px;
+  color: var(--tb-hero-fg);
+  // Paints the header to both screen edges. border-image draws outside the box without
+  // making the page wider, so there is no horizontal scroll. In light mode glow = bg, so the
+  // gradient is flat yellow; in dark mode a yellow glow rises from behind the cards.
+  border-image-source: radial-gradient(
+    ellipse 60% 120% at 85% 120%,
+    var(--tb-hero-glow),
+    var(--tb-hero-bg) 70%
+  );
+  border-image-slice: 0 fill;
+  border-image-outset: 0 100vmax;
+
+  // Buttons on the header (docs/07 §13.3): black pill on yellow, yellow pill on dark.
+  --mat-button-filled-container-color: var(--tb-hero-button);
+  --mat-button-filled-label-text-color: var(--tb-on-hero-button);
+  --mat-button-filled-state-layer-color: var(--tb-on-hero-button);
+  --mat-button-outlined-label-text-color: var(--tb-hero-fg);
+  --mat-button-outlined-outline-color: var(--tb-hero-fg);
+  --mat-button-outlined-state-layer-color: var(--tb-hero-fg);
+  --mat-button-text-label-text-color: var(--tb-hero-fg);
+}
+
+:host(.tall) {
+  padding-bottom: 72px;
+}

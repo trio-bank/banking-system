@@ -18,7 +18,7 @@ We compared four directions on the dashboard (clean fintech, bold brand, dark pr
 - Lists sit directly on the page background as rows, not inside boxes.
 - Space Grotesk for headings and amounts, Inter for everything else.
 - Material Symbols Rounded icons.
-- Light and dark theme; the header stays yellow in both.
+- Light and dark theme. In dark mode the header turns warm charcoal with a yellow glow, and yellow moves to the accents (total, main card, main button); a flat dark copy of the light theme looked dull.
 - Desktop: top toolbar with links on the right. Below 768px: bottom tabs.
 - Minimal motion. No charts on the dashboard.
 

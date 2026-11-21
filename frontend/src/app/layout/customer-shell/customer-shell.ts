@@ -2,8 +2,10 @@ import { Component, computed, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterLink, RouterOutlet } from '@angular/router';
 import { MAT_ICON_DEFAULT_OPTIONS, MatIcon } from '@angular/material/icon';
+import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
 import { filter, map } from 'rxjs';
 import { AuthStore } from '../../core/auth/auth.store';
+import { ThemeService } from '../../core/theme/theme.service';
 import { LogoutButton } from '../logout-button/logout-button';
 import { ThemeToggle } from '../theme-toggle/theme-toggle';
 
@@ -39,7 +41,16 @@ const SCROLLED_AFTER_PX = 8;
  */
 @Component({
   selector: 'app-customer-shell',
-  imports: [RouterOutlet, RouterLink, MatIcon, LogoutButton, ThemeToggle],
+  imports: [
+    RouterOutlet,
+    RouterLink,
+    MatIcon,
+    MatMenu,
+    MatMenuItem,
+    MatMenuTrigger,
+    LogoutButton,
+    ThemeToggle,
+  ],
   // Here and not in app.config: MatIcon in the root injector adds 13 kB to the first load.
   providers: [
     { provide: MAT_ICON_DEFAULT_OPTIONS, useValue: { fontSet: 'material-symbols-rounded' } },
@@ -51,6 +62,7 @@ const SCROLLED_AFTER_PX = 8;
 export class CustomerShell {
   private readonly router = inject(Router);
   private readonly store = inject(AuthStore);
+  protected readonly theme = inject(ThemeService);
 
   protected readonly topLinks = [HOME, ATM];
   // Profile is a tab because on phones the avatar is the only other way to reach it.
@@ -70,6 +82,20 @@ export class CustomerShell {
     const customer = this.store.currentUser()?.customer;
     return customer ? `${customer.firstName[0]}${customer.lastName[0]}`.toUpperCase() : '';
   });
+
+  protected readonly fullName = computed(() => {
+    const customer = this.store.currentUser()?.customer;
+    return customer ? `${customer.firstName} ${customer.lastName}` : '';
+  });
+  protected readonly email = computed(() => this.store.currentUser()?.email ?? '');
+  protected readonly loggingOut = signal(false);
+
+  /** Log out from the phone menu. Same steps as LogoutButton, which can't live inside mat-menu. */
+  protected async logOut(): Promise<void> {
+    this.loggingOut.set(true);
+    await this.store.logout();
+    await this.router.navigateByUrl('/login');
+  }
 
   protected isActive(item: NavItem): boolean {
     // Only the path counts: /app/transfer?from=… is still the Transfer page.
