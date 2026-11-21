@@ -36,6 +36,14 @@ public interface AccountRepository extends JpaRepository<Account, UUID> {
     Optional<Account> findOfCustomer(@Param("accountId") UUID accountId, @Param("customerId") UUID customerId);
 
     /**
+     * Whether the account exists and belongs to the customer.
+     */
+    @Query("""
+            select count(a) > 0 from Account a
+            where a.id = :accountId and a.customer.id = :customerId""")
+    boolean existsOfCustomer(@Param("accountId") UUID accountId, @Param("customerId") UUID customerId);
+
+    /**
      * Same as {@link #findOfCustomer}, with the owner loaded too.
      */
     @Query("""
