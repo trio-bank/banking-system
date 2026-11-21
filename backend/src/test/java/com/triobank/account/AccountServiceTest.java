@@ -3,6 +3,7 @@ package com.triobank.account;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -19,10 +20,13 @@ import com.triobank.common.config.BankProperties;
 import com.triobank.common.error.ApiException;
 import com.triobank.common.error.ErrorCode;
 import com.triobank.common.iban.IbanGenerator;
+import com.triobank.common.web.PageResponse;
 import com.triobank.account.dto.OpenAccountRequest;
 import com.triobank.account.dto.RenameAccountRequest;
 import com.triobank.customer.Customer;
 import com.triobank.customer.CustomerService;
+import com.triobank.ledger.LedgerQueryService;
+import com.triobank.ledger.dto.AccountHistoryItemDto;
 import com.triobank.product.AccountProduct;
 import com.triobank.product.AccountProductService;
 import com.triobank.product.AccountType;
@@ -53,8 +57,10 @@ class AccountServiceTest {
     private final CustomerService customerService = mock(CustomerService.class);
     private final EntityManager entityManager = mock(EntityManager.class);
 
-    private final AccountService service = new AccountService(accounts, productService, customerService,
-            ibanGenerator, auditService, entityManager, Clock.fixed(NOW, ZoneOffset.UTC));
+    private final LedgerQueryService ledgerQueryService = mock(LedgerQueryService.class);
+
+    private final AccountService service = new AccountService(accounts, ledgerQueryService, productService,
+            customerService, ibanGenerator, auditService, entityManager, Clock.fixed(NOW, ZoneOffset.UTC));
 
     @Test
     void opensPersonalAccountWithZeroBalanceAndAudits() {
@@ -259,6 +265,31 @@ class AccountServiceTest {
         assertThatThrownBy(() -> service.getForCustomer(customerId, accountId))
                 .isInstanceOfSatisfying(ApiException.class,
                         ex -> assertThat(ex.getCode()).isEqualTo(ErrorCode.RESOURCE_NOT_FOUND));
+    }
+
+    @Test
+    void historyOfOwnAccountComesFromTheLedger() {
+        UUID customerId = UUID.randomUUID();
+        UUID accountId = UUID.randomUUID();
+        PageResponse<AccountHistoryItemDto> page = new PageResponse<>(List.of(), 1, 10, 10, 1);
+        when(accounts.existsOfCustomer(accountId, customerId)).thenReturn(true);
+        when(ledgerQueryService.getAccountHistory(accountId, 1, 10)).thenReturn(page);
+
+        assertThat(service.getHistory(customerId, accountId, 1, 10)).isSameAs(page);
+    }
+
+    @Test
+    void historyOfForeignOrMissingAccountIsNotFound() {
+        UUID customerId = UUID.randomUUID();
+        UUID accountId = UUID.randomUUID();
+        when(accounts.existsOfCustomer(accountId, customerId)).thenReturn(false);
+
+        assertThatThrownBy(() -> service.getHistory(customerId, accountId, 0, 20))
+                .isInstanceOfSatisfying(ApiException.class, ex -> {
+                    assertThat(ex.getCode()).isEqualTo(ErrorCode.RESOURCE_NOT_FOUND);
+                    assertThat(ex.getMessage()).isEqualTo("Account not found.");
+                });
+        verify(ledgerQueryService, never()).getAccountHistory(any(), anyInt(), anyInt());
     }
 
     @Test

@@ -12,8 +12,11 @@ import com.triobank.auth.User;
 import com.triobank.common.error.ApiException;
 import com.triobank.common.error.ErrorCode;
 import com.triobank.common.iban.IbanGenerator;
+import com.triobank.common.web.PageResponse;
 import com.triobank.customer.Customer;
 import com.triobank.customer.CustomerService;
+import com.triobank.ledger.LedgerQueryService;
+import com.triobank.ledger.dto.AccountHistoryItemDto;
 import com.triobank.product.AccountProduct;
 import com.triobank.product.AccountProductService;
 import com.triobank.product.AccountType;
@@ -33,6 +36,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class AccountService {
 
     private final AccountRepository accounts;
+    private final LedgerQueryService ledgerQueryService;
     private final AccountProductService productService;
     private final CustomerService customerService;
     private final IbanGenerator ibanGenerator;
@@ -40,10 +44,12 @@ public class AccountService {
     private final EntityManager entityManager;
     private final Clock clock;
 
-    public AccountService(AccountRepository accounts, AccountProductService productService,
-                          CustomerService customerService, IbanGenerator ibanGenerator, AuditService auditService,
-                          EntityManager entityManager, Clock clock) {
+    public AccountService(AccountRepository accounts, LedgerQueryService ledgerQueryService,
+                          AccountProductService productService, CustomerService customerService,
+                          IbanGenerator ibanGenerator, AuditService auditService, EntityManager entityManager,
+                          Clock clock) {
         this.accounts = accounts;
+        this.ledgerQueryService = ledgerQueryService;
         this.productService = productService;
         this.customerService = customerService;
         this.ibanGenerator = ibanGenerator;
@@ -114,6 +120,19 @@ public class AccountService {
         return accounts.findOfCustomer(accountId, customerId)
                 .map(AccountMapper::toDto)
                 .orElseThrow(() -> new ApiException(ErrorCode.RESOURCE_NOT_FOUND, "Account not found."));
+    }
+
+    /**
+     * History of one of the customer's accounts, newest first. Blocked and closed accounts have history too.
+     *
+     * @throws ApiException RESOURCE_NOT_FOUND if the account is missing or not the customer's
+     */
+    @Transactional(readOnly = true)
+    public PageResponse<AccountHistoryItemDto> getHistory(UUID customerId, UUID accountId, int page, int size) {
+        if (!accounts.existsOfCustomer(accountId, customerId)) {
+            throw new ApiException(ErrorCode.RESOURCE_NOT_FOUND, "Account not found.");
+        }
+        return ledgerQueryService.getAccountHistory(accountId, page, size);
     }
 
     /**

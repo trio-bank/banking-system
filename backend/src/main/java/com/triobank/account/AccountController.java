@@ -5,6 +5,8 @@ import com.triobank.account.dto.OpenAccountRequest;
 import com.triobank.account.dto.RenameAccountRequest;
 import com.triobank.common.web.AuthenticatedUser;
 import com.triobank.common.web.CurrentUser;
+import com.triobank.common.web.PageResponse;
+import com.triobank.ledger.dto.AccountHistoryItemDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -13,6 +15,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import java.net.URI;
 import java.util.List;
 import java.util.UUID;
@@ -24,6 +28,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @Tag(name = "Accounts", description = "The customer's own accounts")
@@ -96,6 +101,32 @@ public class AccountController {
     public AccountDto account(@Parameter(hidden = true) @CurrentUser AuthenticatedUser caller,
                               @PathVariable UUID accountId) {
         return accountService.getForCustomer(caller.customerId(), accountId);
+    }
+
+    @Operation(summary = "Account history",
+            description = "Operations on one of the caller's accounts, newest first, one page at a time. "
+                    + "For cash, interest and tax the other party is \"Trio Bank\" without an IBAN.")
+    @ApiResponse(responseCode = "200", description = "One page of the history")
+    @ApiResponse(responseCode = "400", description = "VALIDATION_ERROR: page below 0, size outside 1-100",
+            content = @Content(mediaType = "application/problem+json",
+                    schema = @Schema(implementation = ProblemDetail.class)))
+    @ApiResponse(responseCode = "401", description = "UNAUTHENTICATED",
+            content = @Content(mediaType = "application/problem+json",
+                    schema = @Schema(implementation = ProblemDetail.class)))
+    @ApiResponse(responseCode = "403", description = "ACCESS_DENIED: not a customer",
+            content = @Content(mediaType = "application/problem+json",
+                    schema = @Schema(implementation = ProblemDetail.class)))
+    @ApiResponse(responseCode = "404", description = "RESOURCE_NOT_FOUND: no such account, or not the caller's",
+            content = @Content(mediaType = "application/problem+json",
+                    schema = @Schema(implementation = ProblemDetail.class)))
+    @GetMapping("/{accountId}/history")
+    public PageResponse<AccountHistoryItemDto> history(
+            @Parameter(hidden = true) @CurrentUser AuthenticatedUser caller,
+            @PathVariable UUID accountId,
+            @Parameter(description = "Page number, from 0") @RequestParam(defaultValue = "0") @Min(0) int page,
+            @Parameter(description = "Page size, 1-100") @RequestParam(defaultValue = "20") @Min(1) @Max(100)
+            int size) {
+        return accountService.getHistory(caller.customerId(), accountId, page, size);
     }
 
     @Operation(summary = "Rename an account",
