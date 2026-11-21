@@ -2,7 +2,7 @@
 <a
   class="card"
   [routerLink]="['/app/accounts', a.id]"
-  [class.alt]="alt() && active()"
+  [class.alt]="savings() && active()"
   [class.inactive]="!active()"
   [class.closed]="a.status === 'CLOSED'"
 >

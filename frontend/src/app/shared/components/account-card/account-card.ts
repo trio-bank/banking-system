@@ -16,8 +16,8 @@ import { EnumLabelPipe, IbanPipe, MoneyPipe } from '../../pipes';
 })
 export class AccountCard {
   readonly account = input.required<AccountDto>();
-  /** Graphite instead of black: for every active account after the first one. */
-  readonly alt = input(false);
 
   protected readonly active = computed(() => this.account().status === 'ACTIVE');
+  /** Personal accounts are black, savings graphite, so the type shows at a glance. */
+  protected readonly savings = computed(() => this.account().type === 'SAVINGS');
 }

@@ -95,7 +95,7 @@ After login: `CUSTOMER` → `/app/dashboard`, `ADMIN` → `/admin/customers`. A 
 | Login | email, password, error banner, lock countdown | Log in, link to register | A2, then A4 |
 | Register | Stepper: 1) account data (email, password + strength meter), 2) personal data (name, PESEL → shows derived date of birth, phone), 3) address, 4) summary | Submit | A1 |
 | Register success | customer number, IBAN | Go to login | — |
-| Dashboard | Greeting, last login, total balance, account cards (name, type, IBAN, balance, status), last 5 operations of first account | Transfer, ATM, open account, go to details | C1, C5 |
+| Dashboard | Greeting, last login, total balance, account cards (name, type, IBAN, balance, status), last 5 operations of all accounts (own transfer shown once, row opens its account) | Transfer, ATM, open account, go to details | C1, C5 |
 | Open account | Product cards with rules (rate, policy, ATM), name field | Open | P1, C2 |
 | Account details | Header (name, IBAN copy, balance, status, product); savings: rate + accrued interest; history tab with filters & paginator | Rename (inline), Transfer from this account | C3, C4, C5 |
 | Transfer | Toggle "To my account / To someone else"; source select (shows balance), target (own select or recipient name + IBAN), amount, title (placeholder = default title) | Next → confirmation → Confirm → result (reference, link to details) | C1, T1 |

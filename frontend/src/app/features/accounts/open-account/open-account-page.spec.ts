@@ -21,6 +21,11 @@ const problem = (code: string, status: number, errors: FieldError[] = []): Probl
   errors,
 });
 
+const account = (type: 'PERSONAL' | 'SAVINGS', status: AccountDto['status'] = 'ACTIVE') =>
+  ({ productCode: `${type}_STANDARD`, type, status }) as AccountDto;
+/** One active personal account: both products can be opened. */
+const ONE_PERSONAL = [account('PERSONAL')];
+
 const NEW_ACCOUNT = {
   id: 'new-account-id',
   iban: 'PL00999000121000000000000009',
@@ -29,6 +34,7 @@ const NEW_ACCOUNT = {
 
 describe('OpenAccountPage', () => {
   const products = vi.fn();
+  const list = vi.fn();
   const open = vi.fn();
   const snackOpen = vi.fn();
   let fixture: ComponentFixture<OpenAccountPage>;
@@ -69,13 +75,15 @@ describe('OpenAccountPage', () => {
   beforeEach(() => {
     products.mockReset();
     products.mockReturnValue(of(MOCK_PRODUCTS));
+    list.mockReset();
+    list.mockReturnValue(of(ONE_PERSONAL));
     open.mockReset();
     open.mockReturnValue(of(NEW_ACCOUNT));
     snackOpen.mockReset();
     TestBed.configureTestingModule({
       providers: [
         provideRouter([]),
-        { provide: AccountsApi, useValue: { products, open } },
+        { provide: AccountsApi, useValue: { products, list, open } },
         { provide: MatSnackBar, useValue: { open: snackOpen } },
       ],
     });
@@ -226,6 +234,51 @@ describe('OpenAccountPage', () => {
     products.mockReturnValue(of([]));
     await render();
     expect(text()).toContain('No products are available right now.');
+  });
+
+  const card = (code: string) => radio(code).closest('.product')!;
+
+  it('BR-07 greys out a full product, says why and does not let it be chosen', async () => {
+    list.mockReturnValue(of([account('PERSONAL'), account('PERSONAL', 'BLOCKED')]));
+    await render();
+
+    expect(card(PERSONAL.code).classList).toContain('blocked');
+    expect(card(PERSONAL.code).textContent).toContain('Limit reached (2/2)');
+    expect(radio(PERSONAL.code).disabled).toBe(true);
+    expect(card(SAVINGS.code).classList).not.toContain('blocked');
+    expect(radio(SAVINGS.code).disabled).toBe(false);
+  });
+
+  it('BR-08 greys out savings when there is no active personal account', async () => {
+    list.mockReturnValue(of([account('PERSONAL', 'BLOCKED')]));
+    await render();
+
+    expect(card(SAVINGS.code).textContent).toContain('Needs an active personal account');
+    expect(radio(SAVINGS.code).disabled).toBe(true);
+  });
+
+  it('when every limit is reached, shows why instead of the form', async () => {
+    list.mockReturnValue(
+      of([account('PERSONAL'), account('PERSONAL'), account('SAVINGS'), account('SAVINGS')]),
+    );
+    await render();
+
+    expect(el.querySelector('form')).toBeNull();
+    expect(text()).toContain('You already have as many accounts as you can open.');
+    expect(text()).toContain('Trio Personal Account: Limit reached (2/2)');
+    expect(text()).toContain('Trio Savings Account: Limit reached (2/2)');
+    expect(el.querySelector('.info a')?.getAttribute('href')).toBe('/app/dashboard');
+  });
+
+  it('if the accounts fail to load, shows the error with "Try again"', async () => {
+    list.mockReturnValueOnce(throwError(() => problem('NETWORK_ERROR', 0)));
+    await render();
+
+    expect(el.querySelector('form')).toBeNull();
+    el.querySelector<HTMLButtonElement>('.banner button')!.click();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(el.querySelectorAll('.product')).toHaveLength(2);
   });
 });
 

@@ -1,5 +1,6 @@
 import { Component, computed, DestroyRef, inject, signal } from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
+import { forkJoin } from 'rxjs';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
@@ -7,11 +8,21 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { AccountProductDto, OpenAccountRequest, ProblemDetail } from '../../../core/api/models';
+import {
+  AccountDto,
+  AccountProductDto,
+  OpenAccountRequest,
+  ProblemDetail,
+} from '../../../core/api/models';
 import { AccountsApi } from '../../../core/api/services/accounts-api';
 import { errorMessage, fieldErrorMessage } from '../../../core/errors/error-messages';
 import { EnumLabelPipe, ENUM_LABELS } from '../../../shared/pipes';
-import { ACCOUNT_NAME_MAX, formatRate, optionalAccountNameValidator } from '../account-rules';
+import {
+  ACCOUNT_NAME_MAX,
+  cannotOpenReason,
+  formatRate,
+  optionalAccountNameValidator,
+} from '../account-rules';
 
 /** The "main rules" of a product (US-07), as short lines for its card. */
 export function productRules(product: AccountProductDto): string[] {
@@ -32,9 +43,15 @@ export function productRules(product: AccountProductDto): string[] {
   return rules;
 }
 
+/** A product card: the product and why it can't be opened now (null = it can). */
+export interface ProductOption {
+  product: AccountProductDto;
+  blockedBy: string | null;
+}
+
 /**
- * Product cards + optional name → C2 (US-07). The limit (BR-07) and the savings rule (BR-08)
- * are checked by the backend only; its 422 is shown as a message.
+ * Product cards + optional name → C2 (US-07). Products over the limit (BR-07) or without the
+ * needed account (BR-08) are greyed out up front; the backend still checks, its 422 is a message.
  */
 @Component({
   selector: 'app-open-account-page',
@@ -57,6 +74,18 @@ export class OpenAccountPage {
   private readonly destroyRef = inject(DestroyRef);
 
   protected readonly products = signal<AccountProductDto[] | null>(null);
+  private readonly accounts = signal<AccountDto[]>([]);
+  protected readonly options = computed<ProductOption[] | null>(
+    () =>
+      this.products()?.map((product) => ({
+        product,
+        blockedBy: cannotOpenReason(product, this.accounts()),
+      })) ?? null,
+  );
+  /** Every product is at its limit or not allowed: there is nothing to open. */
+  protected readonly nothingToOpen = computed(
+    () => !!this.options()?.length && this.options()!.every((o) => o.blockedBy !== null),
+  );
   protected readonly loading = signal(false);
   protected readonly loadError = signal<string | null>(null);
   protected readonly saving = signal(false);
@@ -88,11 +117,12 @@ export class OpenAccountPage {
   protected loadProducts(): void {
     this.loading.set(true);
     this.loadError.set(null);
-    this.api
-      .products()
+    // The accounts tell which products are already full.
+    forkJoin([this.api.products(), this.api.list()])
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: (products) => {
+        next: ([products, accounts]) => {
+          this.accounts.set(accounts);
           this.products.set(products);
           this.loading.set(false);
         },
