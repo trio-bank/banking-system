@@ -10,12 +10,11 @@ import {
   TransactionDto,
   TransactionType,
   Uuid,
-} from '../models';
+} from '../app/core/api/models';
 import { MOCK_CUSTOMERS } from './mock-data';
 
-// A tiny bank in memory for the mocked endpoints. Every logged-in user sees the same
-// accounts (Anna's): the real backend gives a real JWT, and the mock can't tell users apart.
-// A page reload starts from the seed again.
+// Anna's accounts and history for unit tests, built the way the backend books money,
+// so balances and balanceAfter add up. Call resetMockBank() in beforeEach.
 
 /** Products from docs/03 §9.1. */
 export const MOCK_PRODUCTS: AccountProductDto[] = [
@@ -42,13 +41,13 @@ export const MOCK_PRODUCTS: AccountProductDto[] = [
     interestRate: '4.0000',
     outgoingTransferPolicy: 'OWN_ACCOUNTS_ONLY',
     atmAllowed: false,
-    maxAccountsPerCustomer: 5,
+    maxAccountsPerCustomer: 2,
     prerequisiteType: 'PERSONAL',
   },
 ];
 
 const [anna] = MOCK_CUSTOMERS;
-export const MOCK_OWNER_NAME = `${anna.firstName} ${anna.lastName}`;
+const MOCK_OWNER_NAME = `${anna.firstName} ${anna.lastName}`;
 
 /** Somebody outside our accounts: another customer or the bank itself. */
 interface Outside {
@@ -58,7 +57,7 @@ interface Outside {
 /** One side of a booking: our account or somebody outside. */
 type Side = AccountDto | Outside;
 
-export interface Booking {
+interface Booking {
   type: TransactionType;
   channel: Channel;
   title: string;
@@ -80,8 +79,6 @@ let transactionSeq = 0;
 
 export const mockAccounts = (): readonly AccountDto[] => accounts;
 
-export const findAccount = (id: string) => accounts.find((account) => account.id === id);
-
 /** History of one account, newest first (the backend sorts by `createdAt,desc` too). */
 export function accountEntries(accountId: Uuid): AccountHistoryItemDto[] {
   return entries
@@ -91,11 +88,7 @@ export function accountEntries(accountId: Uuid): AccountHistoryItemDto[] {
     .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
 }
 
-export function addAccount(
-  product: AccountProductDto,
-  name: string,
-  openedAt: IsoDateTime,
-): AccountDto {
+function addAccount(product: AccountProductDto, name: string, openedAt: IsoDateTime): AccountDto {
   accountSeq++;
   const savings = product.type === 'SAVINGS';
   const account: AccountDto = {
@@ -117,7 +110,7 @@ export function addAccount(
 }
 
 /** Moves money and writes a history entry for each of our accounts in the booking. */
-export function book(booking: Booking): TransactionDto {
+function book(booking: Booking): TransactionDto {
   transactionSeq++;
   const transaction: TransactionDto = {
     id: uuid('f000', transactionSeq),
@@ -174,16 +167,16 @@ const partyOf = (side: Side): PartyDto =>
     : { ...side, ownAccount: false };
 
 /** "1250.50" → 125050. Money is counted in whole grosze, so there are no rounding errors. */
-export const toGrosze = (amount: Money) => Math.round(Number(amount) * 100);
+const toGrosze = (amount: Money) => Math.round(Number(amount) * 100);
 
-export const formatGrosze = (grosze: number): Money =>
+const formatGrosze = (grosze: number): Money =>
   `${Math.floor(grosze / 100)}.${String(grosze % 100).padStart(2, '0')}`;
 
 const uuid = (group: string, n: number) =>
   `00000000-0000-4000-${group}-${String(n).padStart(12, '0')}`;
 
 /** Trio Bank IBAN for account number n, with correct check digits (docs/03 §8.1). */
-export function trioIban(n: number): string {
+function trioIban(n: number): string {
   const bban = `999000121${String(n).padStart(15, '0')}`; // sort code + 16-digit number
   let remainder = 0;
   for (const digit of `${bban}252100`) {
@@ -194,7 +187,7 @@ export function trioIban(n: number): string {
 
 // ---------- Seed ----------
 
-export const TRIO_BANK: Outside = { name: 'Trio Bank', iban: null };
+const TRIO_BANK: Outside = { name: 'Trio Bank', iban: null };
 const JAN: Outside = { name: 'Jan Kowalski', iban: trioIban(900) };
 const EWA: Outside = { name: 'Ewa Wiśniewska', iban: trioIban(901) };
 

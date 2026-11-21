@@ -3,7 +3,7 @@ import { By } from '@angular/platform-browser';
 import { provideRouter } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { AccountDto, ProblemDetail } from '../../core/api/models';
-import { mockAccounts, resetMockBank } from '../../core/api/mocks/mock-bank';
+import { mockAccounts, resetMockBank } from '../../../testing/mock-bank';
 import { AccountsApi } from '../../core/api/services/accounts-api';
 import { PaymentsApi } from '../../core/api/services/payments-api';
 import { AtmOperation } from './atm-operation/atm-operation';

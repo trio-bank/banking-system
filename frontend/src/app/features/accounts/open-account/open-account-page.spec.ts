@@ -3,7 +3,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { provideRouter, Router } from '@angular/router';
 import { of, Subject, throwError } from 'rxjs';
 import { AccountDto, FieldError, ProblemDetail } from '../../../core/api/models';
-import { MOCK_PRODUCTS } from '../../../core/api/mocks/mock-bank';
+import { MOCK_PRODUCTS } from '../../../../testing/mock-bank';
 import { AccountsApi } from '../../../core/api/services/accounts-api';
 import { OpenAccountPage, productRules } from './open-account-page';
 
@@ -244,7 +244,7 @@ describe('productRules', () => {
       '4,00% interest per year',
       'Transfers only to your own accounts',
       'No ATM',
-      'Up to 5 accounts per customer',
+      'Up to 2 accounts per customer',
       'Needs an active personal account',
     ]);
   });

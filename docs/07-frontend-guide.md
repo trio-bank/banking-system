@@ -26,8 +26,7 @@ src/app
 ├── core
 │   ├── api
 │   │   ├── models/          # TypeScript interfaces copied from 05 §7 (one file per area)
-│   │   ├── services/        # AuthApi, AccountsApi, PaymentsApi, AdminApi … (thin HTTP wrappers)
-│   │   └── mocks/           # mock payloads + MockApiInterceptor
+│   │   └── services/        # AuthApi, AccountsApi, PaymentsApi, AdminApi … (thin HTTP wrappers)
 │   ├── auth
 │   │   ├── auth.store.ts    # signals: token, currentUser, isLoggedIn, role
 │   │   ├── auth.guard.ts    # requires login

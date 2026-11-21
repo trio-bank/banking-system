@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { AccountDto } from '../../../core/api/models';
-import { mockAccounts, resetMockBank } from '../../../core/api/mocks/mock-bank';
+import { mockAccounts, resetMockBank } from '../../../../testing/mock-bank';
 import { formatMoney } from '../../pipes';
 import { AccountCard } from './account-card';
 

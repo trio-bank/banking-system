@@ -5,7 +5,7 @@ import { MatStepper } from '@angular/material/stepper';
 import { By } from '@angular/platform-browser';
 import { of, Subject, throwError } from 'rxjs';
 import { FieldError, ProblemDetail, RegistrationResponse } from '../../../core/api/models';
-import { NEW_PERSONAL_ACCOUNT } from '../../../core/api/mocks/mock-data';
+import { NEW_PERSONAL_ACCOUNT } from '../../../../testing/mock-data';
 import { AuthApi } from '../../../core/api/services/auth-api';
 import { RegisterPage } from './register-page';
 

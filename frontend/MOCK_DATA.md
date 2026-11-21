@@ -52,27 +52,27 @@ To see the lockout, enter a wrong password 5 times. The 6th attempt shows the co
 
 A blocked user can't be made from the UI until the admin panel exists (US-18).
 
-## Accounts and ATM: mocked data
+## Accounts and ATM: getting started
 
-The backend doesn't have these endpoints yet, so with `useMocks: true` (`src/environments/environment.ts`) they are answered by `src/app/core/api/mocks`: P1, C1–C5, T3, T4. Log in with any real user first. Every user sees the same three accounts below. Changes (new account, rename, ATM) last until the page is reloaded.
+A new customer has one personal account with `0,00 zł`. To have something to look at:
 
-| Account               | IBAN                                 | Type     | Status  | Balance      | Use it for                              |
-| --------------------- | ------------------------------------ | -------- | ------- | ------------ | --------------------------------------- |
-| Trio Personal Account | `PL45 9990 0012 1000 0000 0000 0001` | PERSONAL | ACTIVE  | 10 420,51 zł | ATM, 25 history entries (2 pages of 20) |
-| Holiday savings       | `PL18 9990 0012 1000 0000 0000 0002` | SAVINGS  | ACTIVE  | 3 324,97 zł  | Interest and tax entries, no ATM        |
-| Old personal account  | `PL88 9990 0012 1000 0000 0000 0003` | PERSONAL | BLOCKED | 120,00 zł    | Blocked account                         |
+1. Log in and open the personal account.
+2. **ATM → Deposit** a few times, e.g. `3000`, `500`, `1000`.
+3. **ATM → Withdraw** once or twice, e.g. `200`.
+4. **Open account → Trio Savings Account** to get a second account.
+5. Do 21 or more ATM operations on one account to see the second page of history (20 per page).
+
+A blocked account can't be made from the UI until the admin panel exists (US-18).
 
 ## Accounts and ATM: error cases
 
-| Where           | What to do                                  | Result                              |
-| --------------- | ------------------------------------------- | ----------------------------------- |
-| Open account    | Choose the personal account product         | `ACCOUNT_LIMIT_REACHED` (max 2)     |
-| Open account    | Name longer than 50 characters              | `VALIDATION_ERROR`, `TOO_LONG`      |
-| Rename          | Name longer than 50 characters or blank     | Error under the field, nothing sent |
-| ATM             | Amount not in whole tens, e.g. `15`         | `CASH_AMOUNT_INVALID`               |
-| ATM deposit     | More than `20000`                           | `CASH_AMOUNT_INVALID`               |
-| ATM withdrawal  | More than `5000`                            | `CASH_AMOUNT_INVALID`               |
-| ATM withdrawal  | More than the balance (after a few `5000`s) | `INSUFFICIENT_FUNDS`                |
-| ATM             | Holiday savings                             | `OPERATION_NOT_ALLOWED_FOR_ACCOUNT` |
-| ATM             | Old personal account                        | `*_ACCOUNT_UNAVAILABLE`             |
-| History filters | "From" after "To"                           | `VALIDATION_ERROR`, `INVALID_DATE`  |
+| Where          | What to do                                  | Result                              |
+| -------------- | ------------------------------------------- | ----------------------------------- |
+| Open account   | A 3rd personal or a 3rd savings account     | `ACCOUNT_LIMIT_REACHED` (max 2)     |
+| Open account   | Name longer than 50 characters              | `VALIDATION_ERROR`, `TOO_LONG`      |
+| Rename         | Name longer than 50 characters or blank     | Error under the field, nothing sent |
+| ATM            | Amount not in whole tens, e.g. `15`         | `CASH_AMOUNT_INVALID`               |
+| ATM deposit    | More than `20000`                           | `CASH_AMOUNT_INVALID`               |
+| ATM withdrawal | More than `5000`                            | `CASH_AMOUNT_INVALID`               |
+| ATM withdrawal | More than the balance (after a few `5000`s) | `INSUFFICIENT_FUNDS`                |
+| ATM            | A savings account                           | `OPERATION_NOT_ALLOWED_FOR_ACCOUNT` |

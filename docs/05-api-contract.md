@@ -613,4 +613,6 @@ interface JobRunResponse {
 
 ## 8. Mocking for frontend
 
-Until an endpoint is implemented, the frontend uses an HTTP interceptor (`MockApiInterceptor`, enabled by `environment.useMocks`) returning the example payloads from this document. Mock data lives in `src/app/core/api/mocks/`. When the backend endpoint is merged into `develop`, the mock is removed in the same sprint.
+Until an endpoint is implemented, the frontend may answer it with an HTTP interceptor returning the example payloads from this document. When the backend endpoint is merged into `develop`, the mock is removed in the same sprint.
+
+Sprint 2 mocks (P1, C1–C5, T3, T4) are removed: the frontend now talks only to the real API. Unit tests use fixtures from `frontend/src/testing/`.

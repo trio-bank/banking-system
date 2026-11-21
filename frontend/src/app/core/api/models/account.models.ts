@@ -3,7 +3,6 @@ import {
   AccountType,
   Channel,
   Direction,
-  IsoDate,
   IsoDateTime,
   Money,
   OutgoingTransferPolicy,
@@ -73,12 +72,8 @@ export interface AccountHistoryItemDto {
   bookedAt: IsoDateTime | null;
 }
 
-/** Query params of C5. Not a DTO from §7, the table is in docs/05 C5. All are optional. */
+/** Query params of C5. The backend has no filters yet, only paging. */
 export interface AccountHistoryQuery {
-  from?: IsoDate; // inclusive
-  to?: IsoDate; // inclusive
-  direction?: Direction;
-  type?: TransactionType[];
   page?: number; // 0-based
   size?: number; // default 20, max 100
 }

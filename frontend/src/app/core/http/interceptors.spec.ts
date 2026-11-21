@@ -3,7 +3,7 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
 import { ProblemDetail } from '../api/models';
-import { MOCK_USERS } from '../api/mocks/mock-data';
+import { MOCK_USERS } from '../../../testing/mock-data';
 import { AuthStore } from '../auth/auth.store';
 import { authInterceptor } from './auth.interceptor';
 import { errorInterceptor } from './error.interceptor';

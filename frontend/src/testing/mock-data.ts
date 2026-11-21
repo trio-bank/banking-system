@@ -1,4 +1,4 @@
-import { AccountDto, AddressDto, CurrentUserDto, UserStatus } from '../models';
+import { AccountDto, AddressDto, CurrentUserDto, UserStatus } from '../app/core/api/models';
 
 /** One password for all test users. */
 export const MOCK_PASSWORD = 'Str0ng!Passw0rd';

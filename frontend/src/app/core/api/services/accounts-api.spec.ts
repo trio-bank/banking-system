@@ -59,22 +59,10 @@ describe('AccountsApi', () => {
       req.flush({});
     });
 
-    it('sends filters, repeats `type` and skips empty values', () => {
-      api
-        .history(ID, {
-          from: '2026-10-01',
-          to: undefined,
-          direction: 'OUTGOING',
-          type: ['OWN_TRANSFER', 'INTERNAL_TRANSFER'],
-          page: 0,
-          size: 20,
-        })
-        .subscribe();
+    it('sends page and size, and skips the ones not set', () => {
+      api.history(ID, { page: 2, size: undefined }).subscribe();
       const req = backend.expectOne((r) => r.url === `${API}/accounts/${ID}/history`);
-      expect(req.request.urlWithParams).toBe(
-        `${API}/accounts/${ID}/history?from=2026-10-01&direction=OUTGOING` +
-          '&type=OWN_TRANSFER&type=INTERNAL_TRANSFER&page=0&size=20',
-      );
+      expect(req.request.urlWithParams).toBe(`${API}/accounts/${ID}/history?page=2`);
       req.flush({});
     });
   });
