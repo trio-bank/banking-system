@@ -20,6 +20,7 @@ import com.triobank.common.error.ApiException;
 import com.triobank.common.error.ErrorCode;
 import com.triobank.common.iban.IbanGenerator;
 import com.triobank.account.dto.OpenAccountRequest;
+import com.triobank.account.dto.RenameAccountRequest;
 import com.triobank.customer.Customer;
 import com.triobank.customer.CustomerService;
 import com.triobank.product.AccountProduct;
@@ -37,6 +38,7 @@ import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
+import org.springframework.test.util.ReflectionTestUtils;
 
 class AccountServiceTest {
 
@@ -260,6 +262,77 @@ class AccountServiceTest {
     }
 
     @Test
+    void renamesOwnAccountAndAudits() {
+        UUID customerId = UUID.randomUUID();
+        User user = new User("anna@example.com", "hash", Role.CUSTOMER);
+        Account account = ownedAccount(user);
+        when(accounts.findOfCustomerWithOwner(account.getId(), customerId)).thenReturn(Optional.of(account));
+
+        AccountDto renamed = service.rename(customerId, account.getId(), new RenameAccountRequest("  Daily  "),
+                "203.0.113.7");
+
+        assertThat(renamed.name()).isEqualTo("Daily");
+        assertThat(account.getName()).isEqualTo("Daily");
+        ArgumentCaptor<AuditEventCommand> audit = ArgumentCaptor.forClass(AuditEventCommand.class);
+        verify(auditService).record(audit.capture());
+        assertThat(audit.getValue().action()).isEqualTo(AuditAction.ACCOUNT_RENAMED);
+        assertThat(audit.getValue().actorUserId()).isEqualTo(user.getId());
+        assertThat(audit.getValue().actorEmail()).isEqualTo("anna@example.com");
+        assertThat(audit.getValue().targetType()).isEqualTo("ACCOUNT");
+        assertThat(audit.getValue().targetId()).isEqualTo(account.getId());
+        assertThat(audit.getValue().ipAddress()).isEqualTo("203.0.113.7");
+        assertThat(audit.getValue().details())
+                .containsEntry("oldName", "Trio Personal Account")
+                .containsEntry("newName", "Daily");
+    }
+
+    @Test
+    void renamingToTheSameNameIsNotAudited() {
+        UUID customerId = UUID.randomUUID();
+        Account account = ownedAccount(new User("anna@example.com", "hash", Role.CUSTOMER));
+        when(accounts.findOfCustomerWithOwner(account.getId(), customerId)).thenReturn(Optional.of(account));
+
+        AccountDto renamed = service.rename(customerId, account.getId(),
+                new RenameAccountRequest("Trio Personal Account"), null);
+
+        assertThat(renamed.name()).isEqualTo("Trio Personal Account");
+        verify(auditService, never()).record(any());
+    }
+
+    @Test
+    void foreignOrMissingAccountCannotBeRenamed() {
+        UUID customerId = UUID.randomUUID();
+        UUID accountId = UUID.randomUUID();
+        when(accounts.findOfCustomerWithOwner(accountId, customerId)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> service.rename(customerId, accountId, new RenameAccountRequest("Daily"), null))
+                .isInstanceOfSatisfying(ApiException.class, ex -> {
+                    assertThat(ex.getCode()).isEqualTo(ErrorCode.RESOURCE_NOT_FOUND);
+                    assertThat(ex.getMessage()).isEqualTo("Account not found.");
+                });
+        verify(auditService, never()).record(any());
+    }
+
+    @Test
+    void blockedOrClosedAccountCannotBeRenamed() {
+        UUID customerId = UUID.randomUUID();
+        for (AccountStatus status : new AccountStatus[] {AccountStatus.BLOCKED, AccountStatus.CLOSED}) {
+            Account account = ownedAccount(new User("anna@example.com", "hash", Role.CUSTOMER));
+            ReflectionTestUtils.setField(account, "status", status);
+            when(accounts.findOfCustomerWithOwner(account.getId(), customerId)).thenReturn(Optional.of(account));
+
+            assertThatThrownBy(() -> service.rename(customerId, account.getId(), new RenameAccountRequest("Daily"),
+                    null))
+                    .isInstanceOfSatisfying(ApiException.class, ex -> {
+                        assertThat(ex.getCode()).isEqualTo(ErrorCode.OPERATION_NOT_ALLOWED_FOR_ACCOUNT);
+                        assertThat(ex.getMessage()).isEqualTo("Only an active account can be renamed.");
+                    });
+            assertThat(account.getName()).isEqualTo("Trio Personal Account");
+        }
+        verify(auditService, never()).record(any());
+    }
+
+    @Test
     void postingAccountsAreLockedThenReadAgain() {
         Account source = account();
         Account target = account();
@@ -310,6 +383,16 @@ class AccountServiceTest {
     private void stubAccountCreation() {
         when(accounts.nextAccountNumber()).thenReturn("1000000000000001");
         when(accounts.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+    }
+
+    private static Account ownedAccount(User user) {
+        Customer customer = mock(Customer.class);
+        when(customer.getUser()).thenReturn(user);
+        AccountProduct product = mock(AccountProduct.class);
+        when(product.getType()).thenReturn(AccountType.PERSONAL);
+        when(product.getCurrency()).thenReturn("PLN");
+        return Account.openForCustomer(customer, product, "PL45999000121000000000000001", "Trio Personal Account",
+                NOW);
     }
 
     private static Account account() {

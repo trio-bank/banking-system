@@ -124,7 +124,7 @@ Validation error (400):
 | `TRANSFER_POLICY_VIOLATION` | 422 | BR-14 |
 | `CURRENCY_NOT_SUPPORTED` | 422 | BR-26 |
 | `CASH_AMOUNT_INVALID` | 422 | BR-19 |
-| `OPERATION_NOT_ALLOWED_FOR_ACCOUNT` | 422 | BR-20 |
+| `OPERATION_NOT_ALLOWED_FOR_ACCOUNT` | 422 | BR-20, BR-29 |
 | `SELF_ACTION_FORBIDDEN` | 422 | BR-25 |
 | `FEATURE_DISABLED` | 404 | Demo-only endpoint called in another profile |
 | `INTERNAL_ERROR` | 500 | Unexpected |
@@ -282,7 +282,7 @@ Response `200 AccountDto`. Errors: `RESOURCE_NOT_FOUND`.
 
 ### C4 `PATCH /accounts/{accountId}`
 
-Request `RenameAccountRequest`: `{ "name": "Daily expenses" }`. Response `200 AccountDto`.
+Request `RenameAccountRequest`: `{ "name": "Daily expenses" }`. Response `200 AccountDto`. Errors: `VALIDATION_ERROR`, `RESOURCE_NOT_FOUND`, `OPERATION_NOT_ALLOWED_FOR_ACCOUNT` (BR-29, account not active), `CONCURRENT_MODIFICATION`.
 
 ### C5 `GET /accounts/{accountId}/history`
 

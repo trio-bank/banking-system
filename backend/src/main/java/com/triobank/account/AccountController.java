@@ -2,6 +2,7 @@ package com.triobank.account;
 
 import com.triobank.account.dto.AccountDto;
 import com.triobank.account.dto.OpenAccountRequest;
+import com.triobank.account.dto.RenameAccountRequest;
 import com.triobank.common.web.AuthenticatedUser;
 import com.triobank.common.web.CurrentUser;
 import io.swagger.v3.oas.annotations.Operation;
@@ -18,6 +19,7 @@ import java.util.UUID;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -94,6 +96,35 @@ public class AccountController {
     public AccountDto account(@Parameter(hidden = true) @CurrentUser AuthenticatedUser caller,
                               @PathVariable UUID accountId) {
         return accountService.getForCustomer(caller.customerId(), accountId);
+    }
+
+    @Operation(summary = "Rename an account",
+            description = "The name is trimmed and must be 1-50 characters. Only an active account can be renamed.")
+    @ApiResponse(responseCode = "200", description = "The renamed account")
+    @ApiResponse(responseCode = "400", description = "VALIDATION_ERROR",
+            content = @Content(mediaType = "application/problem+json",
+                    schema = @Schema(implementation = ProblemDetail.class)))
+    @ApiResponse(responseCode = "401", description = "UNAUTHENTICATED",
+            content = @Content(mediaType = "application/problem+json",
+                    schema = @Schema(implementation = ProblemDetail.class)))
+    @ApiResponse(responseCode = "403", description = "ACCESS_DENIED: not a customer",
+            content = @Content(mediaType = "application/problem+json",
+                    schema = @Schema(implementation = ProblemDetail.class)))
+    @ApiResponse(responseCode = "404", description = "RESOURCE_NOT_FOUND: no such account, or not the caller's",
+            content = @Content(mediaType = "application/problem+json",
+                    schema = @Schema(implementation = ProblemDetail.class)))
+    @ApiResponse(responseCode = "409", description = "CONCURRENT_MODIFICATION: changed at the same time, retry",
+            content = @Content(mediaType = "application/problem+json",
+                    schema = @Schema(implementation = ProblemDetail.class)))
+    @ApiResponse(responseCode = "422", description = "OPERATION_NOT_ALLOWED_FOR_ACCOUNT: account is not active",
+            content = @Content(mediaType = "application/problem+json",
+                    schema = @Schema(implementation = ProblemDetail.class)))
+    @PatchMapping("/{accountId}")
+    public AccountDto rename(@Parameter(hidden = true) @CurrentUser AuthenticatedUser caller,
+                             @PathVariable UUID accountId,
+                             @Valid @RequestBody RenameAccountRequest request,
+                             HttpServletRequest httpRequest) {
+        return accountService.rename(caller.customerId(), accountId, request, httpRequest.getRemoteAddr());
     }
 
 }
