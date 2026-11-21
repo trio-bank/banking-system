@@ -3,15 +3,30 @@ import { Component, computed, DestroyRef, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
-import { MatCardModule } from '@angular/material/card';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatIcon } from '@angular/material/icon';
 import { AccountDto, AccountHistoryItemDto, Money, ProblemDetail } from '../../core/api/models';
 import { AccountsApi } from '../../core/api/services/accounts-api';
 import { AuthStore } from '../../core/auth/auth.store';
 import { errorMessage } from '../../core/errors/error-messages';
-import { EnumLabelPipe, IbanPipe, MoneyPipe, SignedAmountPipe } from '../../shared/pipes';
+import { AccountCard } from '../../shared/components/account-card/account-card';
+import { PageHero } from '../../shared/components/page-hero/page-hero';
+import { MoneyPipe, SignedAmountPipe } from '../../shared/pipes';
 
 const LAST_OPERATIONS = 5;
+
+// Icon in the circle of an operation row. Unknown types fall back to the direction arrow.
+const OPERATION_ICONS: Record<string, string> = {
+  CASH_DEPOSIT: 'local_atm',
+  CASH_WITHDRAWAL: 'local_atm',
+  OWN_TRANSFER: 'sync_alt',
+  INTERNAL_TRANSFER: 'swap_horiz',
+  INTEREST: 'percent',
+  TAX: 'account_balance',
+};
+
+export function operationIcon(op: Pick<AccountHistoryItemDto, 'type' | 'direction'>): string {
+  return OPERATION_ICONS[op.type] ?? (op.direction === 'INCOMING' ? 'south_west' : 'north_east');
+}
 
 /** Sum of the active accounts (US-06). Counted in grosze, so there are no rounding errors. */
 export function totalBalance(accounts: readonly AccountDto[]): Money {
@@ -21,17 +36,19 @@ export function totalBalance(accounts: readonly AccountDto[]): Money {
   return `${Math.floor(grosze / 100)}.${String(grosze % 100).padStart(2, '0')}`;
 }
 
-/** Customer home: greeting, total, account cards and the last operations of the first account. */
+/**
+ * Customer home: yellow header with greeting and total, account cards over its edge,
+ * the last operations of the first account (US-06, docs/07 §13).
+ */
 @Component({
   selector: 'app-dashboard-page',
   imports: [
+    AccountCard,
     DatePipe,
-    EnumLabelPipe,
-    IbanPipe,
     MatButtonModule,
-    MatCardModule,
-    MatProgressSpinnerModule,
+    MatIcon,
     MoneyPipe,
+    PageHero,
     RouterLink,
     SignedAmountPipe,
   ],
@@ -57,6 +74,11 @@ export class DashboardPage {
   protected readonly operations = signal<AccountHistoryItemDto[] | null>(null);
   protected readonly operationsLoading = signal(false);
   protected readonly operationsError = signal<string | null>(null);
+
+  protected readonly operationIcon = operationIcon;
+  /** Placeholders while loading: as many as a typical customer has. */
+  protected readonly skeletonCards = [1, 2, 3];
+  protected readonly skeletonRows = [1, 2, 3];
 
   constructor() {
     this.load();

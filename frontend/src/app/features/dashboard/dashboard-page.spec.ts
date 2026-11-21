@@ -8,7 +8,7 @@ import { MOCK_USERS } from '../../core/api/mocks/mock-data';
 import { AccountsApi } from '../../core/api/services/accounts-api';
 import { AuthStore } from '../../core/auth/auth.store';
 import { formatMoney } from '../../shared/pipes';
-import { DashboardPage, totalBalance } from './dashboard-page';
+import { DashboardPage, operationIcon, totalBalance } from './dashboard-page';
 
 resetMockBank();
 // Personal, savings, blocked personal — in the order C1 returns them.
@@ -126,9 +126,39 @@ describe('DashboardPage', () => {
     expect(rows[0].textContent).toContain(`−${formatMoney('800.00')}`);
   });
 
-  it('shows a loader while the accounts load', async () => {
+  it('shows card placeholders while the accounts load', async () => {
     list.mockReturnValue(new Subject<AccountDto[]>());
-    expect((await open()).el.querySelector('mat-spinner')).not.toBeNull();
+    const { el } = await open();
+
+    expect(el.querySelector('[role="status"]')?.getAttribute('aria-label')).toBe(
+      'Loading your accounts',
+    );
+    expect(el.querySelectorAll('.card-skeleton')).toHaveLength(3);
+    expect(el.querySelector('[data-testid="total"]')).toBeNull();
+  });
+
+  it('shows row placeholders while the operations load', async () => {
+    history.mockReturnValue(new Subject());
+    const { el } = await open();
+
+    expect(el.querySelectorAll('.card')).toHaveLength(3);
+    expect(el.querySelector('[aria-label="Loading operations"]')).not.toBeNull();
+  });
+
+  it('puts "Open account" after the cards and links "Show all" to the first account', async () => {
+    const { el } = await open();
+
+    const items = [...el.querySelectorAll('.cards > li')];
+    expect(items).toHaveLength(4);
+    expect(items[3].querySelector('a')?.getAttribute('href')).toBe('/app/accounts/new');
+    expect(el.querySelector('.more')?.getAttribute('href')).toBe(`/app/accounts/${PERSONAL.id}`);
+  });
+
+  it('keeps "Open account" when there are no accounts', async () => {
+    list.mockReturnValue(of([]));
+    const { el } = await open();
+
+    expect(el.querySelector('.card-add')?.getAttribute('href')).toBe('/app/accounts/new');
   });
 
   it('accounts error → banner, "Try again" loads again', async () => {
@@ -160,6 +190,15 @@ describe('DashboardPage', () => {
   it('says so when the first account has no operations', async () => {
     history.mockReturnValue(of({ content: [], page: 0, size: 5, totalElements: 0, totalPages: 0 }));
     expect((await open()).el.textContent).toContain('No operations yet');
+  });
+});
+
+describe('operationIcon', () => {
+  it('picks an icon by type and falls back to the direction', () => {
+    expect(operationIcon({ type: 'CASH_DEPOSIT', direction: 'INCOMING' })).toBe('local_atm');
+    expect(operationIcon({ type: 'OWN_TRANSFER', direction: 'OUTGOING' })).toBe('sync_alt');
+    expect(operationIcon({ type: 'NEW_TYPE', direction: 'INCOMING' })).toBe('south_west');
+    expect(operationIcon({ type: 'NEW_TYPE', direction: 'OUTGOING' })).toBe('north_east');
   });
 });
 

@@ -1,15 +1,13 @@
-h1 {
-  margin: 0;
-  font: var(--mat-sys-headline-small);
-}
-
 h2 {
-  margin: 32px 0 4px;
+  margin: 0;
   font: var(--mat-sys-title-large);
 }
 
-.muted {
+p {
   margin: 0;
+}
+
+.muted {
   color: var(--mat-sys-on-surface-variant);
 }
 
@@ -17,144 +15,145 @@ h2 {
   font: var(--mat-sys-body-small);
 }
 
-.greeting {
-  margin-bottom: 24px;
+// Secondary text on the header: 75% of its text color is still above 7:1 in both themes.
+.soft {
+  opacity: 0.75;
 }
 
-.state {
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+// ---- Header: small greeting line and a big total ----
+.hero {
   display: flex;
-  align-items: center;
-  gap: 16px;
-  padding: 16px 0;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
 }
 
-// Same banner as on the profile page.
-.banner {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 8px 8px 8px 16px;
-  border-left: 4px solid var(--mat-sys-error);
-  border-radius: 4px;
-  background: var(--mat-sys-error-container);
-  color: var(--mat-sys-on-error-container);
-}
-
-.summary {
+.hero-top {
   display: flex;
   flex-wrap: wrap;
-  align-items: flex-end;
   justify-content: space-between;
-  gap: 16px;
-  max-width: 960px;
+  align-items: center;
+  gap: 4px 16px;
+  align-self: stretch;
+}
+
+.hello {
+  font: var(--mat-sys-label-large);
+}
+
+.last-login {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font: var(--mat-sys-body-small);
+
+  mat-icon {
+    width: 16px;
+    height: 16px;
+    font-size: 16px;
+  }
 }
 
 .total {
-  margin: 0;
-  font: var(--mat-sys-display-small);
+  margin-top: 4px;
+  color: var(--tb-hero-accent);
+  font: var(--mat-sys-display-large);
+  letter-spacing: -0.035em;
 }
 
-.actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
+// ---- Account cards: the first row overlaps the header by 48px ----
 .cards {
+  position: relative;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
   gap: 16px;
-  max-width: 960px;
-  margin: 12px 0 0;
+  margin: -48px 0 0;
   padding: 0;
   list-style: none;
 }
 
-.card {
+.card-add {
   display: flex;
   flex-direction: column;
+  align-items: center;
+  justify-content: center;
   gap: 4px;
-  height: 100%;
   box-sizing: border-box;
-  padding: 16px;
-  border: 1px solid var(--mat-sys-outline-variant);
-  border-radius: 12px;
-  color: inherit;
+  height: 100%;
+  min-height: 160px;
+  border: 1.5px dashed color-mix(in srgb, var(--tb-ink) 35%, transparent);
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--tb-surface) 45%, transparent);
+  backdrop-filter: blur(4px);
+  color: var(--tb-ink);
   text-decoration: none;
-  background: var(--mat-sys-surface);
+  font: var(--mat-sys-label-large);
 
-  &:hover,
-  &:focus-visible {
-    border-color: var(--mat-sys-primary);
+  &:hover {
+    border-color: var(--tb-ink);
   }
 }
 
-// Blocked or closed: greyed out, the status badge says why.
-.card.inactive {
-  background: var(--mat-sys-surface-container);
-
-  .card-balance {
-    color: var(--mat-sys-on-surface-variant);
-  }
+// ---- Last operations: plain rows on the page, no box ----
+.last-ops {
+  margin-top: 32px;
 }
 
-.card-top {
+.section-head {
   display: flex;
-  align-items: flex-start;
   justify-content: space-between;
-  gap: 8px;
+  align-items: flex-end;
+  gap: 12px;
+  margin-bottom: 4px;
 }
 
-.card-name {
-  font: var(--mat-sys-title-medium);
-  overflow-wrap: anywhere;
-}
+.more {
+  display: inline-flex;
+  align-items: center;
+  color: var(--tb-ink);
+  text-decoration: none;
+  font: var(--mat-sys-label-large);
 
-.iban {
-  font: var(--mat-sys-body-medium);
-  font-variant-numeric: tabular-nums;
-}
-
-.card-balance {
-  margin-top: 8px;
-  font: var(--mat-sys-headline-small);
-}
-
-// Same badges as on the account details page.
-.status {
-  flex-shrink: 0;
-  padding: 2px 10px;
-  border-radius: 999px;
-  font: var(--mat-sys-label-medium);
-  background: var(--mat-sys-surface-container-high);
-  color: var(--mat-sys-on-surface-variant);
-}
-
-.status-active {
-  background: var(--mat-sys-primary-container);
-  color: var(--mat-sys-on-primary-container);
-}
-
-.status-blocked {
-  background: var(--mat-sys-error-container);
-  color: var(--mat-sys-on-error-container);
+  &:hover {
+    text-decoration: underline;
+  }
 }
 
 .operations {
-  max-width: 960px;
-  margin: 8px 0;
+  margin: 0;
   padding: 0;
   list-style: none;
 }
 
 .operation {
   display: grid;
-  grid-template-columns: 48px 1fr auto;
+  grid-template-columns: 40px minmax(0, 1fr) auto;
   align-items: center;
   gap: 12px;
-  padding: 10px 0;
-  border-bottom: 1px solid var(--mat-sys-outline-variant);
+  padding: 12px 0;
+  border-bottom: 1px solid var(--tb-line);
+
+  &:last-child {
+    border-bottom: 0;
+  }
+}
+
+.op-icon {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--tb-chip);
 }
 
 .op-text {
@@ -165,11 +164,91 @@ h2 {
 }
 
 .op-amount {
-  font: var(--mat-sys-title-small);
+  font: var(--mat-sys-title-medium);
+  font-family: var(--mat-sys-headline-small-font);
+  font-weight: 700;
   white-space: nowrap;
-  font-variant-numeric: tabular-nums;
 }
 
 .op-amount.incoming {
   color: var(--tb-income);
+}
+
+// Same banner as on the profile page.
+.banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 16px;
+  padding: 8px 8px 8px 16px;
+  border-left: 4px solid var(--mat-sys-error);
+  border-radius: 4px;
+  background: var(--mat-sys-error-container);
+  color: var(--mat-sys-on-error-container);
+}
+
+// ---- Loading placeholders ----
+.skeleton {
+  display: block;
+  border-radius: 8px;
+  background: linear-gradient(
+      90deg,
+      transparent,
+      color-mix(in srgb, var(--tb-surface) 60%, transparent),
+      transparent
+    )
+    0 0 / 200% 100% var(--tb-chip);
+  animation: shimmer 1.4s linear infinite;
+}
+
+.total-skeleton {
+  width: 280px;
+  height: 56px;
+  margin: 4px 0;
+  background-color: color-mix(in srgb, currentColor 12%, transparent);
+}
+
+.card-skeleton {
+  aspect-ratio: 1.586;
+  border-radius: 16px;
+}
+
+.line {
+  height: 14px;
+  width: 60%;
+}
+
+.operation .skeleton.op-icon {
+  border-radius: 50%;
+}
+
+@keyframes shimmer {
+  to {
+    background-position: -200% 0;
+  }
+}
+
+// Phones: a smaller total; cards scroll sideways instead of stacking.
+@media (max-width: 767.98px) {
+  // Shrinks with the screen, so a 7-digit total still fits on one line at 360px.
+  .total {
+    font: var(--mat-sys-display-medium);
+    font-size: min(2.812rem, 11vw);
+  }
+
+  .cards {
+    grid-template-columns: none;
+    grid-auto-flow: column;
+    grid-auto-columns: 270px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    margin-inline: -16px;
+    padding: 0 16px 16px;
+    scroll-padding-inline: 16px;
+
+    > * {
+      scroll-snap-align: start;
+    }
+  }
 }

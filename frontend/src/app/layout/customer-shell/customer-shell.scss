@@ -1,9 +1,10 @@
-// Yellow on top of the page; after scrolling the bar turns into the page surface (docs/07 §13.1).
+// Same colors as the page hero below it (yellow / dark); after scrolling the bar turns into
+// the page surface (docs/07 §13.1). Accents (logo mark, active line, avatar) use
+// --tb-hero-accent: black in light mode, yellow in dark mode.
 .topbar {
-  --bar-bg: var(--tb-brand);
-  --bar-fg: var(--tb-on-brand);
-  // The yellow logo mark would vanish on the yellow bar: draw it in the text color.
-  --brand-mark-color: currentColor;
+  --bar-bg: var(--tb-hero-bg);
+  --bar-fg: var(--tb-hero-fg);
+  --brand-mark-color: var(--tb-hero-accent);
 
   position: sticky;
   top: 0;
@@ -18,11 +19,17 @@
   transition:
     background-color 150ms ease,
     box-shadow 150ms ease;
+  // A hairline and a soft shadow, so the bar reads as its own strip above the header.
+  box-shadow:
+    0 1px 0 var(--tb-hero-edge),
+    0 6px 14px -10px var(--tb-hero-edge);
 
   &.scrolled {
     --bar-bg: var(--tb-surface);
     --bar-fg: var(--tb-ink);
-    box-shadow: 0 1px 0 var(--tb-line);
+    box-shadow:
+      0 1px 0 var(--tb-line),
+      0 6px 16px -12px var(--tb-card-shadow);
   }
 }
 
@@ -69,7 +76,7 @@
         inset: auto 0 0;
         height: 3px;
         border-radius: 3px 3px 0 0;
-        background: currentColor;
+        background: var(--tb-hero-accent);
       }
     }
   }
@@ -88,12 +95,37 @@
   place-items: center;
   width: 36px;
   height: 36px;
+  padding: 0;
+  border: 0;
   border-radius: 50%;
-  background: var(--bar-fg);
+  background: var(--tb-hero-accent);
   color: var(--bar-bg);
   font: var(--mat-sys-label-large);
   font-weight: 700;
   text-decoration: none;
+  cursor: pointer;
+}
+
+.phone-only {
+  display: none;
+}
+
+// Header of the phone account menu: who is logged in.
+.menu-head {
+  display: flex;
+  flex-direction: column;
+  padding: 8px 16px 12px;
+  margin-bottom: 4px;
+  border-bottom: 1px solid var(--tb-line);
+}
+
+.menu-name {
+  font: var(--mat-sys-title-medium);
+}
+
+.menu-email {
+  color: var(--tb-muted);
+  font: var(--mat-sys-body-small);
 }
 
 .shell-content {
@@ -106,23 +138,22 @@
   display: none;
 }
 
-// Phones: the links go to the bottom tabs, the bar keeps logo, theme, avatar, logout.
+// Phones: the links go to the bottom tabs; the bar keeps only the logo and the avatar,
+// which opens a menu with profile, theme and logout.
 @media (max-width: 767.98px) {
   .topbar {
-    gap: 8px;
     height: 56px;
-    padding: 0 8px 0 16px;
+    padding: 0 16px;
   }
 
-  .links {
+  .links,
+  .wide-only {
     display: none;
   }
 
-  .end {
+  .phone-only {
+    display: grid;
     margin-left: auto;
-    padding-left: 0;
-    border-left: 0;
-    gap: 0;
   }
 
   // Room for the tabs, so they don't cover the end of the page.

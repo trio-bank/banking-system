@@ -12,19 +12,36 @@ html {
   --tb-on-brand: #141414;
   --tb-ink: light-dark(#141414, #f2f1ea);
   --tb-on-ink: light-dark(#ffffff, #141414);
-  --tb-muted: light-dark(#6b6a62, #a3a297);
-  --tb-background: light-dark(#f6f5f0, #11110f);
-  --tb-surface: light-dark(#ffffff, #1a1a17);
-  --tb-line: light-dark(#e3e2da, #2b2b26);
-  --tb-chip: light-dark(#ecebe4, #272722);
-  --tb-card: light-dark(#141414, #262620);
-  --tb-card-alt: light-dark(#3b3a35, #33332c);
-  --tb-card-off: light-dark(#e4e3dc, #1c1c19);
+  --tb-muted: light-dark(#6b6a62, #b3b2a8);
+  --tb-background: light-dark(#f6f5f0, #1d1c19);
+  --tb-surface: light-dark(#ffffff, #272622);
+  --tb-line: light-dark(#e3e2da, #3a3934);
+  --tb-chip: light-dark(#ecebe4, #34332e);
+  // Light: black and graphite cards. Dark: the main card turns yellow, the others off-white,
+  // so they stand out on the dark page instead of melting into it.
+  --tb-card: light-dark(#141414, #ffd100);
+  --tb-on-card: light-dark(#ffffff, #141414);
+  --tb-card-alt: light-dark(#3b3a35, #e9e7df);
+  --tb-card-off: light-dark(#e4e3dc, #302f2a);
+  --tb-card-chip: light-dark(#ffd100, #141414);
+  --tb-card-shadow: light-dark(rgb(20 20 20 / 60%), rgb(255 209 0 / 22%));
   // Material has no "success" color. Contrast: 4.6:1 on the light page, 5.0:1 on white,
-  // 10.6:1 on the dark page.
+  // 9.5:1 on the dark page.
   --tb-income: light-dark(#12804a, #6fd69a);
 
-  // Admin and guest pages keep a black bar in both themes; customers get the yellow one.
+  // Customer toolbar and page hero (docs/07 §13.1). Light: solid yellow, black text.
+  // Dark: warm charcoal (not black: that felt gloomy) with a yellow glow rising behind the cards;
+  // yellow for the accents.
+  --tb-hero-bg: light-dark(#ffd100, #2a2824);
+  --tb-hero-glow: light-dark(#ffd100, #4d4214);
+  --tb-hero-fg: light-dark(#141414, #f2f1ea);
+  --tb-hero-accent: light-dark(#141414, #ffd100);
+  --tb-hero-button: light-dark(#141414, #ffd100);
+  --tb-on-hero-button: light-dark(#ffd100, #141414);
+  // The thin line and soft shadow under the customer toolbar.
+  --tb-hero-edge: light-dark(rgb(20 20 20 / 12%), rgb(255 209 0 / 16%));
+
+  // Admin and guest pages keep a black bar in both themes.
   --tb-toolbar: #141414;
   --tb-on-toolbar: #ffffff;
 
@@ -68,11 +85,11 @@ html {
       on-surface: var(--tb-ink),
       on-surface-variant: var(--tb-muted),
       surface-container-lowest: var(--tb-surface),
-      surface-container-low: light-dark(#fafaf7, #161613),
-      surface-container: light-dark(#f3f2ec, #1e1e1b),
+      surface-container-low: light-dark(#fafaf7, #22211e),
+      surface-container: light-dark(#f3f2ec, #2a2925),
       surface-container-high: var(--tb-chip),
-      surface-container-highest: light-dark(#e4e3dc, #2f2f2a),
-      outline: light-dark(#76756d, #8d8c83),
+      surface-container-highest: light-dark(#e4e3dc, #3d3c37),
+      outline: light-dark(#76756d, #9a998f),
       outline-variant: var(--tb-line),
       corner-small: 6px,
       corner-medium: 10px,
