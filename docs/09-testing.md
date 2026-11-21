@@ -102,7 +102,7 @@ Parameterized test that calls every customer endpoint with a token of another cu
 | TC-16 | US-07 | Open 3rd personal account; open 3rd savings account | 422 `ACCOUNT_LIMIT_REACHED` (blocked accounts count, closed ones do not) | I |
 | TC-17 | US-07 | Open savings when personal is blocked | 422 `PREREQUISITE_ACCOUNT_REQUIRED` | I |
 | TC-18 | US-06/08 | List & details | Only own accounts; savings shows rate and accrued interest | I |
-| TC-19 | US-09 | Rename to 51 chars / valid name | 400 / 200 | I |
+| TC-19 | US-09 | Rename to 51 chars / valid name / blocked account | 400 / 200 / 422 | I |
 
 ### 5.3 Money movements
 

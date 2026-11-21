@@ -98,6 +98,11 @@ public class Account extends BaseEntity {
         return status == AccountStatus.ACTIVE;
     }
 
+    /** Gives the account a new name. The caller checks the account status and the name itself. */
+    public void rename(String newName) {
+        name = newName;
+    }
+
     /**
      * Takes money out. Only the ledger calls this, together with writing the ledger entries,
      * so the balance always matches the entries. The ledger also checks that a customer account has enough money.

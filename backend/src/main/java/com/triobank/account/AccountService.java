@@ -3,6 +3,7 @@ package com.triobank.account;
 import com.triobank.account.dto.AccountDto;
 import com.triobank.account.dto.AccountMapper;
 import com.triobank.account.dto.OpenAccountRequest;
+import com.triobank.account.dto.RenameAccountRequest;
 import com.triobank.audit.AuditAction;
 import com.triobank.audit.AuditEventCommand;
 import com.triobank.audit.AuditService;
@@ -113,6 +114,42 @@ public class AccountService {
         return accounts.findOfCustomer(accountId, customerId)
                 .map(AccountMapper::toDto)
                 .orElseThrow(() -> new ApiException(ErrorCode.RESOURCE_NOT_FOUND, "Account not found."));
+    }
+
+    /**
+     * Renames one of the customer's accounts. Renaming to the same name changes nothing and is not audited.
+     *
+     * @param ipAddress where the request came from, for the audit log
+     * @throws ApiException RESOURCE_NOT_FOUND if the account is missing or not the customer's,
+     *                      OPERATION_NOT_ALLOWED_FOR_ACCOUNT if the account is blocked or closed
+     */
+    @Transactional
+    public AccountDto rename(UUID customerId, UUID accountId, RenameAccountRequest request, String ipAddress) {
+        Account account = accounts.findOfCustomerWithOwner(accountId, customerId)
+                .orElseThrow(() -> new ApiException(ErrorCode.RESOURCE_NOT_FOUND, "Account not found."));
+        if (!account.isActive()) {
+            throw new ApiException(ErrorCode.OPERATION_NOT_ALLOWED_FOR_ACCOUNT,
+                    "Only an active account can be renamed.");
+        }
+
+        String oldName = account.getName();
+        if (oldName.equals(request.name())) {
+            return AccountMapper.toDto(account);
+        }
+        account.rename(request.name());
+
+        User owner = account.getCustomer().getUser();
+        auditService.record(AuditEventCommand.builder()
+                .action(AuditAction.ACCOUNT_RENAMED)
+                .actorUserId(owner.getId())
+                .actorEmail(owner.getEmail())
+                .actorRole(Role.CUSTOMER.name())
+                .targetType("ACCOUNT")
+                .targetId(account.getId())
+                .ipAddress(ipAddress)
+                .details(Map.of("oldName", oldName, "newName", request.name()))
+                .build());
+        return AccountMapper.toDto(account);
     }
 
     /**
