@@ -4,7 +4,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { provideRouter, Router } from '@angular/router';
 import { of, Subject } from 'rxjs';
 import { LoginResponse } from '../api/models';
-import { MOCK_USERS } from '../api/mocks/mock-data';
+import { MOCK_USERS } from '../../../testing/mock-data';
 import { AuthApi } from '../api/services/auth-api';
 import { AuthStore } from './auth.store';
 import { SessionTimer } from './session-timer';

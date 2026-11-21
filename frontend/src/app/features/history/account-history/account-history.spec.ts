@@ -7,7 +7,7 @@ import {
   PageResponse,
   ProblemDetail,
 } from '../../../core/api/models';
-import { accountEntries, mockAccounts, resetMockBank } from '../../../core/api/mocks/mock-bank';
+import { accountEntries, mockAccounts, resetMockBank } from '../../../../testing/mock-bank';
 import { AccountsApi } from '../../../core/api/services/accounts-api';
 import { formatMoney } from '../../../shared/pipes';
 import { AccountHistory, PHONE_QUERY } from './account-history';

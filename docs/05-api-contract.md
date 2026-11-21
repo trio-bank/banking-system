@@ -613,4 +613,15 @@ interface JobRunResponse {
 
 ## 8. Mocking for frontend
 
-Until an endpoint is implemented, the frontend uses an HTTP interceptor (`MockApiInterceptor`, enabled by `environment.useMocks`) returning the example payloads from this document. Mock data lives in `src/app/core/api/mocks/`. When the backend endpoint is merged into `develop`, the mock is removed in the same sprint.
+Until an endpoint is implemented, the frontend may answer it with an HTTP interceptor returning the example payloads from this document. When the backend endpoint is merged into `develop`, the mock is removed in the same sprint.
+
+Sprint 2 mocks (P1, C1–C5, T3, T4) are removed: the frontend now talks only to the real API. Unit tests use fixtures from `frontend/src/testing/`.
+
+To mock a new endpoint, bring the interceptor back from git history (`mock-api.interceptor.ts`, `mock-routes.ts`, `mock-http.ts`):
+
+```
+git log --oneline --diff-filter=D -- frontend/src/app/core/api/mocks   # the commit that removed them
+git checkout <that commit>~1 -- frontend/src/app/core/api/mocks/mock-api.interceptor.ts frontend/src/app/core/api/mocks/mock-routes.ts frontend/src/app/core/api/mocks/mock-http.ts
+```
+
+Then add it back to `app.config.ts` (last in `withInterceptors`). In `mock-routes.ts` remove the old Sprint 2 imports and lines, and add one line per new endpoint.

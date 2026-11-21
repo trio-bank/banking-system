@@ -12,20 +12,44 @@
     <span>{{ message }}</span>
     <button matButton type="button" (click)="loadProducts()">Try again</button>
   </div>
-} @else if (products(); as list) {
+} @else if (options(); as list) {
   @if (list.length === 0) {
     <p class="muted">No products are available right now.</p>
+  } @else if (nothingToOpen()) {
+    <div class="info" role="status">
+      <p>You already have as many accounts as you can open.</p>
+      <ul class="rules">
+        @for (o of list; track o.product.code) {
+          <li>{{ o.product.name }}: {{ o.blockedBy }}</li>
+        }
+      </ul>
+      <a matButton="filled" routerLink="/app/dashboard">Back to my accounts</a>
+    </div>
   } @else {
     <form [formGroup]="form" (ngSubmit)="open()">
       <fieldset class="products" [disabled]="saving()">
         <legend>Choose an account type</legend>
-        @for (p of list; track p.code) {
-          <label class="product" [class.selected]="selected()?.code === p.code">
+        @for (o of list; track o.product.code) {
+          @let p = o.product;
+          <label
+            class="product"
+            [class.selected]="selected()?.code === p.code"
+            [class.blocked]="o.blockedBy"
+          >
             <span class="product-top">
-              <input type="radio" formControlName="productCode" [value]="p.code" />
+              <!-- attr.disabled: [disabled] on a formControlName input is ignored by Angular. -->
+              <input
+                type="radio"
+                formControlName="productCode"
+                [value]="p.code"
+                [attr.disabled]="o.blockedBy ? '' : null"
+              />
               <span class="product-name">{{ p.name }}</span>
               <span class="type">{{ p.type | enumLabel }}</span>
             </span>
+            @if (o.blockedBy; as reason) {
+              <span class="blocked-reason">{{ reason }}</span>
+            }
             @if (p.description) {
               <span class="muted">{{ p.description }}</span>
             }

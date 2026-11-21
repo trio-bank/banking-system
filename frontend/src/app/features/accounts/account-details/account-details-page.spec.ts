@@ -5,7 +5,7 @@ import { provideRouter, withComponentInputBinding } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
 import { of, Subject, throwError } from 'rxjs';
 import { AccountDto, ProblemDetail } from '../../../core/api/models';
-import { mockAccounts, resetMockBank } from '../../../core/api/mocks/mock-bank';
+import { mockAccounts, resetMockBank } from '../../../../testing/mock-bank';
 import { AccountsApi } from '../../../core/api/services/accounts-api';
 import { formatMoney } from '../../../shared/pipes';
 import { AccountDetailsPage } from './account-details-page';

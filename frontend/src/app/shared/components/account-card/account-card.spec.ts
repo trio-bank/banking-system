@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { AccountDto } from '../../../core/api/models';
-import { mockAccounts, resetMockBank } from '../../../core/api/mocks/mock-bank';
+import { mockAccounts, resetMockBank } from '../../../../testing/mock-bank';
 import { formatMoney } from '../../pipes';
 import { AccountCard } from './account-card';
 
@@ -9,10 +9,9 @@ resetMockBank();
 const [PERSONAL] = mockAccounts();
 
 describe('AccountCard', () => {
-  const render = (changes: Partial<AccountDto> = {}, alt = false) => {
+  const render = (changes: Partial<AccountDto> = {}) => {
     const fixture = TestBed.createComponent(AccountCard);
     fixture.componentRef.setInput('account', { ...PERSONAL, ...changes });
-    fixture.componentRef.setInput('alt', alt);
     fixture.detectChanges();
     return (fixture.nativeElement as HTMLElement).querySelector('a')!;
   };
@@ -34,14 +33,14 @@ describe('AccountCard', () => {
     expect(card.getAttribute('href')).toBe(`/app/accounts/${PERSONAL.id}`);
   });
 
-  it('active: black or graphite, with the yellow chip', () => {
+  it('active: personal black, savings graphite, both with the yellow chip', () => {
     expect(render().className).not.toContain('alt');
-    expect(render({}, true).classList).toContain('alt');
+    expect(render({ type: 'SAVINGS' }).classList).toContain('alt');
     expect(render().querySelector('.chip')).not.toBeNull();
   });
 
   it('blocked: grey with a lock, never graphite', () => {
-    const card = render({ status: 'BLOCKED' }, true);
+    const card = render({ status: 'BLOCKED', type: 'SAVINGS' });
 
     expect(card.classList).toContain('inactive');
     expect(card.classList).not.toContain('alt');

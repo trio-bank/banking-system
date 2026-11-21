@@ -2,7 +2,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { LoginResponse } from '../api/models';
-import { MOCK_USERS } from '../api/mocks/mock-data';
+import { MOCK_USERS } from '../../../testing/mock-data';
 import { AuthStore, homeUrl } from './auth.store';
 
 const [ANNA, ADMIN] = MOCK_USERS;

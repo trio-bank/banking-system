@@ -5,7 +5,7 @@ import { provideRouter, Router } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
 import { routes } from './app.routes';
 import { CurrentUserDto } from './core/api/models';
-import { MOCK_USERS } from './core/api/mocks/mock-data';
+import { MOCK_USERS } from '../testing/mock-data';
 import { AuthStore } from './core/auth/auth.store';
 
 const [CUSTOMER, ADMIN] = MOCK_USERS;

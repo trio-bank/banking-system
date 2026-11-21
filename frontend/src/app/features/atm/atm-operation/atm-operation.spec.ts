@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { of, Subject, throwError } from 'rxjs';
 import { AccountDto, ProblemDetail, TransactionDto } from '../../../core/api/models';
-import { mockAccounts, resetMockBank } from '../../../core/api/mocks/mock-bank';
+import { mockAccounts, resetMockBank } from '../../../../testing/mock-bank';
 import { AccountsApi } from '../../../core/api/services/accounts-api';
 import { PaymentsApi } from '../../../core/api/services/payments-api';
 import { formatMoney } from '../../../shared/pipes';

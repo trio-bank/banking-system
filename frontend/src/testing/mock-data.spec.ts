@@ -3,7 +3,7 @@ import {
   isValidPhone,
   passwordRuleFailures,
   peselBirthDate,
-} from '../../../shared/validators';
+} from '../app/shared/validators';
 import { MOCK_CUSTOMERS, MOCK_PASSWORD, MOCK_USERS } from './mock-data';
 
 const isoDate = (date: Date | null) =>

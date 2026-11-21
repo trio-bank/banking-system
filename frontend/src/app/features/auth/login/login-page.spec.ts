@@ -5,7 +5,7 @@ import { provideRouter, Router } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
 import { of, Subject, throwError } from 'rxjs';
 import { CurrentUserDto, LoginResponse, ProblemDetail } from '../../../core/api/models';
-import { MOCK_USERS } from '../../../core/api/mocks/mock-data';
+import { MOCK_USERS } from '../../../../testing/mock-data';
 import { AuthApi } from '../../../core/api/services/auth-api';
 import { AuthStore } from '../../../core/auth/auth.store';
 import { LoginPage } from './login-page';

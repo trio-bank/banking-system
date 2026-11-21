@@ -1,4 +1,4 @@
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { environment } from '../../../../environments/environment';
 import {
@@ -41,20 +41,14 @@ export class AccountsApi {
   history(accountId: Uuid, query: AccountHistoryQuery = {}) {
     return this.http.get<PageResponse<AccountHistoryItemDto>>(
       `${this.url}/accounts/${accountId}/history`,
-      { params: toParams(query) },
+      { params: withoutUnset(query) },
     );
   }
 }
 
-/** Skips empty values. `type: ['A', 'B']` becomes `?type=A&type=B`, as the backend expects. */
-function toParams(query: AccountHistoryQuery): HttpParams {
-  let params = new HttpParams();
-  for (const [key, value] of Object.entries(query)) {
-    for (const item of [value].flat()) {
-      if (item !== undefined && item !== null && item !== '') {
-        params = params.append(key, String(item));
-      }
-    }
-  }
-  return params;
+/** Leaves out params that aren't set, so the backend uses its defaults. */
+function withoutUnset(query: AccountHistoryQuery): Record<string, number> {
+  return Object.fromEntries(
+    Object.entries(query).filter((entry): entry is [string, number] => entry[1] !== undefined),
+  );
 }
