@@ -1,0 +1,57 @@
+name: E2E (API journeys)
+
+# docs/09-testing.md §1: e2e runs on PR to main and nightly on develop.
+# Journeys are API-level (MockMvc + Testcontainers PostgreSQL), tagged @Tag("e2e").
+on:
+  pull_request:
+    branches:
+      - main
+  schedule:
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: e2e-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  e2e:
+    name: E2E journeys
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    defaults:
+      run:
+        working-directory: backend
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+        with:
+          # the nightly run tests develop; other triggers use their own ref
+          ref: ${{ github.event_name == 'schedule' && 'develop' || '' }}
+
+      - name: Set up Java 21
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+
+      # Docker is preinstalled on ubuntu-latest, so Testcontainers starts PostgreSQL by itself.
+      # JaCoCo is skipped: its 70% gate is for the full unit + integration run, not for the e2e subset.
+      - name: Run e2e journeys
+        run: |
+          chmod +x mvnw
+          ./mvnw -B -ntp verify -Dgroups=e2e -Djacoco.skip=true
+
+      - name: Upload test reports
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: e2e-test-reports
+          path: backend/target/surefire-reports/
+          if-no-files-found: ignore
