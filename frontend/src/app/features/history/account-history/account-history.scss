@@ -1,0 +1,125 @@
+:host {
+  display: block;
+  padding-top: 8px;
+}
+
+.state {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 24px 0;
+}
+
+.empty {
+  padding: 16px 0;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+// Same banner as on the account header.
+.banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 8px 0;
+  padding: 8px 8px 8px 16px;
+  border-left: 4px solid var(--mat-sys-error);
+  border-radius: 4px;
+  background: var(--mat-sys-error-container);
+  color: var(--mat-sys-on-error-container);
+}
+
+// On a narrow tablet the table may still be a bit too wide: then it scrolls, not squeezes.
+.list {
+  overflow-x: auto;
+  transition: opacity 0.15s;
+}
+
+.busy {
+  opacity: 0.5;
+}
+
+// Desktop: full width, so the right edge of the table and the paginator line up.
+.history {
+  width: 100%;
+}
+
+.date {
+  white-space: nowrap;
+}
+
+.counterparty {
+  display: block;
+}
+
+.iban {
+  display: block;
+  color: var(--mat-sys-on-surface-variant);
+  font: var(--mat-sys-body-small);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.number {
+  text-align: right;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.amount {
+  font-weight: 500;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+// docs/07: incoming green, outgoing in the normal text color; the sign is there too.
+.amount.incoming {
+  color: var(--tb-income);
+}
+
+// Phone: one card per operation.
+//   Title             −150,00 zł
+//   Counterparty      Balance after 850,00 zł
+//   24.10.2026, 13:02
+.cards {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 2px 12px;
+  align-items: baseline;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--mat-sys-outline-variant);
+}
+
+.card-title,
+.card-counterparty {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.card-title {
+  font: var(--mat-sys-title-small);
+}
+
+.card-counterparty,
+.card-balance,
+.card-date {
+  color: var(--mat-sys-on-surface-variant);
+  font: var(--mat-sys-body-small);
+}
+
+.card-balance {
+  text-align: right;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.card-date {
+  grid-column: 1 / -1;
+}

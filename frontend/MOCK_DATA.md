@@ -4,6 +4,8 @@ Data for trying the app by hand against the real backend. Everything here is fic
 
 Registrations are saved in the database. To start over, run `docker compose down -v` from the repo root.
 
+> **Quick start:** every test customer uses the same password, `Str0ng!Passw0rd`. Register one from the table below, then log in with its email and this password. Admin: `admin@triobank.local` / `Adm1n!Passw0rd`.
+
 ## Register: data to copy
 
 Each customer can be registered once.
@@ -49,3 +51,28 @@ Customers exist only after you register them. The admin is created when the back
 To see the lockout, enter a wrong password 5 times. The 6th attempt shows the countdown, and the lock lasts 15 minutes.
 
 A blocked user can't be made from the UI until the admin panel exists (US-18).
+
+## Accounts and ATM: getting started
+
+A new customer has one personal account with `0,00 zł`. To have something to look at:
+
+1. Log in and open the personal account.
+2. **ATM → Deposit** a few times, e.g. `3000`, `500`, `1000`.
+3. **ATM → Withdraw** once or twice, e.g. `200`.
+4. **Open account → Trio Savings Account** to get a second account.
+5. Do 21 or more ATM operations on one account to see the second page of history (20 per page).
+
+A blocked account can't be made from the UI until the admin panel exists (US-18).
+
+## Accounts and ATM: error cases
+
+| Where          | What to do                                  | Result                              |
+| -------------- | ------------------------------------------- | ----------------------------------- |
+| Open account   | A 3rd personal or a 3rd savings account     | `ACCOUNT_LIMIT_REACHED` (max 2)     |
+| Open account   | Name longer than 50 characters              | `VALIDATION_ERROR`, `TOO_LONG`      |
+| Rename         | Name longer than 50 characters or blank     | Error under the field, nothing sent |
+| ATM            | Amount not in whole tens, e.g. `15`         | `CASH_AMOUNT_INVALID`               |
+| ATM deposit    | More than `20000`                           | `CASH_AMOUNT_INVALID`               |
+| ATM withdrawal | More than `5000`                            | `CASH_AMOUNT_INVALID`               |
+| ATM withdrawal | More than the balance (after a few `5000`s) | `INSUFFICIENT_FUNDS`                |
+| ATM            | A savings account                           | `OPERATION_NOT_ALLOWED_FOR_ACCOUNT` |

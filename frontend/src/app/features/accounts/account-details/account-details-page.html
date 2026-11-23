@@ -1,0 +1,87 @@
+<a matButton class="back" routerLink="/app/dashboard">← My accounts</a>
+
+@if (loading()) {
+  <div class="state" role="status">
+    <mat-spinner diameter="40" />
+    <span>Loading the account…</span>
+  </div>
+} @else if (notFound()) {
+  <div class="state not-found">
+    <h1>Account not found</h1>
+    <p>This account does not exist or is not yours.</p>
+    <a matButton="filled" routerLink="/app/dashboard">Go to my accounts</a>
+  </div>
+} @else if (error(); as message) {
+  <div class="banner" role="alert">
+    <span>{{ message }}</span>
+    <button matButton type="button" (click)="load()">Try again</button>
+  </div>
+} @else if (account(); as a) {
+  <mat-card appearance="outlined" class="header-card">
+    <mat-card-content>
+      @if (editing()) {
+        <form class="rename" (submit)="saveName($event)" (keydown.escape)="stopEditing()">
+          <mat-form-field appearance="outline" class="name-field">
+            <mat-label>Account name</mat-label>
+            <input #nameInput matInput [formControl]="nameControl" [readonly]="saving()" />
+            <mat-hint align="end">{{ nameControl.value.trim().length }} / {{ nameMax }}</mat-hint>
+            <mat-error>{{ nameError() }}</mat-error>
+          </mat-form-field>
+          <div class="rename-actions">
+            <button matButton="filled" type="submit" [disabled]="saving()">
+              {{ saving() ? 'Saving…' : 'Save' }}
+            </button>
+            <button matButton type="button" [disabled]="saving()" (click)="stopEditing()">
+              Cancel
+            </button>
+          </div>
+        </form>
+      } @else {
+        <div class="title-row">
+          <h1>{{ a.name }}</h1>
+          <span class="status" [class]="'status-' + a.status.toLowerCase()">
+            {{ a.status | enumLabel }}
+          </span>
+          <button matButton type="button" aria-label="Rename account" (click)="startRename(a)">
+            Rename
+          </button>
+        </div>
+      }
+
+      <p class="balance-label">Balance</p>
+      <p class="balance">{{ a.balance | money: a.currency }}</p>
+
+      @if (a.status === 'BLOCKED') {
+        <p class="notice" role="note">
+          This account is blocked. It cannot send or receive money. Please contact the bank.
+        </p>
+      }
+
+      <dl class="fields">
+        <dt>IBAN</dt>
+        <dd class="iban">
+          <span>{{ a.iban | iban }}</span>
+          <button matButton type="button" aria-label="Copy IBAN" (click)="copyIban(a.iban)">
+            Copy
+          </button>
+        </dd>
+        <dt>Product</dt>
+        <dd>{{ a.productName }} ({{ a.type | enumLabel }})</dd>
+        <dt>Opened</dt>
+        <dd>{{ a.openedAt | date: 'dd.MM.yyyy' }}</dd>
+        @if (a.type === 'SAVINGS') {
+          <dt>Interest rate</dt>
+          <dd>{{ formatRate(a.interestRate) }} per year</dd>
+          <dt>Interest this month</dt>
+          <dd>{{ a.accruedInterest | money: a.currency }}</dd>
+        }
+      </dl>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- A heading, not a tab: with one tab there is nothing to switch to. -->
+  <section class="history" aria-labelledby="history-heading">
+    <h2 id="history-heading">History</h2>
+    <app-account-history [accountId]="a.id" />
+  </section>
+}

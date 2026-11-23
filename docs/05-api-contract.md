@@ -124,7 +124,7 @@ Validation error (400):
 | `TRANSFER_POLICY_VIOLATION` | 422 | BR-14 |
 | `CURRENCY_NOT_SUPPORTED` | 422 | BR-26 |
 | `CASH_AMOUNT_INVALID` | 422 | BR-19 |
-| `OPERATION_NOT_ALLOWED_FOR_ACCOUNT` | 422 | BR-20 |
+| `OPERATION_NOT_ALLOWED_FOR_ACCOUNT` | 422 | BR-20, BR-29 |
 | `SELF_ACTION_FORBIDDEN` | 422 | BR-25 |
 | `FEATURE_DISABLED` | 404 | Demo-only endpoint called in another profile |
 | `INTERNAL_ERROR` | 500 | Unexpected |
@@ -262,7 +262,7 @@ Response `200 AccountProductDto[]` (active products only).
     "description": "Savings account with daily accrual and monthly capitalization.",
     "type": "SAVINGS", "currency": "PLN", "interestRate": "4.0000",
     "outgoingTransferPolicy": "OWN_ACCOUNTS_ONLY", "atmAllowed": false,
-    "maxAccountsPerCustomer": 5, "prerequisiteType": "PERSONAL"
+    "maxAccountsPerCustomer": 2, "prerequisiteType": "PERSONAL"
   }
 ]
 ```
@@ -282,7 +282,7 @@ Response `200 AccountDto`. Errors: `RESOURCE_NOT_FOUND`.
 
 ### C4 `PATCH /accounts/{accountId}`
 
-Request `RenameAccountRequest`: `{ "name": "Daily expenses" }`. Response `200 AccountDto`.
+Request `RenameAccountRequest`: `{ "name": "Daily expenses" }`. Response `200 AccountDto`. Errors: `VALIDATION_ERROR`, `RESOURCE_NOT_FOUND`, `OPERATION_NOT_ALLOWED_FOR_ACCOUNT` (BR-29, account not active), `CONCURRENT_MODIFICATION`.
 
 ### C5 `GET /accounts/{accountId}/history`
 
@@ -613,4 +613,15 @@ interface JobRunResponse {
 
 ## 8. Mocking for frontend
 
-Until an endpoint is implemented, the frontend uses an HTTP interceptor (`MockApiInterceptor`, enabled by `environment.useMocks`) returning the example payloads from this document. Mock data lives in `src/app/core/api/mocks/`. When the backend endpoint is merged into `develop`, the mock is removed in the same sprint.
+Until an endpoint is implemented, the frontend may answer it with an HTTP interceptor returning the example payloads from this document. When the backend endpoint is merged into `develop`, the mock is removed in the same sprint.
+
+Sprint 2 mocks (P1, C1–C5, T3, T4) are removed: the frontend now talks only to the real API. Unit tests use fixtures from `frontend/src/testing/`.
+
+To mock a new endpoint, bring the interceptor back from git history (`mock-api.interceptor.ts`, `mock-routes.ts`, `mock-http.ts`):
+
+```
+git log --oneline --diff-filter=D -- frontend/src/app/core/api/mocks   # the commit that removed them
+git checkout <that commit>~1 -- frontend/src/app/core/api/mocks/mock-api.interceptor.ts frontend/src/app/core/api/mocks/mock-routes.ts frontend/src/app/core/api/mocks/mock-http.ts
+```
+
+Then add it back to `app.config.ts` (last in `withInterceptors`). In `mock-routes.ts` remove the old Sprint 2 imports and lines, and add one line per new endpoint.

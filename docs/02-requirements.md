@@ -34,7 +34,7 @@ Priority uses MoSCoW: **M** = must (MVP), **S** = should (MVP if time allows), *
 | FR-ACC-02 | A customer can open a new account by choosing a product from the catalog and optionally giving it a name. | M | BR-07, BR-08, BR-28 |
 | FR-ACC-03 | A customer can list their accounts with IBAN, name, type, balance and status. | M | — |
 | FR-ACC-04 | A customer can view details of one of their accounts (incl. interest rate and accrued interest for savings). | M | — |
-| FR-ACC-05 | A customer can rename their account. | S | BR-28 |
+| FR-ACC-05 | A customer can rename their account. | S | BR-28, BR-29 |
 | FR-ACC-06 | Any logged-in customer can view the catalog of available account products. | M | — |
 | FR-ACC-07 | A customer can close an account with zero balance. | C (PKG-05) | BR-22 |
 
@@ -101,10 +101,11 @@ Business rules are enforced **on the backend** (always) and mirrored on the fron
 
 | ID | Rule | Error code |
 |---|---|---|
-| BR-07 | A customer may hold at most `maxAccountsPerCustomer` non-closed accounts of a given product (`PERSONAL_STANDARD`: 2, `SAVINGS_STANDARD`: 5). | `ACCOUNT_LIMIT_REACHED` |
+| BR-07 | A customer may hold at most `maxAccountsPerCustomer` non-closed accounts of a given product (`PERSONAL_STANDARD`: 2, `SAVINGS_STANDARD`: 2). | `ACCOUNT_LIMIT_REACHED` |
 | BR-08 | Opening a product with a prerequisite (savings requires personal) is only possible if the customer has an active account of the required type. | `PREREQUISITE_ACCOUNT_REQUIRED` |
 | BR-22 | Accounts are never deleted. They can be closed only with a zero balance (PKG-05). | — |
 | BR-28 | Account name: 1–50 characters, trimmed. Default: the product name (set by backend). | `VALIDATION_ERROR` |
+| BR-29 | Only an `ACTIVE` account can be renamed; `BLOCKED` and `CLOSED` accounts keep their name. | `OPERATION_NOT_ALLOWED_FOR_ACCOUNT` |
 
 ### 2.3 Money movements
 
@@ -233,10 +234,11 @@ Format: *As a … I want … so that …*, followed by acceptance criteria (Give
 
 - [ ] I see name, IBAN (with a copy button), product, status, balance, opening date; for savings: interest rate and interest accrued this month.
 
-**US-09 Rename an account** · FR-ACC-05 · BR-28 · Sprint 2
+**US-09 Rename an account** · FR-ACC-05 · BR-28, BR-29 · Sprint 2
 > As a customer, I want to give my accounts names, so that I can distinguish them easily.
 
 - [ ] I can change the name to 1–50 characters; the new name is shown everywhere.
+- [ ] A blocked or closed account cannot be renamed.
 
 ### Epic E4/E5/E6 — Money movements
 

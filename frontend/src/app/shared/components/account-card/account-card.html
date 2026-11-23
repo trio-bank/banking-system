@@ -1,0 +1,23 @@
+@let a = account();
+<a
+  class="card"
+  [routerLink]="['/app/accounts', a.id]"
+  [class.alt]="savings() && active()"
+  [class.inactive]="!active()"
+  [class.closed]="a.status === 'CLOSED'"
+>
+  <span class="top">
+    <span class="name" [title]="a.name">{{ a.name }}</span>
+    <span class="status">{{ a.status | enumLabel }}</span>
+  </span>
+  <span class="type">{{ a.type | enumLabel }} · {{ a.currency }}</span>
+  <span class="iban">{{ a.iban | iban }}</span>
+  <span class="bottom">
+    <span class="balance">{{ a.balance | money: a.currency }}</span>
+    @if (active()) {
+      <span class="chip" aria-hidden="true"></span>
+    } @else if (a.status === 'BLOCKED') {
+      <mat-icon aria-hidden="true">lock</mat-icon>
+    }
+  </span>
+</a>

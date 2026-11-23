@@ -1,0 +1,62 @@
+h1 {
+  margin: 0 0 16px;
+  font: var(--mat-sys-headline-small);
+}
+
+.state {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 24px 0;
+}
+
+.banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 8px 8px 16px;
+  border-left: 4px solid var(--mat-sys-error);
+  border-radius: 4px;
+  background: var(--mat-sys-error-container);
+  color: var(--mat-sys-on-error-container);
+}
+
+.profile-card {
+  max-width: 560px;
+}
+
+// Label on the left, value on the right; stacked on narrow screens.
+.fields {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 12px 24px;
+  margin: 8px 0;
+}
+
+.fields dt {
+  color: var(--mat-sys-on-surface-variant);
+  font: var(--mat-sys-label-large);
+}
+
+.fields dd {
+  margin: 0;
+  font: var(--mat-sys-body-large);
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 480px) {
+  .fields {
+    grid-template-columns: 1fr;
+    gap: 2px;
+  }
+
+  .fields dd {
+    margin-bottom: 10px;
+  }
+}
+
+.hint {
+  color: var(--mat-sys-on-surface-variant);
+  font: var(--mat-sys-body-medium);
+}

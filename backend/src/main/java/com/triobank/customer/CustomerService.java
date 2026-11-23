@@ -12,6 +12,7 @@ import java.time.Clock;
 import java.time.LocalDate;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
@@ -81,6 +82,18 @@ public class CustomerService {
         return customers.findByUserId(userId)
                 .map(CustomerMapper::toProfile)
                 .orElseThrow(() -> new IllegalStateException("User " + userId + " has no customer"));
+    }
+
+    /**
+     * Locks the customer until the end of the caller's transaction. Two requests that open accounts
+     * for the same customer then run one after another, so both can't pass the account limit check at once.
+     *
+     * @throws IllegalStateException if the customer does not exist, which must not happen for an id from a token
+     */
+    @Transactional(propagation = Propagation.MANDATORY)
+    public Customer lockForAccountOpening(UUID customerId) {
+        return customers.findByIdForUpdate(customerId)
+                .orElseThrow(() -> new IllegalStateException("Customer " + customerId + " does not exist"));
     }
 
     private static String blankToNull(String value) {

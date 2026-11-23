@@ -25,15 +25,15 @@ import { RouterLink } from '@angular/router';
 
     .auth-header {
       padding: 16px 24px;
-      background: var(--mat-sys-primary);
-      border-bottom: 3px solid var(--mat-sys-tertiary);
+      background: var(--tb-toolbar);
+      border-bottom: 3px solid var(--tb-brand);
     }
 
     .brand {
       display: inline-flex;
       align-items: center;
       gap: 10px;
-      color: var(--mat-sys-on-primary);
+      color: var(--tb-on-toolbar);
       text-decoration: none;
       font: var(--mat-sys-title-large);
     }

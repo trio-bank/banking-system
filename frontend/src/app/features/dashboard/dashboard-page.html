@@ -1,0 +1,129 @@
+<app-page-hero size="tall">
+  <div class="hero">
+    <div class="hero-top">
+      <p class="hello">
+        <!-- The page heading, kept small: the total below is the star of the header. ATM is in the
+             navigation, so the header has no buttons. -->
+        <span role="heading" aria-level="1">Hello{{ firstName() ? ', ' + firstName() : '' }}</span>
+        <span class="soft"> · total of active accounts</span>
+      </p>
+      <p class="last-login soft">
+        @if (previousLoginAt(); as at) {
+          <mat-icon aria-hidden="true">schedule</mat-icon>
+          Last login: {{ at | date: 'dd.MM.yyyy, HH:mm' }}
+        } @else {
+          Welcome to Trio Bank! This is your first login.
+        }
+      </p>
+    </div>
+
+    @if (accounts()) {
+      <p class="total" data-testid="total">{{ total() | money }}</p>
+    } @else if (loading()) {
+      <span class="skeleton total-skeleton" aria-hidden="true"></span>
+    } @else {
+      <p class="total" aria-label="Not available">—</p>
+    }
+  </div>
+</app-page-hero>
+
+<section class="accounts" aria-labelledby="accounts-title">
+  <h2 id="accounts-title" class="sr-only">My accounts</h2>
+
+  @if (loading()) {
+    <div class="cards" role="status" aria-label="Loading your accounts">
+      @for (i of skeletonCards; track i) {
+        <span class="skeleton card-skeleton"></span>
+      }
+    </div>
+  } @else if (error(); as message) {
+    <div class="banner" role="alert">
+      <span>{{ message }}</span>
+      <button matButton type="button" (click)="load()">Try again</button>
+    </div>
+  } @else if (accounts(); as list) {
+    <ul class="cards">
+      @for (a of list; track a.id) {
+        <li><app-account-card [account]="a" /></li>
+      }
+      @if (canOpenMore()) {
+        <li>
+          <a class="card-add" routerLink="/app/accounts/new">
+            <mat-icon aria-hidden="true">add</mat-icon>
+            Open account
+          </a>
+        </li>
+      }
+    </ul>
+    @if (list.length === 0) {
+      <p class="muted">You have no accounts yet.</p>
+    }
+  }
+</section>
+
+@if (accounts()?.length) {
+  <section class="last-ops" aria-labelledby="ops-title">
+    <div class="section-head">
+      <h2 id="ops-title">Last operations</h2>
+      <p class="muted small">All accounts</p>
+    </div>
+
+    @if (operationsLoading()) {
+      <ul class="operations" role="status" aria-label="Loading operations">
+        @for (i of skeletonRows; track i) {
+          <li class="operation">
+            <span class="skeleton op-icon"></span>
+            <span class="skeleton line"></span>
+          </li>
+        }
+      </ul>
+    } @else if (operationsError(); as message) {
+      <div class="banner" role="alert">
+        <span>{{ message }}</span>
+        <button matButton type="button" (click)="loadOperations()">Try again</button>
+      </div>
+    } @else if (operations(); as items) {
+      @if (items.length === 0) {
+        <p class="muted">No operations yet.</p>
+      } @else {
+        <ul class="operations">
+          @for (row of items; track row.entry.transactionId) {
+            @let op = row.entry;
+            <li>
+              <!-- The whole row opens the history of its account. -->
+              <a class="operation" [routerLink]="['/app/accounts', row.account.id]">
+                <span class="op-icon" aria-hidden="true">
+                  <mat-icon>{{ operationIcon(op) }}</mat-icon>
+                </span>
+                <span class="op-text">
+                  <span class="op-title">{{ op.title }}</span>
+                  <!-- Date · the person (not the bank: the title already says ATM or
+                       interest) · the account, or from → to for an own transfer. -->
+                  <span class="op-meta">
+                    {{ op.createdAt | date: 'dd.MM' }}
+                    @if (row.transfer; as t) {
+                      · {{ t.from.name }} → {{ t.to.name }}
+                    } @else {
+                      @if (op.counterpartyIban) {
+                        · {{ op.counterpartyName }}
+                      }
+                      · {{ row.account.name }}
+                    }
+                  </span>
+                </span>
+                @if (row.transfer) {
+                  <!-- Own money only moved: no sign, no colour. -->
+                  <span class="op-amount">{{ op.amount | money: op.currency }}</span>
+                } @else {
+                  <span class="op-amount" [class.incoming]="op.direction === 'INCOMING'">
+                    {{ op.amount | signedAmount: op.direction : op.currency }}
+                  </span>
+                }
+              </a>
+            </li>
+          }
+        </ul>
+      }
+    }
+  </section>
+}

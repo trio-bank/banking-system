@@ -20,5 +20,6 @@ Statuses: `Proposed` → `Accepted` → (`Superseded by ADR-xxxx` | `Deprecated`
 | [0012](0012-github-projects-for-planning.md) | GitHub Projects instead of Trello | Accepted |
 | [0013](0013-technology-stack.md) | Technology stack and versions | Accepted |
 | 0014 | Demo hosting provider | To be written in Sprint 1 |
+| [0015](0015-ui-visual-direction.md) | UI visual direction: yellow header, dense admin | Accepted |
 
 New ADR: copy [template.md](template.md), next free number, kebab-case title.

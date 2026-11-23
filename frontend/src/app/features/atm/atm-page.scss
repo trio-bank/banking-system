@@ -1,0 +1,49 @@
+:host {
+  display: block;
+  max-width: 960px;
+}
+
+.back {
+  margin: 0 0 8px -12px;
+}
+
+h1 {
+  margin: 0 0 8px;
+  font: var(--mat-sys-headline-small);
+}
+
+.mode {
+  margin: 8px 0 0;
+  // The chosen operation: yellow like the main button, bold, and a check mark,
+  // so it's clear without relying on color only.
+  --mat-button-toggle-selected-state-background-color: var(--mat-sys-primary-container);
+  --mat-button-toggle-selected-state-text-color: var(--mat-sys-on-primary-container);
+
+  .mat-button-toggle-checked {
+    font-weight: 600;
+  }
+}
+
+.state {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 0;
+}
+
+.empty p {
+  margin: 0 0 16px;
+}
+
+// Same banner as on the dashboard.
+.banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 8px 8px 16px;
+  border-left: 4px solid var(--mat-sys-error);
+  border-radius: 4px;
+  background: var(--mat-sys-error-container);
+  color: var(--mat-sys-on-error-container);
+}

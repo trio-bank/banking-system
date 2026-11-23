@@ -1,0 +1,141 @@
+:host {
+  display: block;
+  max-width: 480px;
+  padding-top: 16px;
+}
+
+h2 {
+  margin: 0 0 16px;
+  font: var(--mat-sys-title-medium);
+
+  &:focus {
+    outline: none; // focused by code only, for screen readers
+  }
+}
+
+.field {
+  width: 100%;
+}
+
+.label {
+  margin: 0 0 8px;
+  font: var(--mat-sys-body-medium);
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.quick {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-bottom: 16px;
+
+  // Chosen amount: yellow like the main button, the text stays black.
+  .active {
+    background: var(--mat-sys-primary-container);
+    border-color: var(--mat-sys-primary);
+  }
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.summary {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 8px 24px;
+  margin: 0 0 16px;
+
+  dt {
+    color: var(--mat-sys-on-surface-variant);
+  }
+
+  dd {
+    margin: 0;
+    overflow-wrap: anywhere;
+  }
+}
+
+.muted {
+  display: block;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.iban,
+.reference {
+  font-variant-numeric: tabular-nums;
+}
+
+.big {
+  font: var(--mat-sys-headline-small);
+}
+
+p.big {
+  margin: 0 0 16px;
+}
+
+.incoming {
+  color: var(--tb-income);
+}
+
+// Same banner as on the other pages.
+.banner {
+  margin-bottom: 16px;
+  padding: 8px 16px;
+  border-left: 4px solid var(--mat-sys-error);
+  border-radius: 4px;
+  background: var(--mat-sys-error-container);
+  color: var(--mat-sys-on-error-container);
+}
+
+.preview {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 4px 16px;
+  margin: 4px 0 16px;
+  padding: 12px 16px;
+  border-radius: 8px;
+  background: var(--mat-sys-surface-container);
+
+  dt {
+    color: var(--mat-sys-on-surface-variant);
+  }
+
+  dd {
+    margin: 0;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .after {
+    font: var(--mat-sys-title-medium);
+  }
+}
+
+// Phone (< 600 px): 4 amount buttons don't fit in one row at 360 px, labels above values,
+// big buttons for the thumb, the main one on top.
+@media (max-width: 599px) {
+  .quick {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .summary {
+    grid-template-columns: 1fr;
+    gap: 2px;
+
+    dd {
+      margin-bottom: 10px;
+    }
+  }
+
+  .actions {
+    flex-direction: column;
+
+    > * {
+      width: 100%;
+    }
+  }
+}

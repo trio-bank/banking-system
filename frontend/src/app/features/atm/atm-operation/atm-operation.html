@@ -1,0 +1,124 @@
+@switch (step()) {
+  @case ('form') {
+    <form [formGroup]="form" (ngSubmit)="next()">
+      <mat-form-field appearance="outline" class="field">
+        <mat-label>Account</mat-label>
+        <mat-select formControlName="accountId">
+          @for (a of accounts(); track a.id) {
+            <mat-option [value]="a.id" [disabled]="a.status !== 'ACTIVE'">
+              {{ a.name }} · {{ a.balance | money: a.currency }}
+              @if (a.status !== 'ACTIVE') {
+                (blocked)
+              }
+            </mat-option>
+          }
+        </mat-select>
+        <mat-error>Choose an account.</mat-error>
+      </mat-form-field>
+
+      <p class="label" id="quick-label">Amount</p>
+      <div class="quick" role="group" aria-labelledby="quick-label">
+        @for (q of quickAmounts; track q) {
+          <button
+            matButton="outlined"
+            type="button"
+            [class.active]="amount() === q + '.00'"
+            [attr.aria-pressed]="amount() === q + '.00'"
+            (click)="pick(q)"
+          >
+            {{ q }} zł
+          </button>
+        }
+      </div>
+
+      <mat-form-field appearance="outline" class="field">
+        <mat-label>Other amount</mat-label>
+        <input
+          #focusTarget
+          matInput
+          formControlName="amount"
+          inputmode="numeric"
+          autocomplete="off"
+        />
+        <span matTextSuffix>zł</span>
+        <mat-hint>{{ limitsHint() }}</mat-hint>
+        <mat-error>{{ amountError() }}</mat-error>
+      </mat-form-field>
+
+      @if (selected(); as a) {
+        <dl class="preview">
+          <dt>Balance now</dt>
+          <dd>{{ a.balance | money: a.currency }}</dd>
+          <dt>After this {{ texts().noun }}</dt>
+          <!-- Read out when it changes, so a screen reader hears it while typing. -->
+          <dd class="after" aria-live="polite" data-testid="balance-after">
+            {{ balanceAfter() ? (balanceAfter() | money: a.currency) : '—' }}
+          </dd>
+        </dl>
+      }
+
+      <div class="actions">
+        <button matButton="filled" type="submit">Next</button>
+      </div>
+    </form>
+  }
+
+  @case ('confirm') {
+    <h2 #focusTarget tabindex="-1">Check and confirm</h2>
+    @if (selected(); as a) {
+      <dl class="summary">
+        <dt>Operation</dt>
+        <dd>{{ texts().operation }}</dd>
+        <dt>Account</dt>
+        <dd>
+          {{ a.name }}
+          <span class="muted iban">{{ a.iban | iban }}</span>
+        </dd>
+        <dt>Amount</dt>
+        <dd class="big">{{ amount() | money: a.currency }}</dd>
+        @if (balanceAfter(); as after) {
+          <dt>Balance after</dt>
+          <dd>{{ after | money: a.currency }}</dd>
+        }
+      </dl>
+    }
+
+    @if (error(); as message) {
+      <div class="banner" role="alert">{{ message }}</div>
+    }
+
+    <div class="actions">
+      <button matButton="filled" type="button" [disabled]="sending()" (click)="confirm()">
+        {{ sending() ? texts().busy : 'Confirm' }}
+      </button>
+      <button matButton type="button" [disabled]="sending()" (click)="back()">Back</button>
+    </div>
+  }
+
+  @case ('result') {
+    @if (transaction(); as t) {
+      <div class="result" role="status">
+        <h2 #focusTarget tabindex="-1">{{ texts().done }}</h2>
+        <p class="big" [class.incoming]="texts().direction === 'INCOMING'">
+          {{ t.amount | signedAmount: texts().direction : t.currency }}
+        </p>
+        <dl class="summary">
+          <dt>Account</dt>
+          <dd>{{ selected()?.name }}</dd>
+          @if (updatedAccount(); as u) {
+            <dt>New balance</dt>
+            <dd>{{ u.balance | money: u.currency }}</dd>
+          }
+          <dt>Reference</dt>
+          <dd class="reference">{{ t.reference }}</dd>
+        </dl>
+      </div>
+      <div class="actions">
+        <button matButton="filled" type="button" (click)="startOver()">{{ texts().again }}</button>
+        @if (selected(); as a) {
+          <a matButton [routerLink]="['/app/accounts', a.id]">Go to account</a>
+        }
+      </div>
+    }
+  }
+}

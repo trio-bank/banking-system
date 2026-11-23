@@ -38,6 +38,33 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/dashboard/dashboard-page').then((m) => m.DashboardPage),
       },
+      // Before 'accounts/:accountId', or "new" would be taken as an id.
+      {
+        path: 'accounts/new',
+        title: 'Open account · Trio Bank',
+        loadComponent: () =>
+          import('./features/accounts/open-account/open-account-page').then(
+            (m) => m.OpenAccountPage,
+          ),
+      },
+      {
+        path: 'accounts/:accountId',
+        title: 'Account · Trio Bank',
+        loadComponent: () =>
+          import('./features/accounts/account-details/account-details-page').then(
+            (m) => m.AccountDetailsPage,
+          ),
+      },
+      {
+        path: 'atm',
+        title: 'ATM · Trio Bank',
+        loadComponent: () => import('./features/atm/atm-page').then((m) => m.AtmPage),
+      },
+      {
+        path: 'profile',
+        title: 'My profile · Trio Bank',
+        loadComponent: () => import('./features/profile/profile-page').then((m) => m.ProfilePage),
+      },
     ],
   },
   {

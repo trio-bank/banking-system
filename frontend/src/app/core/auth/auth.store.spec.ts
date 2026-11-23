@@ -2,7 +2,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { LoginResponse } from '../api/models';
-import { MOCK_USERS } from '../api/mocks/mock-data';
+import { MOCK_USERS } from '../../../testing/mock-data';
 import { AuthStore, homeUrl } from './auth.store';
 
 const [ANNA, ADMIN] = MOCK_USERS;
@@ -48,6 +48,15 @@ describe('AuthStore', () => {
     expect(store.token()).toBe('token-123');
     expect(store.role()).toBe('CUSTOMER');
     expect(sessionStorage.getItem('trio.session')).toContain('token-123');
+  });
+
+  it('keeps the previous login from the login answer, even after GET /me and a reload', () => {
+    store.setSession(loginResponse());
+    store.setUser({ ...ANNA, lastLoginAt: '2026-11-16T10:00:00Z' }); // /me = this login
+    expect(store.previousLoginAt()).toBe(ANNA.lastLoginAt);
+
+    createStore();
+    expect(store.previousLoginAt()).toBe(ANNA.lastLoginAt);
   });
 
   it('forgets everything on clear', () => {

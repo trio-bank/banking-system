@@ -3,7 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
 import { RegistrationResponse } from '../../../core/api/models';
-import { NEW_PERSONAL_ACCOUNT } from '../../../core/api/mocks/mock-data';
+import { NEW_PERSONAL_ACCOUNT } from '../../../../testing/mock-data';
 import { RegisterSuccessPage } from './register-success-page';
 
 const registration: RegistrationResponse = {

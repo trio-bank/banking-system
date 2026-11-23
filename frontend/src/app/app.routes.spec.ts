@@ -5,7 +5,7 @@ import { provideRouter, Router } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
 import { routes } from './app.routes';
 import { CurrentUserDto } from './core/api/models';
-import { MOCK_USERS } from './core/api/mocks/mock-data';
+import { MOCK_USERS } from '../testing/mock-data';
 import { AuthStore } from './core/auth/auth.store';
 
 const [CUSTOMER, ADMIN] = MOCK_USERS;
@@ -85,6 +85,17 @@ describe('app routes', () => {
       await harness.navigateByUrl('/app');
       expect(url()).toBe('/app/dashboard');
       expect(harness.routeNativeElement?.querySelector('app-dashboard-page')).not.toBeNull();
+    });
+
+    it('/app/accounts/new opens the open-account page, not details of an account "new"', async () => {
+      await harness.navigateByUrl('/app/accounts/new');
+      expect(harness.routeNativeElement?.querySelector('app-open-account-page')).not.toBeNull();
+      expect(harness.routeNativeElement?.querySelector('app-account-details-page')).toBeNull();
+    });
+
+    it('/app/atm opens the ATM page', async () => {
+      await harness.navigateByUrl('/app/atm');
+      expect(harness.routeNativeElement?.querySelector('app-atm-page')).not.toBeNull();
     });
 
     it.each(['/admin', '/login', '/register'])('cannot open %s', async (path) => {
