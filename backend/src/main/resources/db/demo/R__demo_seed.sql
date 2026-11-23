@@ -1,6 +1,6 @@
 -- Demo data for the demo/local profiles (NOT loaded in production or tests).
 -- Loaded by adding classpath:db/demo to spring.flyway.locations in application-demo.yml.
--- Repeatable migration: safe to run again, customers that already exist are skipped.
+-- Repeatable migration: safe to run again, customers whose email or PESEL already exists are skipped.
 --
 -- Password of every demo user: Demo!Passw0rd2026
 -- Everything goes through the same tables and rules as the application, so the ledger stays balanced:
@@ -61,7 +61,7 @@ BEGIN
     FOR demo IN
         SELECT *
         FROM (VALUES
-                  ('anna.demo@example.com', 'Anna', 'Nowak', '90051412343', DATE '1990-05-14', '+48501000001',
+                  ('anna.demo@example.com', 'Anna', 'Nowak', '90051402869', DATE '1990-05-14', '+48501000001',
                    'Krakowska', '12A', '4', '45-018', 'Opole', 5000.00, 2000.00, 3),
                   ('jan.demo@example.com', 'Jan', 'Kowalski', '85110356782', DATE '1985-11-03', '+48501000002',
                    'Rynek', '7', NULL, '50-101', 'Wroclaw', 1200.00, 0.00, 2),
@@ -70,7 +70,12 @@ BEGIN
              ) AS t(email, first_name, last_name, pesel, birth, phone, street, building, apartment, postal, city,
                     personal_deposit, savings_transfer, days_ago)
     LOOP
-        CONTINUE WHEN EXISTS (SELECT 1 FROM users WHERE email = demo.email);
+        -- skip if the email or PESEL is taken, otherwise the unique constraint kills the whole app startup
+        IF EXISTS (SELECT 1 FROM users WHERE email = demo.email)
+            OR EXISTS (SELECT 1 FROM customers WHERE pesel = demo.pesel) THEN
+            RAISE NOTICE 'demo seed: % skipped, email or PESEL already exists', demo.email;
+            CONTINUE;
+        END IF;
 
         v_user := gen_random_uuid();
         v_customer := gen_random_uuid();
