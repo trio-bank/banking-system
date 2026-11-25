@@ -1,18 +1,17 @@
 :host {
   display: block;
-  padding-top: 8px;
-}
 
-.state {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  padding: 24px 0;
+  // The table sits on the page's card, so it has no background of its own.
+  --mat-table-background-color: transparent;
+  --mat-table-row-item-outline-color: var(--tb-line);
+  --mat-table-header-headline-color: var(--tb-muted);
+  --mat-paginator-container-background-color: transparent;
 }
 
 .empty {
+  margin: 0;
   padding: 16px 0;
-  color: var(--mat-sys-on-surface-variant);
+  color: var(--tb-muted);
 }
 
 // Same banner as on the account header.
@@ -39,35 +38,59 @@
   opacity: 0.5;
 }
 
-// Desktop: full width, so the right edge of the table and the paginator line up.
-.history {
-  width: 100%;
-}
-
-.date {
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
   white-space: nowrap;
 }
 
-.counterparty {
-  display: block;
+// ---- Shared by rows and table: icon in a circle, title and a muted line under it ----
+.op-icon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--tb-chip);
+
+  &.incoming {
+    color: var(--tb-income);
+  }
+
+  mat-icon {
+    width: 20px;
+    height: 20px;
+    font-size: 20px;
+  }
 }
 
-.iban {
-  display: block;
-  color: var(--mat-sys-on-surface-variant);
+.op-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.op-title {
+  font: var(--mat-sys-title-small);
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.op-meta {
+  overflow: hidden;
+  color: var(--tb-muted);
   font: var(--mat-sys-body-small);
-  font-variant-numeric: tabular-nums;
+  text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-.number {
-  text-align: right;
-  white-space: nowrap;
-  font-variant-numeric: tabular-nums;
 }
 
 .amount {
-  font-weight: 500;
+  font-weight: 700;
   white-space: nowrap;
   font-variant-numeric: tabular-nums;
 }
@@ -77,49 +100,108 @@
   color: var(--tb-income);
 }
 
-// Phone: one card per operation.
-//   Title             −150,00 zł
-//   Counterparty      Balance after 850,00 zł
-//   24.10.2026, 13:02
-.cards {
+.balance-after {
+  color: var(--tb-muted);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+// ---- Phone: rows grouped by day, straight on the page ----
+.day {
+  margin: 12px 0 2px;
+  color: var(--tb-muted);
+  font: var(--mat-sys-label-medium);
+  font-weight: 600;
+}
+
+.ops {
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
-.card {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 2px 12px;
-  align-items: baseline;
-  padding: 12px 0;
-  border-bottom: 1px solid var(--mat-sys-outline-variant);
+.op {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+
+  & + & {
+    border-top: 1px solid var(--tb-line);
+  }
 }
 
-.card-title,
-.card-counterparty {
-  overflow: hidden;
-  text-overflow: ellipsis;
+.op-text {
+  flex: 1;
+}
+
+.op-numbers {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+
+  .balance-after {
+    font: var(--mat-sys-body-small);
+  }
+}
+
+// ---- ≥ 768px: table ----
+// Full width, so the right edge of the table and the paginator line up.
+.history {
+  width: 100%;
+  min-width: 640px;
+}
+
+.date {
+  color: var(--tb-muted);
   white-space: nowrap;
 }
 
-.card-title {
-  font: var(--mat-sys-title-small);
+.description {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+
+  .op-icon {
+    width: 36px;
+    height: 36px;
+  }
 }
 
-.card-counterparty,
-.card-balance,
-.card-date {
-  color: var(--mat-sys-on-surface-variant);
-  font: var(--mat-sys-body-small);
+.iban {
+  font-variant-numeric: tabular-nums;
 }
 
-.card-balance {
+.number {
   text-align: right;
   white-space: nowrap;
   font-variant-numeric: tabular-nums;
 }
 
-.card-date {
-  grid-column: 1 / -1;
+// ---- Loading placeholders (.skeleton is global) ----
+.skeletons {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 0;
+  }
+}
+
+.circle {
+  flex: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+}
+
+.line {
+  width: 60%;
+  height: 14px;
 }

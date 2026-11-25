@@ -172,6 +172,27 @@ body {
   }
 }
 
+// Loading placeholder (docs/07 §13.3: skeletons, not spinners). Pages set the size;
+// on the yellow header they override background-color with a tint of the text.
+.skeleton {
+  display: block;
+  border-radius: 8px;
+  background: linear-gradient(
+      90deg,
+      transparent,
+      color-mix(in srgb, var(--tb-surface) 60%, transparent),
+      transparent
+    )
+    0 0 / 200% 100% var(--tb-chip);
+  animation: skeleton-shimmer 1.4s linear infinite;
+}
+
+@keyframes skeleton-shimmer {
+  to {
+    background-position: -200% 0;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

@@ -235,6 +235,8 @@ Direction and alternatives: [ADR-0015](adr/0015-ui-visual-direction.md). Custome
 | Open account card | The last card in the row: see-through, dashed outline, `add` icon. |
 | Card row | On phones the row scrolls sideways. |
 | Lists (operations, history) | Rows directly on the page background, no box: icon in a circle, title + date, amount on the right, `line` divider. |
+| Account history | < 768px: rows grouped by day ("Today", "19 November"), time · counterparty under the title, balance after under the amount. ≥ 768px: table on a `surface` card (Date, Description, Amount, Balance after). |
+| Account header | Compact header with name, status chip, Rename, big balance and the IBAN block with Copy. Product, opened date and savings interest: tiles in the header ≥ 768px, a `surface` card under it on phones. |
 | Forms | On a `surface` card with 16px radius. |
 | Loading | Skeletons, not spinners. |
 

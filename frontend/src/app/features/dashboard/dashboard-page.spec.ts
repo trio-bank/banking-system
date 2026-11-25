@@ -19,7 +19,8 @@ import { MOCK_USERS } from '../../../testing/mock-data';
 import { AccountsApi } from '../../core/api/services/accounts-api';
 import { AuthStore } from '../../core/auth/auth.store';
 import { formatMoney } from '../../shared/pipes';
-import { DashboardPage, operationIcon, recentOperations, totalBalance } from './dashboard-page';
+import { operationIcon } from '../history/operation-icon';
+import { DashboardPage, recentOperations, totalBalance } from './dashboard-page';
 
 resetMockBank();
 // Personal, savings, blocked personal — in the order C1 returns them.
