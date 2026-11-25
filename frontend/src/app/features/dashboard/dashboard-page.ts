@@ -16,25 +16,12 @@ import { AccountsApi } from '../../core/api/services/accounts-api';
 import { AuthStore } from '../../core/auth/auth.store';
 import { errorMessage } from '../../core/errors/error-messages';
 import { cannotOpenReason } from '../accounts/account-rules';
+import { operationIcon } from '../history/operation-icon';
 import { AccountCard } from '../../shared/components/account-card/account-card';
 import { PageHero } from '../../shared/components/page-hero/page-hero';
 import { MoneyPipe, SignedAmountPipe } from '../../shared/pipes';
 
 const LAST_OPERATIONS = 5;
-
-// Icon in the circle of an operation row. Unknown types fall back to the direction arrow.
-const OPERATION_ICONS: Record<string, string> = {
-  CASH_DEPOSIT: 'local_atm',
-  CASH_WITHDRAWAL: 'local_atm',
-  OWN_TRANSFER: 'sync_alt',
-  INTERNAL_TRANSFER: 'swap_horiz',
-  INTEREST: 'percent',
-  TAX: 'account_balance',
-};
-
-export function operationIcon(op: Pick<AccountHistoryItemDto, 'type' | 'direction'>): string {
-  return OPERATION_ICONS[op.type] ?? (op.direction === 'INCOMING' ? 'south_west' : 'north_east');
-}
 
 /** Sum of the active accounts (US-06). Counted in grosze, so there are no rounding errors. */
 export function totalBalance(accounts: readonly AccountDto[]): Money {

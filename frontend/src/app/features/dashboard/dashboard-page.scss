@@ -206,20 +206,7 @@ a.operation {
   color: var(--mat-sys-on-error-container);
 }
 
-// ---- Loading placeholders ----
-.skeleton {
-  display: block;
-  border-radius: 8px;
-  background: linear-gradient(
-      90deg,
-      transparent,
-      color-mix(in srgb, var(--tb-surface) 60%, transparent),
-      transparent
-    )
-    0 0 / 200% 100% var(--tb-chip);
-  animation: shimmer 1.4s linear infinite;
-}
-
+// ---- Loading placeholders (.skeleton is global) ----
 .total-skeleton {
   width: 280px;
   height: 56px;
@@ -239,12 +226,6 @@ a.operation {
 
 .operation .skeleton.op-icon {
   border-radius: 50%;
-}
-
-@keyframes shimmer {
-  to {
-    background-position: -200% 0;
-  }
 }
 
 // Phones: a smaller total; cards scroll sideways instead of stacking.

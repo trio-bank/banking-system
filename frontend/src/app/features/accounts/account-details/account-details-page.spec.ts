@@ -125,11 +125,11 @@ describe('AccountDetailsPage', () => {
     expect(history).toHaveBeenCalledTimes(1);
   });
 
-  it('shows a loader while waiting', async () => {
+  it('shows placeholders while waiting', async () => {
     get.mockReturnValue(new Subject<AccountDto>());
     const el = await open(PERSONAL);
 
-    expect(el.querySelector('mat-spinner')).not.toBeNull();
+    expect(el.querySelector('[role="status"] .skeleton')).not.toBeNull();
   });
 
   it('404 (unknown or not mine) → "Account not found"', async () => {

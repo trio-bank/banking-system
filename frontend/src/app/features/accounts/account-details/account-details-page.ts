@@ -1,5 +1,6 @@
 import { Clipboard } from '@angular/cdk/clipboard';
-import { DatePipe } from '@angular/common';
+import { BreakpointObserver } from '@angular/cdk/layout';
+import { DatePipe, NgTemplateOutlet } from '@angular/common';
 import {
   afterNextRender,
   Component,
@@ -13,23 +14,23 @@ import {
   untracked,
   viewChild,
 } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
-import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIcon } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { Subscription } from 'rxjs';
+import { map, Subscription } from 'rxjs';
 import { AccountDto, ProblemDetail } from '../../../core/api/models';
 import { AccountsApi } from '../../../core/api/services/accounts-api';
 import { errorMessage, fieldErrorMessage } from '../../../core/errors/error-messages';
+import { PageHero } from '../../../shared/components/page-hero/page-hero';
 import { EnumLabelPipe, IbanPipe, MoneyPipe } from '../../../shared/pipes';
 import { AccountHistory } from '../../history/account-history/account-history';
 import { ACCOUNT_NAME_MAX, accountNameValidator, formatRate } from '../account-rules';
 
-// No mat-icon here on purpose: it moves MatIcon into the first-load bundle (+10 kB).
 /** Account header with inline rename (US-08, US-09) and the history tab (US-12). */
 @Component({
   selector: 'app-account-details-page',
@@ -39,11 +40,12 @@ import { ACCOUNT_NAME_MAX, accountNameValidator, formatRate } from '../account-r
     EnumLabelPipe,
     IbanPipe,
     MatButtonModule,
-    MatCardModule,
     MatFormFieldModule,
+    MatIcon,
     MatInputModule,
-    MatProgressSpinnerModule,
     MoneyPipe,
+    NgTemplateOutlet,
+    PageHero,
     ReactiveFormsModule,
     RouterLink,
   ],
@@ -64,6 +66,13 @@ export class AccountDetailsPage implements OnDestroy {
   protected readonly error = signal<string | null>(null);
   /** 404: no such account, or it belongs to someone else (the backend doesn't say which). */
   protected readonly notFound = signal(false);
+  /** ≥ 768px: product and dates are tiles in the header; on phones a card under it. */
+  protected readonly wide = toSignal(
+    inject(BreakpointObserver)
+      .observe('(min-width: 768px)')
+      .pipe(map((state) => state.matches)),
+    { initialValue: false },
+  );
   protected readonly formatRate = formatRate;
   protected readonly nameMax = ACCOUNT_NAME_MAX;
 

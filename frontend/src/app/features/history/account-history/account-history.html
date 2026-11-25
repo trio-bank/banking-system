@@ -4,34 +4,54 @@
     <button matButton type="button" (click)="load()">Try again</button>
   </div>
 } @else if (loading() && !page()) {
-  <div class="state" role="status">
-    <mat-spinner diameter="32" />
-    <span>Loading the history…</span>
-  </div>
+  <ul class="skeletons" role="status" aria-label="Loading the history">
+    @for (i of skeletonRows; track i) {
+      <li>
+        <span class="skeleton circle"></span>
+        <span class="skeleton line"></span>
+      </li>
+    }
+  </ul>
 }
 
 @if (page(); as p) {
   @if (p.totalElements === 0) {
     <p class="empty">No operations yet.</p>
   } @else {
-    <!-- The old page stays dimmed while the next one loads, so the table doesn't jump. -->
+    <!-- The old page stays dimmed while the next one loads, so the list doesn't jump. -->
     <div class="list" [class.busy]="loading()" [attr.aria-busy]="loading()">
       @if (phone()) {
-        <ul class="cards">
-          @for (op of p.content; track op.entryId) {
-            <li class="card">
-              <span class="card-title">{{ op.title }}</span>
-              <span class="amount" [class.incoming]="op.direction === 'INCOMING'">
-                {{ op.amount | signedAmount: op.direction : op.currency }}
-              </span>
-              <span class="card-counterparty">{{ op.counterpartyName }}</span>
-              <span class="card-balance">
-                Balance after {{ op.balanceAfter | money: op.currency }}
-              </span>
-              <span class="card-date">{{ op.createdAt | date: 'dd.MM.yyyy, HH:mm' }}</span>
-            </li>
-          }
-        </ul>
+        @for (group of days(); track group.key) {
+          <h3 class="day">{{ group.label }}</h3>
+          <ul class="ops">
+            @for (op of group.items; track op.entryId) {
+              <li class="op">
+                <span
+                  class="op-icon"
+                  aria-hidden="true"
+                  [class.incoming]="op.direction === 'INCOMING'"
+                >
+                  <mat-icon>{{ icon(op) }}</mat-icon>
+                </span>
+                <span class="op-text">
+                  <span class="op-title">{{ op.title }}</span>
+                  <span class="op-meta">
+                    {{ op.createdAt | date: 'HH:mm' }} · {{ op.counterpartyName }}
+                  </span>
+                </span>
+                <span class="op-numbers">
+                  <span class="amount" [class.incoming]="op.direction === 'INCOMING'">
+                    {{ op.amount | signedAmount: op.direction : op.currency }}
+                  </span>
+                  <span class="balance-after">
+                    <span class="sr-only">Balance after </span>
+                    {{ op.balanceAfter | money: op.currency }}
+                  </span>
+                </span>
+              </li>
+            }
+          </ul>
+        }
       } @else {
         <table mat-table [dataSource]="p.content" [trackBy]="trackEntry" class="history">
           <ng-container matColumnDef="date">
@@ -41,19 +61,28 @@
             </td>
           </ng-container>
 
-          <ng-container matColumnDef="counterparty">
-            <th mat-header-cell *matHeaderCellDef>Counterparty</th>
+          <ng-container matColumnDef="description">
+            <th mat-header-cell *matHeaderCellDef>Description</th>
             <td mat-cell *matCellDef="let op">
-              <span class="counterparty">{{ op.counterpartyName }}</span>
-              @if (op.counterpartyIban) {
-                <span class="iban">{{ op.counterpartyIban | iban }}</span>
-              }
+              <span class="description">
+                <span
+                  class="op-icon"
+                  aria-hidden="true"
+                  [class.incoming]="op.direction === 'INCOMING'"
+                >
+                  <mat-icon>{{ icon(op) }}</mat-icon>
+                </span>
+                <span class="op-text">
+                  <span class="op-title">{{ op.title }}</span>
+                  <span class="op-meta">
+                    <span class="counterparty">{{ op.counterpartyName }}</span>
+                    @if (op.counterpartyIban) {
+                      · <span class="iban">{{ op.counterpartyIban | iban }}</span>
+                    }
+                  </span>
+                </span>
+              </span>
             </td>
-          </ng-container>
-
-          <ng-container matColumnDef="title">
-            <th mat-header-cell *matHeaderCellDef>Title</th>
-            <td mat-cell *matCellDef="let op">{{ op.title }}</td>
           </ng-container>
 
           <ng-container matColumnDef="amount">
@@ -70,7 +99,7 @@
 
           <ng-container matColumnDef="balanceAfter">
             <th mat-header-cell *matHeaderCellDef class="number">Balance after</th>
-            <td mat-cell *matCellDef="let op" class="number">
+            <td mat-cell *matCellDef="let op" class="number balance-after">
               {{ op.balanceAfter | money: op.currency }}
             </td>
           </ng-container>

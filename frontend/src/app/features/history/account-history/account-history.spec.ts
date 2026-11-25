@@ -10,7 +10,7 @@ import {
 import { accountEntries, mockAccounts, resetMockBank } from '../../../../testing/mock-bank';
 import { AccountsApi } from '../../../core/api/services/accounts-api';
 import { formatMoney } from '../../../shared/pipes';
-import { AccountHistory, PHONE_QUERY } from './account-history';
+import { AccountHistory, groupByDay, PHONE_QUERY } from './account-history';
 
 resetMockBank();
 const [PERSONAL, SAVINGS] = mockAccounts();
@@ -77,7 +77,7 @@ describe('AccountHistory', () => {
   });
 
   describe('phone (NFR-USE-01)', () => {
-    const cards = (el: HTMLElement) => [...el.querySelectorAll<HTMLElement>('li.card')];
+    const cards = (el: HTMLElement) => [...el.querySelectorAll<HTMLElement>('li.op')];
 
     it('watches the phone width', async () => {
       await render();
@@ -85,7 +85,7 @@ describe('AccountHistory', () => {
       expect(observe).toHaveBeenCalledWith(PHONE_QUERY);
     });
 
-    it('shows one card per operation and no table', async () => {
+    it('shows one row per operation and no table', async () => {
       usePhone(true);
       const el = (await render()).nativeElement as HTMLElement;
 
@@ -93,20 +93,35 @@ describe('AccountHistory', () => {
       expect(cards(el)).toHaveLength(20);
     });
 
-    it('a card has title, signed amount, counterparty, balance after and date', async () => {
+    it('a row has icon, title, time · counterparty, signed amount and balance after', async () => {
       usePhone(true);
       const el = (await render()).nativeElement as HTMLElement;
       const first = PERSONAL_ENTRIES[0];
       const card = cards(el)[0];
-      const text = (selector: string) => card.querySelector(selector)?.textContent?.trim();
+      const text = (selector: string) =>
+        card
+          .querySelector(selector)
+          ?.textContent?.replace(/[ \n]+/g, ' ')
+          .trim();
 
-      expect(text('.card-title')).toBe(first.title);
+      expect(card.querySelector('.op-icon mat-icon')).not.toBeNull();
+      expect(text('.op-title')).toBe(first.title);
+      expect(text('.op-meta')).toMatch(/^\d{2}:\d{2} · /);
+      expect(text('.op-meta')).toContain(first.counterpartyName);
       expect(text('.amount')).toMatch(first.direction === 'INCOMING' ? /^\+/ : /^−/);
-      expect(text('.card-counterparty')).toBe(first.counterpartyName);
-      expect(text('.card-balance')).toBe(
+      expect(text('.balance-after')).toBe(
         `Balance after ${formatMoney(first.balanceAfter, first.currency)}`,
       );
-      expect(text('.card-date')).toMatch(/^\d{2}\.\d{2}\.\d{4}, \d{2}:\d{2}$/);
+    });
+
+    it('groups the rows by day under a heading', async () => {
+      usePhone(true);
+      const el = (await render()).nativeElement as HTMLElement;
+      const headings = el.querySelectorAll('h3.day');
+      const groups = el.querySelectorAll('ul.ops');
+
+      expect(headings.length).toBeGreaterThan(0);
+      expect(groups).toHaveLength(headings.length);
     });
 
     it('incoming cards are marked, outgoing are not', async () => {
@@ -135,7 +150,7 @@ describe('AccountHistory', () => {
       expect(cards(el)).toHaveLength(5);
     });
 
-    it('switches between table and cards when the width changes', async () => {
+    it('switches between table and rows when the width changes', async () => {
       const fixture = await render();
       const el = fixture.nativeElement as HTMLElement;
       expect(el.querySelector('table')).not.toBeNull();
@@ -160,18 +175,18 @@ describe('AccountHistory', () => {
     expect(rows(el)[0].textContent).toContain(PERSONAL_ENTRIES[0].title);
   });
 
-  it('shows date, counterparty, title, signed amount and balance after', async () => {
+  it('shows date, description (title + counterparty), signed amount and balance after', async () => {
     const el = (await render()).nativeElement as HTMLElement;
     const headers = [...el.querySelectorAll('th')].map((th) => th.textContent?.trim());
     const first = PERSONAL_ENTRIES[0];
     const cells = [...rows(el)[0].querySelectorAll('td')].map((td) => td.textContent?.trim());
 
-    expect(headers).toEqual(['Date', 'Counterparty', 'Title', 'Amount', 'Balance after']);
+    expect(headers).toEqual(['Date', 'Description', 'Amount', 'Balance after']);
     expect(cells[0]).toMatch(/^\d{2}\.\d{2}\.\d{4}, \d{2}:\d{2}$/);
+    expect(cells[1]).toContain(first.title);
     expect(cells[1]).toContain(first.counterpartyName);
-    expect(cells[2]).toBe(first.title);
-    expect(cells[3]).toMatch(first.direction === 'INCOMING' ? /^\+/ : /^−/);
-    expect(cells[4]).toBe(formatMoney(first.balanceAfter, first.currency));
+    expect(cells[2]).toMatch(first.direction === 'INCOMING' ? /^\+/ : /^−/);
+    expect(cells[3]).toBe(formatMoney(first.balanceAfter, first.currency));
   });
 
   it('incoming has "+" and the incoming color, outgoing has "−"', async () => {
@@ -230,11 +245,11 @@ describe('AccountHistory', () => {
     expect(el.querySelector('table')).toBeNull();
   });
 
-  it('shows a loader on the first load', async () => {
+  it('shows placeholders on the first load', async () => {
     history.mockReturnValue(new Subject());
     const el = (await render()).nativeElement as HTMLElement;
 
-    expect(el.querySelector('mat-spinner')).not.toBeNull();
+    expect(el.querySelector('[role="status"] .skeleton')).not.toBeNull();
   });
 
   it('keeps the old page dimmed while the next one loads', async () => {
@@ -247,7 +262,7 @@ describe('AccountHistory', () => {
 
     expect(rows(el)).toHaveLength(20);
     expect(el.querySelector('.list')?.classList).toContain('busy');
-    expect(el.querySelector('mat-spinner')).toBeNull();
+    expect(el.querySelector('.skeleton')).toBeNull();
   });
 
   it('error → banner, "Try again" asks for the same page again', async () => {
@@ -281,5 +296,38 @@ describe('AccountHistory', () => {
     fixture.detectChanges();
 
     expect(history).toHaveBeenLastCalledWith(SAVINGS.id, { page: 0, size: 20 });
+  });
+});
+
+describe('groupByDay', () => {
+  const entry = (createdAt: string) =>
+    ({ ...PERSONAL_ENTRIES[0], entryId: createdAt, createdAt }) as AccountHistoryItemDto;
+  const now = new Date(2026, 10, 21, 15, 0);
+
+  it('"Today", then the date; keeps the order', () => {
+    const days = groupByDay(
+      [
+        entry(new Date(2026, 10, 21, 14, 32).toISOString()),
+        entry(new Date(2026, 10, 21, 9, 10).toISOString()),
+        entry(new Date(2026, 10, 19, 18, 45).toISOString()),
+      ],
+      now,
+      'en-US',
+    );
+
+    expect(days.map((d) => [d.label, d.items.length])).toEqual([
+      ['Today', 2],
+      ['19 November', 1],
+    ]);
+  });
+
+  it('adds the year for another year', () => {
+    const days = groupByDay([entry(new Date(2025, 2, 3, 12, 0).toISOString())], now, 'en-US');
+
+    expect(days[0].label).toBe('3 March 2025');
+  });
+
+  it('nothing → no groups', () => {
+    expect(groupByDay([], now, 'en-US')).toEqual([]);
   });
 });
