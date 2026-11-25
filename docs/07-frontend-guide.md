@@ -206,6 +206,7 @@ Direction and alternatives: [ADR-0015](adr/0015-ui-visual-direction.md). Custome
 |---|---|
 | Dashboard | Tall: greeting, last login, total balance. Account cards overlap it by 48px. |
 | Other customer pages | Compact: page title + one-line subtitle. A form card overlaps it by 28px. |
+| Guest pages (log in, register, register success) | No toolbar. `AuthLayout`: yellow header with the logo, a big title and a subtitle; the form card overlaps it by 36px. ≥ 768px: split screen, header on the left (stays in place while a long form scrolls), form on the right. |
 | Admin pages | None. Black toolbar. |
 
 - The toolbar and the header share the `hero-*` colors, so they read as one block.
@@ -219,7 +220,7 @@ Direction and alternatives: [ADR-0015](adr/0015-ui-visual-direction.md). Custome
 ### 13.2 Navigation
 
 - **≥ 768px:** logo on the left; links with icons on the right; a divider; theme toggle, avatar (opens Profile), "Log out" (outlined pill with an icon, in the bar's text color). The active link is bold, has a filled icon, `aria-current="page"` and a 3px line across its full width on the bar's bottom edge.
-- Logo mark, active line and avatar use `hero-accent`: black on the yellow bar, yellow on the dark one. On the black guest and admin bars the logo mark is yellow.
+- Logo mark, active line and avatar use `hero-accent`: black on the yellow bar, yellow on the dark one. On the black admin bar the logo mark is yellow; on the guest pages' header it uses `hero-accent` too.
 - **< 768px:** the bar keeps only the logo and the avatar. The avatar opens a menu: name and email, My profile, light/dark theme, Log out. The links move to bottom tabs; the active tab gets a yellow pill and a filled icon.
 - Links today: **Home** (also active on account details) and **ATM**. Tabs: Home, ATM, Profile. There is no separate accounts page: accounts are the cards on the dashboard. **Transfer** (`/app/transfer`) is added to the links and tabs in `customer-shell.ts` with its page in Sprint 3.
 - The theme toggle switches between light and dark and remembers the choice. Until it is pressed, the app follows the system.

@@ -1,16 +1,8 @@
-.register-card {
-  max-width: 640px;
-}
-
 .step-form {
   display: flex;
   flex-direction: column;
   gap: 12px;
   padding-top: 8px;
-}
-
-mat-form-field {
-  width: 100%;
 }
 
 .row {
@@ -29,12 +21,11 @@ mat-form-field {
   justify-content: flex-end;
   gap: 8px;
   padding-top: 8px;
-}
 
-mat-spinner {
-  display: inline-block;
-  margin-right: 8px;
-  vertical-align: middle;
+  // Back and Next: same size, so they read as a pair.
+  button {
+    min-width: 120px;
+  }
 }
 
 .summary {
@@ -66,5 +57,15 @@ mat-spinner {
 
   .summary dd {
     margin-bottom: 8px;
+  }
+}
+
+// The stepper has its own 24px side padding: pull it out so the fields line up
+// with the card's other content.
+mat-stepper {
+  margin-inline: -20px;
+
+  @media (min-width: 768px) {
+    margin-inline: -24px;
   }
 }

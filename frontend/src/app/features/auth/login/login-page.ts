@@ -3,8 +3,8 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
-import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MAT_ICON_DEFAULT_OPTIONS, MatIcon } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -26,8 +26,8 @@ const REASON_MESSAGES: Record<string, string> = {
   imports: [
     AuthLayout,
     MatButtonModule,
-    MatCardModule,
     MatFormFieldModule,
+    MatIcon,
     MatInputModule,
     MatProgressSpinnerModule,
     ReactiveFormsModule,
@@ -35,6 +35,10 @@ const REASON_MESSAGES: Record<string, string> = {
   ],
   templateUrl: './login-page.html',
   styleUrls: ['../auth-page.scss', './login-page.scss'],
+  // Guest pages have no shell, so the icon font is set here (lazy page: no cost on first load).
+  providers: [
+    { provide: MAT_ICON_DEFAULT_OPTIONS, useValue: { fontSet: 'material-symbols-rounded' } },
+  ],
 })
 export class LoginPage {
   private readonly authApi = inject(AuthApi);
@@ -54,6 +58,7 @@ export class LoginPage {
   );
   protected readonly banner = signal<string | null>(null);
   protected readonly submitting = signal(false);
+  protected readonly showPassword = signal(false);
 
   // The lock is on one user, so it only applies while the same email stays in the form.
   protected readonly locked = signal(false);

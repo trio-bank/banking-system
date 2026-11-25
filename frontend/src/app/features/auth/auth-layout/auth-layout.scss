@@ -1,0 +1,119 @@
+:host {
+  display: block;
+}
+
+.guest {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  min-height: 100vh;
+  min-height: 100dvh;
+  background: var(--tb-background);
+}
+
+.hero {
+  --brand-mark-color: var(--tb-hero-accent);
+
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+  min-height: 300px;
+  box-sizing: border-box;
+  padding: 20px 24px 64px;
+  color: var(--tb-hero-fg);
+  // Light: glow = bg, so it's flat yellow. Dark: a yellow glow rises from the bottom.
+  background: radial-gradient(130% 75% at 50% 125%, var(--tb-hero-glow), var(--tb-hero-bg) 72%);
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  gap: 10px;
+  color: inherit;
+  text-decoration: none;
+  font: var(--mat-sys-title-large);
+}
+
+.welcome {
+  margin-top: auto;
+
+  h1 {
+    margin: 0 0 10px;
+    font: var(--mat-sys-display-medium);
+    line-height: 1.02;
+    letter-spacing: -0.5px;
+  }
+
+  p {
+    margin: 0;
+    font: var(--mat-sys-body-large);
+  }
+}
+
+.form-side {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 0 16px 32px;
+}
+
+.form-card {
+  position: relative; // above the header it overlaps
+  width: 100%;
+  max-width: 440px;
+  box-sizing: border-box;
+  margin-top: -36px;
+  padding: 24px 20px;
+  border-radius: 16px;
+  background: var(--tb-surface);
+  box-shadow: 0 16px 32px -20px var(--tb-card-shadow);
+
+  // Taller buttons, easy to hit with a thumb; outlined ones in the text color.
+  --mat-button-filled-container-height: 52px;
+  --mat-button-outlined-container-height: 52px;
+  --mat-button-outlined-outline-color: var(--tb-ink);
+  --mat-button-outlined-label-text-color: var(--tb-ink);
+  --mat-button-outlined-state-layer-color: var(--tb-ink);
+
+  &.wide {
+    max-width: 640px;
+  }
+}
+
+@media (min-width: 768px) {
+  .guest {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: none;
+  }
+
+  // Stays in place while a long form (register) scrolls.
+  .hero {
+    position: sticky;
+    top: 0;
+    align-self: start;
+    height: 100vh;
+    height: 100dvh;
+    padding: 40px 56px 48px;
+    background: radial-gradient(90% 70% at 30% 115%, var(--tb-hero-glow), var(--tb-hero-bg) 70%);
+  }
+
+  .welcome {
+    margin-block: auto;
+
+    h1 {
+      font-size: clamp(3rem, 6vw, 5.5rem);
+      line-height: 0.98;
+      letter-spacing: -1px;
+    }
+  }
+
+  .form-side {
+    align-items: center;
+    padding: 48px 24px;
+  }
+
+  .form-card {
+    margin-top: 0;
+    padding: 36px 32px;
+  }
+}
