@@ -41,7 +41,7 @@ html {
   // The thin line and soft shadow under the customer toolbar.
   --tb-hero-edge: light-dark(rgb(20 20 20 / 12%), rgb(255 209 0 / 16%));
 
-  // Admin and guest pages keep a black bar in both themes.
+  // The admin bar stays black in both themes.
   --tb-toolbar: #141414;
   --tb-on-toolbar: #ffffff;
 

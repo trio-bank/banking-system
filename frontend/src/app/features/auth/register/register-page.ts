@@ -11,8 +11,8 @@ import {
 } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
-import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MAT_ICON_DEFAULT_OPTIONS, MatIcon } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -51,8 +51,8 @@ const CONFLICT_FIELDS: Record<string, string> = {
     AuthLayout,
     DatePipe,
     MatButtonModule,
-    MatCardModule,
     MatFormFieldModule,
+    MatIcon,
     MatInputModule,
     MatProgressSpinnerModule,
     MatStepperModule,
@@ -62,6 +62,10 @@ const CONFLICT_FIELDS: Record<string, string> = {
   ],
   templateUrl: './register-page.html',
   styleUrls: ['../auth-page.scss', './register-page.scss'],
+  // Guest pages have no shell, so the icon font is set here.
+  providers: [
+    { provide: MAT_ICON_DEFAULT_OPTIONS, useValue: { fontSet: 'material-symbols-rounded' } },
+  ],
 })
 export class RegisterPage {
   private readonly authApi = inject(AuthApi);
@@ -117,10 +121,10 @@ export class RegisterPage {
     return checkPesel(pesel) === null ? peselBirthDate(pesel) : null;
   });
 
-  // Four labels don't fit in one row on a phone.
+  // Four labels don't fit in one row on a phone, nor in the half-screen card below 1100px.
   protected readonly orientation = toSignal<StepperOrientation, StepperOrientation>(
     inject(BreakpointObserver)
-      .observe('(max-width: 600px)')
+      .observe('(max-width: 1099.98px)')
       .pipe(map(({ matches }) => (matches ? 'vertical' : 'horizontal'))),
     { initialValue: 'horizontal' },
   );

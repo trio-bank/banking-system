@@ -44,7 +44,7 @@ describe('RegisterSuccessPage', () => {
     await TestBed.inject(Router).navigateByUrl('/register/success', { state: { registration } });
     await harness.fixture.whenStable();
 
-    const link = harness.routeNativeElement?.querySelector('mat-card a');
+    const link = harness.routeNativeElement?.querySelector('a.go-login');
     expect(link?.getAttribute('href')).toBe('/login');
     expect(link?.textContent).toContain('Go to login');
   });

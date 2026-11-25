@@ -120,6 +120,34 @@ describe('LoginPage', () => {
       expect(element().querySelector('a[href="/register"]')).not.toBeNull();
     });
 
+    it('shows and hides the password', async () => {
+      await open();
+      const input = () =>
+        element().querySelector<HTMLInputElement>('input[formcontrolname="password"]');
+      const toggle = element().querySelector<HTMLButtonElement>('.toggle-password');
+
+      expect(input()?.type).toBe('password');
+      expect(toggle?.getAttribute('aria-pressed')).toBe('false');
+
+      toggle?.click();
+      await render();
+      expect(input()?.type).toBe('text');
+      expect(toggle?.getAttribute('aria-pressed')).toBe('true');
+
+      toggle?.click();
+      await render();
+      expect(input()?.type).toBe('password');
+    });
+
+    it('does not submit the form when the password is shown', async () => {
+      await open();
+      page.form.setValue(CREDENTIALS);
+      element().querySelector<HTMLButtonElement>('.toggle-password')?.click();
+      await render();
+
+      expect(login).not.toHaveBeenCalled();
+    });
+
     it('sends only one request on a double click and blocks the button meanwhile', async () => {
       login.mockReturnValue(new Subject());
       await open();

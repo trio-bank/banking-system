@@ -1,56 +1,37 @@
-import { Component } from '@angular/core';
+import { Component, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
-/** Frame of the guest pages: black header on top, page content centered below. */
+/**
+ * Frame of the guest pages: yellow header with the logo and a big title, the page's form
+ * card next to it. Phone: header on top, the card overlaps it. ≥ 768px: split screen.
+ */
 @Component({
   selector: 'app-auth-layout',
   imports: [RouterLink],
   template: `
-    <header class="auth-header">
-      <a class="brand" routerLink="/login">
-        <span class="brand-mark" aria-hidden="true"></span>
-        Trio Bank
-      </a>
-    </header>
-    <main class="auth-main">
-      <ng-content />
+    <main class="guest">
+      <section class="hero">
+        <a class="brand" routerLink="/login">
+          <span class="brand-mark" aria-hidden="true"></span>
+          Trio Bank
+        </a>
+        <div class="welcome">
+          <h1>{{ title() }}</h1>
+          <p>{{ subtitle() }}</p>
+        </div>
+      </section>
+      <section class="form-side">
+        <div class="form-card" [class.wide]="wide()">
+          <ng-content />
+        </div>
+      </section>
     </main>
   `,
-  styles: `
-    :host {
-      display: flex;
-      flex-direction: column;
-      min-height: 100vh;
-    }
-
-    .auth-header {
-      padding: 16px 24px;
-      background: var(--tb-toolbar);
-      border-bottom: 3px solid var(--tb-brand);
-    }
-
-    .brand {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      color: var(--tb-on-toolbar);
-      text-decoration: none;
-      font: var(--mat-sys-title-large);
-    }
-
-    .auth-main {
-      flex: 1;
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
-      padding: 40px 16px;
-    }
-
-    @media (max-width: 600px) {
-      .auth-main {
-        padding: 16px;
-      }
-    }
-  `,
+  styleUrl: './auth-layout.scss',
 })
-export class AuthLayout {}
+export class AuthLayout {
+  readonly title = input.required<string>();
+  readonly subtitle = input.required<string>();
+  /** Wider card for long forms (register). */
+  readonly wide = input(false);
+}

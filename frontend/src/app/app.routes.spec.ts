@@ -53,12 +53,12 @@ describe('app routes', () => {
     it('redirects the root path to /login', async () => {
       await harness.navigateByUrl('/');
       expect(url()).toBe('/login');
-      expect(heading()).toBe('Log in');
+      expect(heading()).toBe('Welcome back');
     });
 
     it('shows the register form on /register', async () => {
       await harness.navigateByUrl('/register');
-      expect(heading()).toBe('Register');
+      expect(heading()).toBe('Join Trio Bank');
     });
 
     it('goes back to /register when /register/success has no result to show', async () => {
