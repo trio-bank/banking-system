@@ -1,15 +1,184 @@
-h1 {
-  margin: 0 0 16px;
-  font: var(--mat-sys-headline-small);
+p {
+  margin: 0;
 }
 
-.state {
+mat-icon {
+  flex: none;
+}
+
+// ---- Header ----
+.hero-body {
   display: flex;
   align-items: center;
   gap: 16px;
-  padding: 24px 0;
 }
 
+// Same colors as the toolbar avatar: black on yellow, yellow on charcoal.
+.avatar {
+  display: grid;
+  flex: none;
+  width: 68px;
+  height: 68px;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--tb-hero-accent);
+  color: var(--tb-on-hero-button);
+  font: var(--mat-sys-headline-medium);
+}
+
+h1 {
+  margin: 0;
+  font: var(--mat-sys-headline-medium);
+  overflow-wrap: anywhere;
+}
+
+// 75% of the header's text color is still above 7:1 in both themes.
+.soft {
+  margin-top: 4px;
+  opacity: 0.75;
+}
+
+.skeleton {
+  background-color: color-mix(in srgb, var(--tb-hero-fg) 9%, transparent);
+}
+
+.avatar-skeleton {
+  width: 68px;
+  height: 68px;
+  border-radius: 50%;
+}
+
+.name-skeleton {
+  width: 200px;
+  height: 32px;
+}
+
+// ---- Below the header: cards overlap it by 28px (docs/07 §13.1) ----
+.below {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: -28px;
+}
+
+.cards {
+  display: grid;
+  gap: 16px;
+}
+
+.card-skeleton {
+  height: 160px;
+  border-radius: 20px;
+  background-color: var(--tb-surface);
+}
+
+// Cards with the title inside: the first one overlaps the header.
+section,
+.settings {
+  padding: 16px 16px 4px;
+  border-radius: 20px;
+  background: var(--tb-surface);
+  box-shadow: 0 16px 32px -20px var(--tb-card-shadow);
+}
+
+.settings {
+  padding: 0 16px;
+}
+
+h2 {
+  margin: 0 0 4px;
+  font: var(--mat-sys-title-medium);
+  font-family: var(--mat-sys-title-large-font);
+  font-weight: 700;
+}
+
+dl {
+  margin: 0;
+}
+
+dl > div,
+.row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 56px;
+  padding: 8px 0;
+  box-sizing: border-box;
+}
+
+dl > div + div,
+.row + .row {
+  border-top: 1px solid var(--tb-line);
+}
+
+dl mat-icon {
+  color: var(--tb-muted);
+}
+
+dt {
+  flex: 1;
+  color: var(--tb-muted);
+}
+
+dd {
+  margin: 0;
+  min-width: 0;
+  font-weight: 600;
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+
+.hint {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 4px;
+  color: var(--tb-muted);
+
+  mat-icon {
+    width: 18px;
+    height: 18px;
+    font-size: 18px;
+  }
+}
+
+// ---- Phones only: theme and Log out ----
+.row-label {
+  flex: 1;
+  font-weight: 600;
+}
+
+// Yellow track with a black handle when on, as on the bottom tab.
+mat-slide-toggle {
+  --mat-slide-toggle-selected-track-color: var(--tb-brand);
+  --mat-slide-toggle-selected-hover-track-color: var(--tb-brand);
+  --mat-slide-toggle-selected-focus-track-color: var(--tb-brand);
+  --mat-slide-toggle-selected-pressed-track-color: var(--tb-brand);
+  --mat-slide-toggle-selected-handle-color: var(--tb-on-brand);
+  --mat-slide-toggle-selected-hover-handle-color: var(--tb-on-brand);
+  --mat-slide-toggle-selected-focus-handle-color: var(--tb-on-brand);
+  --mat-slide-toggle-selected-pressed-handle-color: var(--tb-on-brand);
+  --mat-slide-toggle-selected-icon-color: var(--tb-brand);
+}
+
+.logout {
+  width: 100%;
+  border: 0;
+  border-top: 1px solid var(--tb-line);
+  background: none;
+  color: var(--tb-ink);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+
+  &:focus-visible {
+    outline: 2px solid var(--tb-ink);
+    outline-offset: -2px;
+  }
+}
+
+// Same banner as on the other pages.
 .banner {
   display: flex;
   align-items: center;
@@ -22,41 +191,45 @@ h1 {
   color: var(--mat-sys-on-error-container);
 }
 
-.profile-card {
-  max-width: 560px;
-}
-
-// Label on the left, value on the right; stacked on narrow screens.
-.fields {
-  display: grid;
-  grid-template-columns: max-content 1fr;
-  gap: 12px 24px;
-  margin: 8px 0;
-}
-
-.fields dt {
-  color: var(--mat-sys-on-surface-variant);
-  font: var(--mat-sys-label-large);
-}
-
-.fields dd {
-  margin: 0;
-  font: var(--mat-sys-body-large);
-  overflow-wrap: anywhere;
-}
-
-@media (max-width: 480px) {
-  .fields {
-    grid-template-columns: 1fr;
-    gap: 2px;
+@media (min-width: 768px) {
+  .hero-body {
+    gap: 24px;
   }
 
-  .fields dd {
-    margin-bottom: 10px;
+  .avatar,
+  .avatar-skeleton {
+    width: 96px;
+    height: 96px;
   }
-}
 
-.hint {
-  color: var(--mat-sys-on-surface-variant);
-  font: var(--mat-sys-body-medium);
+  .avatar {
+    font: var(--mat-sys-display-small);
+  }
+
+  h1 {
+    font: var(--mat-sys-display-medium);
+  }
+
+  .soft {
+    font: var(--mat-sys-body-large);
+  }
+
+  // Two cards side by side and of the same height, so the hint under them lines up.
+  .cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+  }
+
+  section {
+    padding: 20px 24px 8px;
+  }
+
+  h2 {
+    margin-bottom: 6px;
+    font: var(--mat-sys-title-large);
+  }
+
+  .settings {
+    display: none;
+  }
 }

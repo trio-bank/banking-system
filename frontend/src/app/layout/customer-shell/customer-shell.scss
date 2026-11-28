@@ -106,28 +106,6 @@
   cursor: pointer;
 }
 
-.phone-only {
-  display: none;
-}
-
-// Header of the phone account menu: who is logged in.
-.menu-head {
-  display: flex;
-  flex-direction: column;
-  padding: 8px 16px 12px;
-  margin-bottom: 4px;
-  border-bottom: 1px solid var(--tb-line);
-}
-
-.menu-name {
-  font: var(--mat-sys-title-medium);
-}
-
-.menu-email {
-  color: var(--tb-muted);
-  font: var(--mat-sys-body-small);
-}
-
 .shell-content {
   max-width: 1200px;
   margin: 0 auto;
@@ -139,7 +117,7 @@
 }
 
 // Phones: the links go to the bottom tabs; the bar keeps only the logo and the avatar,
-// which opens a menu with profile, theme and logout.
+// which opens the Profile page (theme and Log out are there).
 @media (max-width: 767.98px) {
   .topbar {
     height: 56px;
@@ -151,9 +129,10 @@
     display: none;
   }
 
-  .phone-only {
-    display: grid;
+  .end {
     margin-left: auto;
+    padding-left: 0;
+    border-left: 0;
   }
 
   // Room for the tabs, so they don't cover the end of the page.
