@@ -6,7 +6,6 @@ import com.triobank.account.SystemAccountCode;
 import com.triobank.common.config.BankProperties;
 import com.triobank.common.error.ApiException;
 import com.triobank.common.error.ErrorCode;
-import com.triobank.customer.Customer;
 import com.triobank.ledger.LedgerService;
 import com.triobank.ledger.PostingCommand;
 import com.triobank.ledger.Transaction;
@@ -48,7 +47,7 @@ public class AtmService {
      * The controller hashes the request with this value, so leaving it out and sending PLN is the same request.
      */
     public String resolveCurrency(String requested) {
-        return requested == null ? bank.currency() : requested;
+        return PaymentRules.resolveCurrency(bank, requested);
     }
 
     /**
@@ -74,7 +73,7 @@ public class AtmService {
                 .currency(resolveCurrency(request.currency()))
                 .title(DefaultTitles.ATM_DEPOSIT)
                 .senderName(DefaultTitles.BANK_NAME)
-                .recipientName(fullName(account.getCustomer()))
+                .recipientName(PaymentRules.fullName(account.getCustomer()))
                 .initiatedByUserId(userId)
                 .idempotencyKey(idempotencyKey)
                 .requestHash(requestHash)
@@ -105,7 +104,7 @@ public class AtmService {
                 .amount(request.amount())
                 .currency(resolveCurrency(request.currency()))
                 .title(DefaultTitles.ATM_WITHDRAWAL)
-                .senderName(fullName(account.getCustomer()))
+                .senderName(PaymentRules.fullName(account.getCustomer()))
                 .recipientName(DefaultTitles.BANK_NAME)
                 .initiatedByUserId(userId)
                 .idempotencyKey(idempotencyKey)
@@ -117,7 +116,7 @@ public class AtmService {
     /** Checks shared by deposits and withdrawals, in the order the errors are reported. */
     private Account checkCashOperation(UUID customerId, CashOperationRequest request, BigDecimal max) {
         Account account = accountService.getOfCustomerForOperation(customerId, request.accountId());
-        checkCurrency(request.currency());
+        PaymentRules.checkCurrency(bank, request.currency());
         checkAmount(request.amount(), max);
         checkAtmAllowed(account);
         return account;
@@ -125,17 +124,6 @@ public class AtmService {
 
     private UUID bankCashId() {
         return accountService.getSystemAccountId(SystemAccountCode.BANK_CASH);
-    }
-
-    private static String fullName(Customer customer) {
-        return customer.getFirstName() + " " + customer.getLastName();
-    }
-
-    private void checkCurrency(String requested) {
-        if (!resolveCurrency(requested).equals(bank.currency())) {
-            throw new ApiException(ErrorCode.CURRENCY_NOT_SUPPORTED,
-                    "Only " + bank.currency() + " is supported.");
-        }
     }
 
     private static void checkAmount(BigDecimal amount, BigDecimal max) {

@@ -53,6 +53,15 @@ public interface AccountRepository extends JpaRepository<Account, UUID> {
                                               @Param("customerId") UUID customerId);
 
     /**
+     * A customer account by IBAN, with its product and owner. The bank's own accounts are left out:
+     * nobody can send money to them.
+     */
+    @Query("""
+            select a from Account a join fetch a.product join fetch a.customer
+            where a.iban = :iban and a.category = com.triobank.account.AccountCategory.CUSTOMER""")
+    Optional<Account> findOfCustomerByIban(@Param("iban") String iban);
+
+    /**
      * How many accounts of the product the customer has that are not closed. Blocked accounts count too.
      */
     @Query("""
