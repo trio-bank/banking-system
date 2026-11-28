@@ -1,48 +1,62 @@
-<a matButton class="back" routerLink="/app/dashboard">← My accounts</a>
-
-<h1>ATM</h1>
-
-@if (loading()) {
-  <div class="state" role="status">
-    <mat-spinner diameter="40" />
-    <span>Loading your accounts…</span>
-  </div>
-} @else if (error(); as message) {
-  <div class="banner" role="alert">
-    <span>{{ message }}</span>
-    <button matButton type="button" (click)="load()">Try again</button>
-  </div>
-} @else if (accounts()) {
-  @if (!hasActive()) {
-    <div class="empty">
-      <p>The ATM works only with an active personal account, and you don't have one.</p>
-      <a matButton="filled" routerLink="/app/accounts/new">Open account</a>
+<app-page-hero>
+  <div class="hero-body">
+    <div>
+      <h1>ATM</h1>
+      <p class="subtitle">Cash in or out of your personal account</p>
     </div>
-  } @else {
-    <!-- A switch, not tabs: it is one choice, and each side starts from an empty form. -->
-    <mat-button-toggle-group
-      class="mode"
-      aria-label="Operation"
-      [value]="kind()"
-      (change)="kind.set($event.value)"
-    >
-      <mat-button-toggle value="deposit">Deposit</mat-button-toggle>
-      <mat-button-toggle value="withdrawal">Withdraw</mat-button-toggle>
-    </mat-button-toggle-group>
 
-    <!-- @if, not one component with a changing kind: switching drops the typed amount. -->
-    @if (kind() === 'deposit') {
-      <app-atm-operation
-        kind="deposit"
-        [accounts]="personal()"
-        (accountChanged)="replace($event)"
-      />
+    @if (hasActive()) {
+      <!-- A switch, not tabs: it is one choice, and each side starts from an empty form. -->
+      <mat-button-toggle-group
+        class="mode"
+        aria-label="Operation"
+        [value]="kind()"
+        (change)="kind.set($event.value)"
+      >
+        <mat-button-toggle value="deposit">Deposit</mat-button-toggle>
+        <mat-button-toggle value="withdrawal">Withdraw</mat-button-toggle>
+      </mat-button-toggle-group>
+    }
+  </div>
+</app-page-hero>
+
+<div class="below">
+  @if (loading()) {
+    <div class="card" role="status" aria-label="Loading your accounts">
+      <span class="skeleton picker-skeleton"></span>
+      <span class="skeleton chips-skeleton"></span>
+      <span class="skeleton field-skeleton"></span>
+    </div>
+  } @else if (error(); as message) {
+    <div class="banner" role="alert">
+      <span>{{ message }}</span>
+      <button matButton type="button" (click)="load()">Try again</button>
+    </div>
+  } @else if (accounts()) {
+    @if (!hasActive()) {
+      <div class="card empty">
+        <p>The ATM works only with an active personal account, and you don't have one.</p>
+        <a matButton="filled" routerLink="/app/accounts/new">Open account</a>
+      </div>
     } @else {
-      <app-atm-operation
-        kind="withdrawal"
-        [accounts]="personal()"
-        (accountChanged)="replace($event)"
-      />
+      <!-- @if, not one component with a changing kind: switching drops the typed amount. -->
+      @if (kind() === 'deposit') {
+        <app-atm-operation
+          kind="deposit"
+          [accounts]="personal()"
+          [initialAccountId]="accountId()"
+          (accountChanged)="replace($event)"
+          (accountPicked)="accountId.set($event)"
+        />
+      } @else {
+        <app-atm-operation
+          kind="withdrawal"
+          [accounts]="personal()"
+          [initialAccountId]="accountId()"
+          (accountChanged)="replace($event)"
+          (accountPicked)="accountId.set($event)"
+        />
+      }
     }
   }
-}
+</div>

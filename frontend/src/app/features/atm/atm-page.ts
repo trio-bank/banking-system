@@ -3,22 +3,16 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { AccountDto, ProblemDetail } from '../../core/api/models';
 import { AccountsApi } from '../../core/api/services/accounts-api';
 import { errorMessage } from '../../core/errors/error-messages';
+import { PageHero } from '../../shared/components/page-hero/page-hero';
 import { AtmKind, AtmOperation } from './atm-operation/atm-operation';
 
 /** ATM (US-14, US-15): loads the accounts once, deposit and withdrawal share them. */
 @Component({
   selector: 'app-atm-page',
-  imports: [
-    AtmOperation,
-    MatButtonModule,
-    MatButtonToggleModule,
-    MatProgressSpinnerModule,
-    RouterLink,
-  ],
+  imports: [AtmOperation, MatButtonModule, MatButtonToggleModule, PageHero, RouterLink],
   templateUrl: './atm-page.html',
   styleUrl: './atm-page.scss',
 })
@@ -30,6 +24,8 @@ export class AtmPage {
   protected readonly loading = signal(false);
   protected readonly error = signal<string | null>(null);
   protected readonly kind = signal<AtmKind>('deposit');
+  /** Kept here, so switching Deposit / Withdraw keeps the chosen account (the amount resets). */
+  protected readonly accountId = signal<string | null>(null);
 
   /** BR-20: the ATM works with personal accounts only. */
   protected readonly personal = computed(

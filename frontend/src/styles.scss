@@ -202,6 +202,30 @@ body {
   }
 }
 
+// ATM account picker. Without a form field the list opens under the inner trigger,
+// so the padding goes there, or the list would be shifted by it.
+.account-picker .mat-mdc-select-trigger {
+  padding: 14px 12px 14px 16px;
+}
+
+// Its list: a rounded card instead of Material's square menu.
+// The panel is in an overlay, outside the component, so its style lives here.
+.cdk-overlay-pane div.mat-mdc-select-panel.account-panel {
+  margin-top: 8px;
+  padding: 6px;
+  border-radius: 16px;
+  background: var(--tb-surface);
+  // The line keeps it apart from the card under it in dark mode.
+  box-shadow:
+    0 0 0 1px var(--tb-line),
+    0 16px 32px -12px rgb(0 0 0 / 35%);
+
+  .mdc-list-item__primary-text {
+    flex: 1;
+    min-width: 0;
+  }
+}
+
 // Three bars = "Trio". Used next to the bank name in all headers.
 // Yellow by default; a yellow bar sets --brand-mark-color to its text color.
 .brand-mark {

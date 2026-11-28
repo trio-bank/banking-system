@@ -82,6 +82,23 @@ describe('AtmPage', () => {
     expect(amount().value).toBe('');
   });
 
+  it('switching Deposit / Withdraw keeps the chosen account', async () => {
+    const second: AccountDto = { ...PERSONAL, id: 'second', name: 'Second personal' };
+    list.mockReturnValue(of([PERSONAL, second, BLOCKED]));
+    await render();
+    operation()!.accountPicked.emit(second.id); // what the select does when one is picked
+    fixture.detectChanges();
+
+    [...el.querySelectorAll<HTMLButtonElement>('.mode button')]
+      .find((b) => b.textContent?.includes('Withdraw'))!
+      .click();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(operation()?.kind()).toBe('withdrawal');
+    expect(el.querySelector('mat-select-trigger')?.textContent).toContain('Second personal');
+  });
+
   it('without an active personal account it says so and offers to open one', async () => {
     list.mockReturnValue(of([SAVINGS, BLOCKED]));
     await render();
