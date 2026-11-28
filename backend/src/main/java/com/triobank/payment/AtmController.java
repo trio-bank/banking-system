@@ -2,11 +2,11 @@ package com.triobank.payment;
 
 import com.triobank.common.web.AuthenticatedUser;
 import com.triobank.common.web.CurrentUser;
-import com.triobank.ledger.IdempotencyKey;
-import com.triobank.ledger.IdempotentExecutor;
-import com.triobank.ledger.IdempotentRequest;
-import com.triobank.ledger.IdempotentResult;
-import com.triobank.ledger.RequestHash;
+import com.triobank.ledger.idempotency.IdempotencyKey;
+import com.triobank.ledger.idempotency.IdempotentExecutor;
+import com.triobank.ledger.idempotency.IdempotentRequest;
+import com.triobank.ledger.idempotency.IdempotentResult;
+import com.triobank.ledger.idempotency.RequestHash;
 import com.triobank.payment.dto.CashOperationRequest;
 import com.triobank.payment.dto.TransactionDto;
 import com.triobank.payment.dto.TransactionMapper;

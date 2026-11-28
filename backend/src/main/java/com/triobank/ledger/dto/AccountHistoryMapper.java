@@ -1,9 +1,9 @@
 package com.triobank.ledger.dto;
 
 import com.triobank.account.Account;
-import com.triobank.ledger.DefaultTitles;
 import com.triobank.ledger.LedgerEntry;
 import com.triobank.ledger.Transaction;
+import com.triobank.ledger.transaction.DefaultTitles;
 
 public final class AccountHistoryMapper {
 

@@ -3,6 +3,8 @@ package com.triobank.ledger;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import com.triobank.ledger.transaction.Channel;
+import com.triobank.ledger.transaction.TransactionType;
 import java.math.BigDecimal;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;

@@ -9,10 +9,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.jayway.jsonpath.JsonPath;
 import com.triobank.AbstractIntegrationTest;
-import com.triobank.TestDataFactory;
 import com.triobank.TestDataFactory.RegisteredCustomer;
-import com.triobank.auth.JwtService;
+import com.triobank.TestDataFactory;
 import com.triobank.auth.Role;
+import com.triobank.auth.jwt.JwtService;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;

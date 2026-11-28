@@ -12,7 +12,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.jayway.jsonpath.JsonPath;
-import com.triobank.auth.JwtConfig;
+import com.triobank.auth.jwt.JwtConfig;
 import com.triobank.common.config.SecurityConfig;
 import com.triobank.common.web.TraceIdFilter;
 import java.time.Clock;

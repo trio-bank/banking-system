@@ -6,6 +6,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.triobank.AbstractIntegrationTest;
+import com.triobank.auth.jwt.JwtService;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.Map;

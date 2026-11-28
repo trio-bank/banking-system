@@ -1,7 +1,7 @@
 package com.triobank.common.web;
 
-import com.triobank.auth.JwtService;
 import com.triobank.auth.Role;
+import com.triobank.auth.jwt.JwtService;
 import java.util.UUID;
 import org.springframework.core.MethodParameter;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;

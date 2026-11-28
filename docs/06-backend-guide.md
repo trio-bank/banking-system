@@ -52,7 +52,7 @@ account
     └── AccountMapper.java
 ```
 
-Small modules stay flat; split into sub-packages (`web`, `domain`, `persistence`) only if a module grows beyond ~15 classes.
+Small modules stay flat. Once a module grows beyond ~15 classes, move groups of related classes into sub-packages by topic (e.g. `ledger.transaction`, `ledger.idempotency`, `auth.jwt`, `auth.password`), not by layer. Entities, their repositories and the services that use them stay in the module root, so repositories remain package-private.
 
 ## 3. Coding rules
 

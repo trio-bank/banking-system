@@ -8,14 +8,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.jayway.jsonpath.JsonPath;
 import com.triobank.AbstractIntegrationTest;
-import com.triobank.TestDataFactory;
 import com.triobank.TestDataFactory.RegisteredCustomer;
-import com.triobank.ledger.Channel;
+import com.triobank.TestDataFactory;
 import com.triobank.ledger.LedgerInvariants;
 import com.triobank.ledger.LedgerService;
 import com.triobank.ledger.PostingCommand;
 import com.triobank.ledger.Transaction;
-import com.triobank.ledger.TransactionType;
+import com.triobank.ledger.transaction.Channel;
+import com.triobank.ledger.transaction.TransactionType;
 import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.Statement;
@@ -28,8 +28,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
-import org.springframework.jdbc.core.ConnectionCallback;
 import org.springframework.http.MediaType;
+import org.springframework.jdbc.core.ConnectionCallback;
 import org.springframework.test.web.servlet.ResultActions;
 
 /**

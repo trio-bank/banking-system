@@ -1,6 +1,9 @@
 package com.triobank.ledger;
 
 import com.triobank.account.Account;
+import com.triobank.ledger.transaction.Channel;
+import com.triobank.ledger.transaction.TransactionStatus;
+import com.triobank.ledger.transaction.TransactionType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
