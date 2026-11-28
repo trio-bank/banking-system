@@ -43,7 +43,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     static final String TIMESTAMP = "timestamp";
     static final String ERRORS = "errors";
 
-    private static final String VALIDATION_DETAIL = "One or more fields are invalid.";
+    static final String VALIDATION_DETAIL = "One or more fields are invalid.";
     private static final String MALFORMED_DETAIL = "Request body is missing or is not valid JSON.";
     private static final String CONCURRENT_DETAIL = "The resource was modified by another request. Retry the operation.";
     private static final String UNAUTHENTICATED_DETAIL = "A valid access token is required.";

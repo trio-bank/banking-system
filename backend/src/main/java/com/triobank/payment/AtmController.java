@@ -17,7 +17,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import java.net.URI;
 import java.util.UUID;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
@@ -31,8 +30,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/v1/atm")
 public class AtmController {
-
-    static final String TRANSACTIONS_PATH = "/api/v1/transactions/";
 
     private final AtmService atmService;
     private final IdempotentExecutor idempotentExecutor;
@@ -130,15 +127,7 @@ public class AtmController {
                 new IdempotentRequest(caller.userId(), key, hash),
                 () -> operation.run(caller.userId(), caller.customerId(), request, key, hash),
                 stored -> TransactionMapper.toDto(stored, caller.customerId()));
-        return respond(result);
-    }
-
-    private static ResponseEntity<TransactionDto> respond(IdempotentResult<TransactionDto> result) {
-        TransactionDto transaction = result.value();
-        if (result.replayed()) {
-            return ResponseEntity.ok(transaction);
-        }
-        return ResponseEntity.created(URI.create(TRANSACTIONS_PATH + transaction.id())).body(transaction);
+        return IdempotentResponses.of(result);
     }
 
 }

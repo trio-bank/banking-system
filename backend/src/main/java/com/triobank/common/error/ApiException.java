@@ -1,5 +1,6 @@
 package com.triobank.common.error;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -24,6 +25,15 @@ public class ApiException extends RuntimeException {
         super(detail);
         this.code = Objects.requireNonNull(code, "code");
         this.properties = Map.copyOf(properties);
+    }
+
+    /**
+     * A {@code VALIDATION_ERROR} about one field that only the service can check, e.g. a field that is
+     * required in some cases. The body looks the same as when request validation fails.
+     */
+    public static ApiException fieldError(String field, FieldErrorCode code, String message) {
+        return new ApiException(ErrorCode.VALIDATION_ERROR, GlobalExceptionHandler.VALIDATION_DETAIL,
+                Map.of(GlobalExceptionHandler.ERRORS, List.of(new FieldErrorDto(field, code, message))));
     }
 
     public ErrorCode getCode() {

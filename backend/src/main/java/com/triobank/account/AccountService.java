@@ -27,6 +27,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -180,6 +181,17 @@ public class AccountService {
     public Account getOfCustomerForOperation(UUID customerId, UUID accountId) {
         return accounts.findOfCustomerWithOwner(accountId, customerId)
                 .orElseThrow(() -> new ApiException(ErrorCode.RESOURCE_NOT_FOUND, "Account not found."));
+    }
+
+    /**
+     * The customer account with this IBAN, with its product and owner loaded, for transfers.
+     * Empty for unknown IBANs and for the bank's own accounts.
+     *
+     * @param iban normalized IBAN, without spaces
+     */
+    @Transactional(propagation = Propagation.MANDATORY)
+    public Optional<Account> findForTransfer(String iban) {
+        return accounts.findOfCustomerByIban(iban);
     }
 
     /**

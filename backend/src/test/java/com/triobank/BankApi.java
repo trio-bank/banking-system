@@ -120,7 +120,30 @@ public final class BankApi {
         return mvc.perform(request);
     }
 
+    /**
+     * @param recipientName null to leave it out
+     * @param title         null to leave it out
+     * @param amount        raw JSON number, e.g. {@code "150.00"}
+     * @param key           null to send no Idempotency-Key header
+     */
+    public ResultActions transfer(String token, UUID sourceAccountId, String targetIban, String recipientName,
+                                  String title, String amount, String key) throws Exception {
+        MockHttpServletRequestBuilder request = auth(post("/api/v1/transfers"), token)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"sourceAccountId\":\"%s\",\"targetIban\":%s,\"recipientName\":%s,\"title\":%s,\"amount\":%s}"
+                        .formatted(sourceAccountId, jsonString(targetIban), jsonString(recipientName),
+                                jsonString(title), amount));
+        if (key != null) {
+            request.header(IDEMPOTENCY_KEY, key);
+        }
+        return mvc.perform(request);
+    }
+
     // -------------------------------------------------------------- helpers
+
+    private static String jsonString(String value) {
+        return value == null ? "null" : "\"" + value + "\"";
+    }
 
     public BigDecimal balance(String token, UUID accountId) throws Exception {
         return dec(JsonPath.read(body(account(token, accountId).andExpect(status().isOk())), "$.balance"));
