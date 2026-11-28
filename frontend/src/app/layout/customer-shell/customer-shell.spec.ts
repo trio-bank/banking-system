@@ -28,13 +28,6 @@ describe('CustomerShell', () => {
       a.getAttribute('aria-current'),
     ]);
 
-  // The menu panel is rendered in the CDK overlay at the end of <body>, not in the shell.
-  const openMenu = (el: HTMLElement) => {
-    el.querySelector<HTMLButtonElement>('button.phone-only')!.click();
-    TestBed.tick();
-    return document.querySelector<HTMLElement>('.account-menu')!;
-  };
-
   beforeEach(() => {
     logout.mockReset().mockResolvedValue(undefined);
     localStorage.clear();
@@ -123,40 +116,10 @@ describe('CustomerShell', () => {
     expect(bar?.classList).not.toContain('scrolled');
   });
 
-  describe('account menu (phones)', () => {
-    it('shows who is logged in and links to the profile', async () => {
-      const customer = MOCK_USERS[0].customer!;
-      const menu = openMenu(await render('/app/dashboard'));
+  it('the avatar opens the profile, there is no account menu any more', async () => {
+    const el = await render('/app/dashboard');
 
-      expect(menu.querySelector('.menu-name')?.textContent).toContain(
-        `${customer.firstName} ${customer.lastName}`,
-      );
-      expect(menu.querySelector('.menu-email')?.textContent).toContain(MOCK_USERS[0].email);
-      expect(menu.querySelector('a[mat-menu-item]')?.getAttribute('href')).toBe('/app/profile');
-    });
-
-    it('switches the theme', async () => {
-      const menu = openMenu(await render('/app/dashboard'));
-      const themeItem = menu.querySelectorAll<HTMLButtonElement>('button[mat-menu-item]')[0];
-      const before = themeItem.textContent;
-
-      themeItem.click();
-      TestBed.tick();
-
-      expect(document.documentElement.style.getPropertyValue('color-scheme')).not.toBe('');
-      expect(themeItem.textContent).not.toBe(before);
-    });
-
-    it('logs out and goes to /login', async () => {
-      const navigate = vi.spyOn(TestBed.inject(Router), 'navigateByUrl');
-      const menu = openMenu(await render('/app/dashboard'));
-
-      menu.querySelectorAll<HTMLButtonElement>('button[mat-menu-item]')[1].click();
-      await Promise.resolve();
-      await Promise.resolve();
-
-      expect(logout).toHaveBeenCalledTimes(1);
-      expect(navigate).toHaveBeenCalledWith('/login');
-    });
+    expect(el.querySelector('.avatar')?.getAttribute('href')).toBe('/app/profile');
+    expect(el.querySelector('[aria-haspopup]')).toBeNull();
   });
 });

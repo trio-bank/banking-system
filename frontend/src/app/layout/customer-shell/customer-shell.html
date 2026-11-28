@@ -18,44 +18,15 @@
     }
   </nav>
 
-  <!-- Wide screens: everything in the bar. -->
-  <div class="end wide-only">
-    <app-theme-toggle />
+  <!-- Phones keep only the avatar: theme and Log out are on the Profile page there. -->
+  <div class="end">
+    <app-theme-toggle class="wide-only" />
     <a class="avatar" routerLink="/app/profile" aria-label="My profile" title="My profile">
       {{ initials() }}
     </a>
-    <app-logout-button />
+    <app-logout-button class="wide-only" />
   </div>
-
-  <!-- Phones: only the avatar; profile, theme and logout are in its menu. -->
-  <button
-    type="button"
-    class="avatar phone-only"
-    aria-label="Account menu"
-    [matMenuTriggerFor]="accountMenu"
-  >
-    {{ initials() }}
-  </button>
 </header>
-
-<mat-menu #accountMenu="matMenu" xPosition="before" class="account-menu">
-  <div class="menu-head">
-    <span class="menu-name">{{ fullName() }}</span>
-    <span class="menu-email">{{ email() }}</span>
-  </div>
-  <a mat-menu-item routerLink="/app/profile">
-    <mat-icon>person</mat-icon>
-    My profile
-  </a>
-  <button mat-menu-item type="button" (click)="theme.toggle()">
-    <mat-icon>{{ theme.isDark() ? 'light_mode' : 'dark_mode' }}</mat-icon>
-    {{ theme.isDark() ? 'Light theme' : 'Dark theme' }}
-  </button>
-  <button mat-menu-item type="button" [disabled]="loggingOut()" (click)="logOut()">
-    <mat-icon>logout</mat-icon>
-    Log out
-  </button>
-</mat-menu>
 
 <main class="shell-content">
   <router-outlet />

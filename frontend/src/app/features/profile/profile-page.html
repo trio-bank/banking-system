@@ -1,35 +1,98 @@
-<h1>My profile</h1>
+<app-page-hero>
+  @if (loading()) {
+    <div class="hero-body" role="status" aria-label="Loading your data">
+      <span class="skeleton avatar-skeleton"></span>
+      <span class="skeleton name-skeleton"></span>
+    </div>
+  } @else if (profile(); as p) {
+    <div class="hero-body">
+      <span class="avatar" aria-hidden="true">{{ initials() }}</span>
+      <div>
+        <h1>{{ p.firstName }} {{ p.lastName }}</h1>
+        <p class="soft">Customer no. {{ p.customerNumber }}</p>
+      </div>
+    </div>
+  } @else {
+    <h1>My profile</h1>
+  }
+</app-page-hero>
 
-@if (loading()) {
-  <div class="state" role="status">
-    <mat-spinner diameter="40" />
-    <span>Loading your data…</span>
-  </div>
-} @else if (error(); as message) {
-  <div class="banner" role="alert">
-    <span>{{ message }}</span>
-    <button matButton type="button" (click)="load()">Try again</button>
-  </div>
-} @else if (profile(); as p) {
-  <mat-card appearance="outlined" class="profile-card">
-    <mat-card-content>
-      <dl class="fields">
-        <dt>Customer number</dt>
-        <dd>{{ p.customerNumber }}</dd>
-        <dt>Full name</dt>
-        <dd>{{ p.firstName }} {{ p.lastName }}</dd>
-        <dt>PESEL</dt>
-        <dd>{{ p.peselMasked }}</dd>
-        <dt>Date of birth</dt>
-        <dd>{{ p.dateOfBirth | date: 'dd.MM.yyyy' }}</dd>
-        <dt>Email</dt>
-        <dd>{{ p.email }}</dd>
-        <dt>Phone</dt>
-        <dd>{{ p.phoneNumber }}</dd>
-        <dt>Address</dt>
-        <dd>{{ formatAddress(p.address) }}</dd>
-      </dl>
-    </mat-card-content>
-  </mat-card>
-  <p class="hint">To change your data, please contact the bank.</p>
-}
+<div class="below">
+  @if (loading()) {
+    <div class="cards">
+      <span class="skeleton card-skeleton"></span>
+      <span class="skeleton card-skeleton"></span>
+    </div>
+  } @else if (error(); as message) {
+    <div class="banner" role="alert">
+      <span>{{ message }}</span>
+      <button matButton type="button" (click)="load()">Try again</button>
+    </div>
+  } @else if (profile(); as p) {
+    <div class="cards">
+      <section aria-labelledby="personal-heading">
+        <h2 id="personal-heading">Personal data</h2>
+        <dl>
+          <div>
+            <mat-icon aria-hidden="true">person</mat-icon>
+            <dt>Full name</dt>
+            <dd>{{ p.firstName }} {{ p.lastName }}</dd>
+          </div>
+          <div>
+            <mat-icon aria-hidden="true">badge</mat-icon>
+            <dt>PESEL</dt>
+            <dd>{{ p.peselMasked }}</dd>
+          </div>
+          <div>
+            <mat-icon aria-hidden="true">calendar_month</mat-icon>
+            <dt>Date of birth</dt>
+            <dd>{{ p.dateOfBirth | date: 'dd.MM.yyyy' }}</dd>
+          </div>
+        </dl>
+      </section>
+
+      <section aria-labelledby="contact-heading">
+        <h2 id="contact-heading">Contact</h2>
+        <dl>
+          <div>
+            <mat-icon aria-hidden="true">mail</mat-icon>
+            <dt>Email</dt>
+            <dd>{{ p.email }}</dd>
+          </div>
+          <div>
+            <mat-icon aria-hidden="true">call</mat-icon>
+            <dt>Phone</dt>
+            <dd>{{ p.phoneNumber }}</dd>
+          </div>
+          <div>
+            <mat-icon aria-hidden="true">location_on</mat-icon>
+            <dt>Address</dt>
+            <dd>{{ formatAddress(p.address) }}</dd>
+          </div>
+        </dl>
+      </section>
+    </div>
+
+    <p class="hint">
+      <mat-icon aria-hidden="true">lock</mat-icon>
+      To change your data, please contact the bank.
+    </p>
+
+    <!-- Phones only: on wider screens both are in the toolbar. -->
+    <div class="settings">
+      <div class="row">
+        <mat-icon aria-hidden="true">dark_mode</mat-icon>
+        <span class="row-label" id="theme-label">Dark theme</span>
+        <mat-slide-toggle
+          aria-labelledby="theme-label"
+          [checked]="theme.isDark()"
+          (change)="theme.set($event.checked ? 'dark' : 'light')"
+        />
+      </div>
+      <button type="button" class="row logout" [disabled]="loggingOut()" (click)="logOut()">
+        <mat-icon aria-hidden="true">logout</mat-icon>
+        Log out
+      </button>
+    </div>
+  }
+</div>
