@@ -1,38 +1,93 @@
 :host {
   display: block;
-  max-width: 960px;
 }
 
-.back {
-  margin: 0 0 8px -12px;
+// ---- Header ----
+.hero-body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
 h1 {
-  margin: 0 0 8px;
-  font: var(--mat-sys-headline-small);
+  margin: 0;
+  font: var(--mat-sys-display-small);
 }
 
+// 75% of the header's text color is still above 7:1 in both themes.
+.subtitle {
+  margin: 4px 0 0;
+  opacity: 0.75;
+}
+
+// Deposit / Withdraw: a pill on a see-through tint, the chosen side is the header's button
+// color with Material's check mark, so it's clear without relying on color only.
 .mode {
-  margin: 8px 0 0;
-  // The chosen operation: yellow like the main button, bold, and a check mark,
-  // so it's clear without relying on color only.
-  --mat-button-toggle-selected-state-background-color: var(--mat-sys-primary-container);
-  --mat-button-toggle-selected-state-text-color: var(--mat-sys-on-primary-container);
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 4px;
+  padding: 4px;
+  border: 0;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--tb-hero-fg) 9%, transparent);
+
+  --mat-button-toggle-shape: 999px;
+  --mat-button-toggle-height: 44px;
+  --mat-button-toggle-divider-color: transparent;
+  --mat-button-toggle-background-color: transparent;
+  --mat-button-toggle-text-color: var(--tb-hero-fg);
+  --mat-button-toggle-state-layer-color: var(--tb-hero-fg);
+  --mat-button-toggle-selected-state-background-color: var(--tb-hero-button);
+  --mat-button-toggle-selected-state-text-color: var(--tb-on-hero-button);
+  --mat-pseudo-checkbox-minimal-selected-checkmark-color: var(--tb-on-hero-button);
+
+  // overflow: the ripple and focus layers are squares, keep them inside the pill.
+  .mat-button-toggle {
+    overflow: hidden;
+    border-radius: 999px;
+  }
 
   .mat-button-toggle-checked {
-    font-weight: 600;
+    font-weight: 700;
   }
 }
 
-.state {
+// ---- Below the header: cards overlap it by 28px (docs/07 §13.1) ----
+.below {
+  position: relative;
+  margin-top: -28px;
+}
+
+.card {
   display: flex;
-  align-items: center;
+  flex-direction: column;
   gap: 16px;
-  padding: 16px 0;
+  padding: 20px 16px;
+  border-radius: 20px;
+  background: var(--tb-surface);
+  box-shadow: 0 16px 32px -20px var(--tb-card-shadow);
 }
 
 .empty p {
-  margin: 0 0 16px;
+  margin: 0;
+}
+
+.empty a {
+  align-self: flex-start;
+}
+
+.picker-skeleton {
+  height: 72px;
+  border-radius: 16px;
+}
+
+.chips-skeleton {
+  height: 44px;
+}
+
+.field-skeleton {
+  height: 64px;
+  border-radius: 14px;
 }
 
 // Same banner as on the dashboard.
@@ -46,4 +101,30 @@ h1 {
   border-radius: 4px;
   background: var(--mat-sys-error-container);
   color: var(--mat-sys-on-error-container);
+}
+
+@media (min-width: 768px) {
+  .hero-body {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 24px;
+  }
+
+  h1 {
+    font: var(--mat-sys-display-medium);
+  }
+
+  .subtitle {
+    font: var(--mat-sys-body-large);
+  }
+
+  .mode {
+    width: 340px;
+  }
+
+  .card {
+    padding: 28px;
+  }
 }

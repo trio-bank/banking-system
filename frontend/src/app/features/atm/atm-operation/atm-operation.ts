@@ -25,6 +25,7 @@ import {
 import { RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { catchError, map, of, switchMap } from 'rxjs';
@@ -57,6 +58,8 @@ const TEXTS: Record<
   {
     operation: string;
     noun: string;
+    you: string;
+    accountLabel: string;
     busy: string;
     done: string;
     again: string;
@@ -66,6 +69,8 @@ const TEXTS: Record<
   deposit: {
     operation: 'ATM cash deposit',
     noun: 'deposit',
+    you: 'You deposit',
+    accountLabel: 'To account',
     busy: 'Depositing…',
     done: 'Cash deposited',
     again: 'New deposit',
@@ -74,6 +79,8 @@ const TEXTS: Record<
   withdrawal: {
     operation: 'ATM cash withdrawal',
     noun: 'withdrawal',
+    you: 'You withdraw',
+    accountLabel: 'From account',
     busy: 'Withdrawing…',
     done: 'Cash withdrawn',
     again: 'New withdrawal',
@@ -115,6 +122,7 @@ export function amountErrorText(error: MoneyError, kind: AtmKind): string {
     IbanPipe,
     MatButtonModule,
     MatFormFieldModule,
+    MatIconModule,
     MatInputModule,
     MatSelectModule,
     MoneyPipe,
@@ -136,6 +144,10 @@ export class AtmOperation {
   readonly accounts = input.required<AccountDto[]>();
   /** The account with its new balance after a successful operation. */
   readonly accountChanged = output<AccountDto>();
+  /** The account to start with, e.g. the one chosen before switching Deposit / Withdraw. */
+  readonly initialAccountId = input<string | null>(null);
+  /** The chosen account, so the page can keep it for the other operation. */
+  readonly accountPicked = output<string>();
 
   protected readonly quickAmounts = QUICK_AMOUNTS;
   protected readonly texts = computed(() => TEXTS[this.kind()]);
@@ -191,14 +203,23 @@ export class AtmOperation {
     // "Not above the balance" depends on the account, so check the amount again.
     this.form.controls.accountId.valueChanges
       .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(() => this.form.controls.amount.updateValueAndValidity());
-    // Pick the first active account, and keep the choice when the list is refreshed.
+      .subscribe((id) => {
+        this.form.controls.amount.updateValueAndValidity();
+        this.accountPicked.emit(id);
+      });
+    // Start with the given account or the first active one, and keep the choice
+    // when the list is refreshed.
     effect(() => {
       const accounts = this.accounts();
       untracked(() => {
         const control = this.form.controls.accountId;
-        if (!accounts.some((a) => a.id === control.value && a.status === 'ACTIVE')) {
-          control.setValue(accounts.find((a) => a.status === 'ACTIVE')?.id ?? '');
+        const active = (id: string | null) =>
+          accounts.some((a) => a.id === id && a.status === 'ACTIVE');
+        if (!active(control.value)) {
+          const initial = this.initialAccountId();
+          control.setValue(
+            active(initial) ? initial! : (accounts.find((a) => a.status === 'ACTIVE')?.id ?? ''),
+          );
         }
       });
     });

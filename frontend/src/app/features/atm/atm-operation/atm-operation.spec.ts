@@ -118,8 +118,47 @@ describe('AtmOperation', () => {
     const options = [...document.querySelectorAll('mat-option')];
     expect(options).toHaveLength(2);
     const blocked = options.find((o) => o.textContent?.includes(BLOCKED.name))!;
-    expect(blocked.textContent).toContain('(blocked)');
+    expect(blocked.textContent).toContain('Blocked');
     expect(blocked.getAttribute('aria-disabled')).toBe('true');
+  });
+
+  it('the picker shows the chosen account like a card: name, balance and IBAN', async () => {
+    await render();
+    const trigger = el.querySelector('mat-select-trigger')!;
+
+    expect(el.querySelector('#account-label')?.textContent).toBe('To account');
+    expect(trigger.textContent).toContain(PERSONAL.name);
+    expect(trigger.textContent).toContain(formatMoney(PERSONAL.balance));
+    expect(trigger.textContent).toContain('PL45 9990 0012 1000 0000 0000 0001');
+  });
+
+  it('a withdrawal takes the money "From account", the preview is not green', async () => {
+    await render('withdrawal');
+    await typeAmount('100');
+
+    expect(el.querySelector('#account-label')?.textContent).toBe('From account');
+    expect(el.querySelector('[data-testid=balance-after]')?.classList).not.toContain('incoming');
+  });
+
+  it('starts with the given account and tells the page when another one is picked', async () => {
+    const second: AccountDto = { ...PERSONAL, id: 'second', name: 'Second personal' };
+    fixture = TestBed.createComponent(AtmOperation);
+    fixture.componentRef.setInput('kind', 'deposit');
+    fixture.componentRef.setInput('accounts', [PERSONAL, second]);
+    fixture.componentRef.setInput('initialAccountId', second.id);
+    const picked: string[] = [];
+    fixture.componentInstance.accountPicked.subscribe((id) => picked.push(id));
+    el = fixture.nativeElement;
+    await settle();
+    expect(el.querySelector('mat-select-trigger')?.textContent).toContain('Second personal');
+
+    el.querySelector<HTMLElement>('.mat-mdc-select-trigger')!.click();
+    await settle();
+    [...document.querySelectorAll<HTMLElement>('mat-option')]
+      .find((o) => o.textContent?.includes(PERSONAL.name))!
+      .click();
+    await settle();
+    expect(picked.at(-1)).toBe(PERSONAL.id);
   });
 
   it('a quick amount fills the field and is marked as chosen', async () => {
@@ -270,6 +309,7 @@ describe('AtmOperation', () => {
 
       await typeAmount('200');
       expect(after()).toBe(formatMoney('10620.51'));
+      expect(el.querySelector('[data-testid=balance-after]')?.classList).toContain('incoming');
 
       await typeAmount('2000');
       expect(after()).toBe(formatMoney('12420.51'));

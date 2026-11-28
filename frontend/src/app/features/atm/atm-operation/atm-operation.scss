@@ -1,89 +1,320 @@
 :host {
   display: block;
-  max-width: 480px;
-  padding-top: 16px;
+  // Main buttons are as tall as on the log in and register pages.
+  --mat-button-filled-container-height: 52px;
+  --mat-button-outlined-container-height: 52px;
 }
 
 h2 {
-  margin: 0 0 16px;
-  font: var(--mat-sys-title-medium);
+  margin: 0;
+  font: var(--mat-sys-title-large);
 
   &:focus {
     outline: none; // focused by code only, for screen readers
   }
 }
 
-.field {
-  width: 100%;
+p,
+dl,
+dd {
+  margin: 0;
+}
+
+// Form cards (docs/07 §13.3). On a phone the whole form is one card.
+.layout,
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 20px 16px;
+  border-radius: 20px;
+  background: var(--tb-surface);
+  box-shadow: 0 16px 32px -20px var(--tb-card-shadow);
+}
+
+.fields,
+.side,
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.group {
+  gap: 8px;
 }
 
 .label {
-  margin: 0 0 8px;
-  font: var(--mat-sys-body-medium);
-  color: var(--mat-sys-on-surface-variant);
+  font: var(--mat-sys-label-large);
+  font-weight: 600;
 }
 
-.quick {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 8px;
-  margin-bottom: 16px;
+.field-error {
+  color: var(--mat-sys-error);
+  font: var(--mat-sys-body-small);
+}
 
-  // Chosen amount: yellow like the main button, the text stays black.
-  .active {
-    background: var(--mat-sys-primary-container);
-    border-color: var(--mat-sys-primary);
+// ---- Account picker: looks like a small account card ----
+.picker {
+  // No padding here: it's on the inner trigger (styles.scss), the list opens under that.
+  border-radius: 16px;
+  background: var(--tb-card);
+  color: var(--tb-on-card);
+  box-shadow: 0 10px 20px -14px var(--tb-card-shadow);
+  --mat-select-enabled-trigger-text-color: var(--tb-on-card);
+  --mat-select-enabled-arrow-color: var(--tb-on-card);
+  --mat-select-focused-arrow-color: var(--tb-on-card);
+
+  &:focus-visible {
+    outline: 2px solid var(--tb-ink);
+    outline-offset: 2px;
   }
 }
 
-.actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 8px;
+// Name and balance on top, the IBAN under them: all three don't fit in one line at 360px.
+mat-select-trigger {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 2px 12px;
+  width: 100%;
 }
 
-.summary {
+.picker-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-weight: 700;
+}
+
+.picker-balance {
+  font: var(--mat-sys-title-medium);
+  font-family: var(--mat-sys-headline-small-font);
+  font-weight: 700;
+}
+
+.picker-iban {
+  grid-column: 1 / -1;
+  opacity: 0.8;
+  font-size: min(0.8125rem, 3.4vw);
+}
+
+// Options in the list: same layout as the picker. They are shown in an overlay, but
+// still get these styles because they come from this template. The panel: styles.scss.
+.mat-mdc-option {
+  min-height: 64px;
+  border-radius: 12px;
+}
+
+.option {
   display: grid;
-  grid-template-columns: max-content 1fr;
-  gap: 8px 24px;
-  margin: 0 0 16px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 2px 12px;
+}
+
+.option-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 600;
+}
+
+.option-balance {
+  font-weight: 700;
+}
+
+.option-iban {
+  display: flex;
+  grid-column: 1 / -1;
+  align-items: center;
+  gap: 4px;
+  color: var(--tb-muted);
+  font: var(--mat-sys-body-small);
+  font-size: min(0.75rem, 3.3vw); // the whole IBAN on one line at 360px
+  white-space: nowrap;
+
+  mat-icon {
+    width: 14px;
+    height: 14px;
+    font-size: 14px;
+  }
+}
+
+// ---- Amount ----
+.quick {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.chip {
+  height: 44px;
+  padding: 0;
+  border: 1.5px solid var(--tb-line);
+  border-radius: 12px;
+  background: transparent;
+  color: var(--tb-ink);
+  font: var(--mat-sys-label-large);
+  font-weight: 600;
+  cursor: pointer;
+
+  &:hover {
+    border-color: var(--tb-muted);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--tb-ink);
+    outline-offset: 2px;
+  }
+
+  // Chosen amount: yellow with black text in both themes.
+  &[aria-pressed='true'] {
+    border-color: var(--tb-brand);
+    background: var(--tb-brand);
+    color: var(--tb-on-brand);
+    font-weight: 700;
+  }
+}
+
+// A big field: the amount is the main thing on this page.
+.amount-field {
+  width: 100%;
+  margin-top: 4px;
+  --mat-form-field-container-height: 64px;
+  --mat-form-field-container-vertical-padding: 12px;
+  --mat-form-field-container-text-font: var(--mat-sys-headline-small-font);
+  --mat-form-field-container-text-size: 1.875rem;
+  --mat-form-field-container-text-weight: 700;
+  --mat-form-field-container-text-line-height: 2.5rem;
+  --mat-form-field-outlined-outline-color: var(--tb-ink);
+  --mat-form-field-outlined-outline-width: 2px;
+  --mat-form-field-outlined-container-shape: 14px;
+}
+
+.suffix {
+  color: var(--tb-muted);
+  font-size: 1.25rem;
+}
+
+// ---- Summary ----
+// Phone: only "Balance now → After", the heading and the big amount are for the Summary card.
+.summary-title,
+.side .you {
+  display: none;
+}
+
+.you {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  color: var(--tb-muted);
+}
+
+.you-amount {
+  color: var(--tb-ink);
+  font: var(--mat-sys-display-small);
+  font-size: min(2.25rem, 10vw);
+}
+
+.preview {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: var(--tb-background);
 
   dt {
-    color: var(--mat-sys-on-surface-variant);
+    color: var(--tb-muted);
+    font: var(--mat-sys-body-small);
   }
 
   dd {
-    margin: 0;
-    overflow-wrap: anywhere;
+    font-weight: 600;
   }
 }
 
-.muted {
-  display: block;
-  color: var(--mat-sys-on-surface-variant);
+.after-row {
+  position: relative;
+  text-align: right;
+
+  // The arrow between the two values; '' after the slash = nothing for screen readers.
+  &::before {
+    content: '→' / '';
+    position: absolute;
+    top: 50%;
+    left: -14px;
+    translate: 0 -50%;
+    color: var(--tb-muted);
+  }
 }
 
-.iban,
-.reference {
-  font-variant-numeric: tabular-nums;
-}
-
-.big {
-  font: var(--mat-sys-headline-small);
-}
-
-p.big {
-  margin: 0 0 16px;
+.after {
+  font-weight: 700;
 }
 
 .incoming {
   color: var(--tb-income);
 }
 
+.next {
+  width: 100%;
+}
+
+// ---- Confirm and result ----
+.step {
+  max-width: 600px;
+}
+
+.rows {
+  > div {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 2px 16px;
+    padding: 12px 0;
+    border-top: 1px solid var(--tb-line);
+  }
+
+  dt {
+    color: var(--tb-muted);
+  }
+
+  dd {
+    margin-left: auto;
+    font-weight: 600;
+    text-align: right;
+    overflow-wrap: anywhere;
+  }
+}
+
+.muted {
+  display: block;
+  color: var(--tb-muted);
+  font: var(--mat-sys-body-small);
+}
+
+.result {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.done-icon {
+  display: grid;
+  width: 52px;
+  height: 52px;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--tb-brand);
+  color: var(--tb-on-brand);
+}
+
+.big {
+  font: var(--mat-sys-display-small);
+  font-size: min(2.25rem, 10vw);
+}
+
 // Same banner as on the other pages.
 .banner {
-  margin-bottom: 16px;
   padding: 8px 16px;
   border-left: 4px solid var(--mat-sys-error);
   border-radius: 4px;
@@ -91,51 +322,86 @@ p.big {
   color: var(--mat-sys-on-error-container);
 }
 
-.preview {
-  display: grid;
-  grid-template-columns: max-content 1fr;
-  gap: 4px 16px;
-  margin: 4px 0 16px;
-  padding: 12px 16px;
-  border-radius: 8px;
-  background: var(--mat-sys-surface-container);
-
-  dt {
-    color: var(--mat-sys-on-surface-variant);
-  }
-
-  dd {
-    margin: 0;
-    text-align: right;
-    font-variant-numeric: tabular-nums;
-  }
-
-  .after {
-    font: var(--mat-sys-title-medium);
-  }
+// Phone: big buttons for the thumb, the main one on top.
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
-// Phone (< 600 px): 4 amount buttons don't fit in one row at 360 px, labels above values,
-// big buttons for the thumb, the main one on top.
-@media (max-width: 599px) {
-  .quick {
-    grid-template-columns: repeat(2, 1fr);
+@media (min-width: 768px) {
+  // Fields on the left, Summary card on the right; the form itself has no card.
+  .layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 320px;
+    align-items: start;
+    gap: 24px;
+    padding: 0;
+    background: none;
+    box-shadow: none;
   }
 
-  .summary {
-    grid-template-columns: 1fr;
-    gap: 2px;
+  .fields,
+  .side,
+  .card {
+    padding: 28px;
+    border-radius: 20px;
+    background: var(--tb-surface);
+    box-shadow: 0 16px 32px -20px var(--tb-card-shadow);
+  }
 
-    dd {
-      margin-bottom: 10px;
+  .fields {
+    gap: 24px;
+  }
+
+  .summary-title,
+  .side .you {
+    display: flex;
+  }
+
+  // In the Summary card the two values are rows with lines, not side by side.
+  .preview {
+    display: block;
+    padding: 0;
+    background: none;
+
+    > div {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 10px 0;
+      border-top: 1px solid var(--tb-line);
+    }
+
+    dt {
+      font: var(--mat-sys-body-medium);
     }
   }
 
+  .after-row::before {
+    content: none;
+  }
+
+  .quick {
+    gap: 10px;
+  }
+
+  .chip {
+    height: 48px;
+  }
+
+  .amount-field {
+    --mat-form-field-container-height: 72px;
+    --mat-form-field-container-vertical-padding: 14px;
+    --mat-form-field-container-text-size: 2.125rem;
+    --mat-form-field-container-text-line-height: 2.75rem;
+  }
+
   .actions {
-    flex-direction: column;
+    flex-direction: row;
 
     > * {
-      width: 100%;
+      min-width: 140px;
     }
   }
 }
