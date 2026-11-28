@@ -1,7 +1,7 @@
 package com.triobank.auth.dto;
 
-import com.triobank.auth.PasswordWithoutEmail;
-import com.triobank.auth.StrongPassword;
+import com.triobank.auth.password.PasswordWithoutEmail;
+import com.triobank.auth.password.StrongPassword;
 import com.triobank.common.pesel.ValidPesel;
 import com.triobank.customer.dto.AddressDto;
 import io.swagger.v3.oas.annotations.media.Schema;

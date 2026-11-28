@@ -1,6 +1,6 @@
 package com.triobank.ledger.dto;
 
-import com.triobank.ledger.EntryDirection;
+import com.triobank.ledger.transaction.EntryDirection;
 
 /**
  * Which way money went from the point of view of the account whose history is shown.

@@ -7,12 +7,12 @@ import com.triobank.common.config.BankProperties;
 import com.triobank.common.error.ApiException;
 import com.triobank.common.error.ErrorCode;
 import com.triobank.customer.Customer;
-import com.triobank.ledger.Channel;
-import com.triobank.ledger.DefaultTitles;
 import com.triobank.ledger.LedgerService;
 import com.triobank.ledger.PostingCommand;
 import com.triobank.ledger.Transaction;
-import com.triobank.ledger.TransactionType;
+import com.triobank.ledger.transaction.Channel;
+import com.triobank.ledger.transaction.DefaultTitles;
+import com.triobank.ledger.transaction.TransactionType;
 import com.triobank.payment.dto.CashOperationRequest;
 import com.triobank.payment.dto.TransactionDto;
 import com.triobank.payment.dto.TransactionMapper;
@@ -56,7 +56,7 @@ public class AtmService {
      *
      * @param userId         who is at the ATM, stored on the transaction
      * @param idempotencyKey checked key from the header
-     * @param requestHash    hash of the request, see {@link com.triobank.ledger.RequestHash}
+     * @param requestHash    hash of the request, see {@link com.triobank.ledger.idempotency.RequestHash}
      * @throws ApiException RESOURCE_NOT_FOUND, CURRENCY_NOT_SUPPORTED, CASH_AMOUNT_INVALID,
      *                      OPERATION_NOT_ALLOWED_FOR_ACCOUNT, RECIPIENT_ACCOUNT_UNAVAILABLE
      */
@@ -88,7 +88,7 @@ public class AtmService {
      *
      * @param userId         who is at the ATM, stored on the transaction
      * @param idempotencyKey checked key from the header
-     * @param requestHash    hash of the request, see {@link com.triobank.ledger.RequestHash}
+     * @param requestHash    hash of the request, see {@link com.triobank.ledger.idempotency.RequestHash}
      * @throws ApiException RESOURCE_NOT_FOUND, CURRENCY_NOT_SUPPORTED, CASH_AMOUNT_INVALID,
      *                      OPERATION_NOT_ALLOWED_FOR_ACCOUNT, SOURCE_ACCOUNT_UNAVAILABLE, INSUFFICIENT_FUNDS
      */

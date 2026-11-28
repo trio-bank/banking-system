@@ -9,10 +9,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.triobank.AbstractIntegrationTest;
-import com.triobank.TestDataFactory;
 import com.triobank.TestDataFactory.RegisteredCustomer;
-import com.triobank.auth.JwtService;
+import com.triobank.TestDataFactory;
 import com.triobank.auth.Role;
+import com.triobank.auth.jwt.JwtService;
 import com.triobank.common.iban.IbanGenerator;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;

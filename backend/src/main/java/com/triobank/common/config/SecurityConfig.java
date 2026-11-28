@@ -1,6 +1,6 @@
 package com.triobank.common.config;
 
-import com.triobank.auth.JwtService;
+import com.triobank.auth.jwt.JwtService;
 import jakarta.servlet.DispatcherType;
 import java.time.Duration;
 import java.util.List;

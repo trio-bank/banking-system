@@ -1,9 +1,9 @@
 package com.triobank.payment.dto;
 
 import com.triobank.common.money.Money;
-import com.triobank.ledger.Channel;
-import com.triobank.ledger.TransactionStatus;
-import com.triobank.ledger.TransactionType;
+import com.triobank.ledger.transaction.Channel;
+import com.triobank.ledger.transaction.TransactionStatus;
+import com.triobank.ledger.transaction.TransactionType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.math.BigDecimal;
 import java.time.Instant;

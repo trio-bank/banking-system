@@ -12,9 +12,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.triobank.AbstractIntegrationTest;
-import com.triobank.auth.JwtProperties;
-import com.triobank.auth.JwtService;
 import com.triobank.auth.Role;
+import com.triobank.auth.jwt.JwtProperties;
+import com.triobank.auth.jwt.JwtService;
 import java.nio.charset.StandardCharsets;
 import java.time.Clock;
 import java.time.Duration;

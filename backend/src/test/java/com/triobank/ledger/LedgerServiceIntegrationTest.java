@@ -6,6 +6,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import com.triobank.AbstractIntegrationTest;
 import com.triobank.TestDataFactory.RegisteredCustomer;
 import com.triobank.common.error.ApiException;
+import com.triobank.ledger.transaction.Channel;
+import com.triobank.ledger.transaction.TransactionType;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;

@@ -5,12 +5,12 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.triobank.account.Account;
-import com.triobank.ledger.Channel;
-import com.triobank.ledger.EntryDirection;
 import com.triobank.ledger.LedgerEntry;
 import com.triobank.ledger.Transaction;
-import com.triobank.ledger.TransactionStatus;
-import com.triobank.ledger.TransactionType;
+import com.triobank.ledger.transaction.Channel;
+import com.triobank.ledger.transaction.EntryDirection;
+import com.triobank.ledger.transaction.TransactionStatus;
+import com.triobank.ledger.transaction.TransactionType;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.UUID;

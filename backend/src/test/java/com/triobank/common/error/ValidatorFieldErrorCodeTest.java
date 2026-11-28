@@ -2,7 +2,7 @@ package com.triobank.common.error;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.triobank.auth.StrongPassword;
+import com.triobank.auth.password.StrongPassword;
 import com.triobank.common.iban.ValidIban;
 import com.triobank.common.pesel.ValidPesel;
 import jakarta.validation.ConstraintViolation;

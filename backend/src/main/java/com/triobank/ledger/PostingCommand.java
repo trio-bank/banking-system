@@ -1,6 +1,8 @@
 package com.triobank.ledger;
 
 import com.triobank.common.money.MoneyConstants;
+import com.triobank.ledger.transaction.Channel;
+import com.triobank.ledger.transaction.TransactionType;
 import java.math.BigDecimal;
 import java.util.Objects;
 import java.util.UUID;
